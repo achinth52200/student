@@ -58,24 +58,6 @@ export function WellbeingChat() {
     }
   }, [messages])
 
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const userMessage = formData.get('message') as string;
-    
-    if (userMessage.trim()) {
-      const newMessages: Message[] = [...messages, { role: 'user', content: userMessage }];
-      setMessages(newMessages);
-
-      const newFormData = new FormData();
-      newFormData.append('message', userMessage);
-      newFormData.append('history', JSON.stringify(messages)); // Send previous messages as history
-
-      formAction(newFormData);
-      formRef.current?.reset();
-    }
-  };
-
   return (
     <Card className="flex flex-col h-[calc(100vh-10rem)]">
       <CardHeader>
@@ -124,11 +106,34 @@ export function WellbeingChat() {
                 )}
               </div>
             ))}
+             {isPending && (
+              <div className="flex items-start gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>
+                    <Bot className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="max-w-sm rounded-lg px-4 py-2 text-sm bg-muted">
+                  <Sparkles className="h-4 w-4 animate-spin" />
+                </div>
+              </div>
+            )}
           </div>
         </ScrollArea>
         <form
           ref={formRef}
-          onSubmit={handleFormSubmit}
+          action={formAction}
+          onSubmit={(e) => {
+            const form = e.currentTarget as HTMLFormElement;
+            const formData = new FormData(form);
+            const message = formData.get('message') as string;
+            if (message.trim()) {
+              setMessages((prev) => [...prev, { role: 'user', content: message }]);
+              form.reset();
+            } else {
+              e.preventDefault();
+            }
+          }}
           className="flex items-center gap-2 border-t pt-4"
         >
           <input
