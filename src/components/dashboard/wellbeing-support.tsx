@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useEffect, useState, useActionState } from "react";
+import { useEffect, useState, useActionState, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { Sparkles, Bot } from "lucide-react";
+import { Sparkles, Bot, Volume2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 const initialState = {
   message: "",
   feedback: "",
+  audioDataUri: "",
   errors: {},
 };
 
@@ -76,6 +77,7 @@ export function WellbeingSupport() {
     },
   });
   const [stressLevel, setStressLevel] = useState(5);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (state.message && state.errors) {
@@ -86,6 +88,13 @@ export function WellbeingSupport() {
       });
     }
   }, [state, toast]);
+
+  useEffect(() => {
+    if (state.audioDataUri && audioRef.current) {
+        audioRef.current.src = state.audioDataUri;
+        audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+    }
+  }, [state.audioDataUri]);
 
   return (
     <Card>
@@ -205,6 +214,14 @@ export function WellbeingSupport() {
                 <p className="text-sm text-secondary-foreground whitespace-pre-wrap">
                   {state.feedback}
                 </p>
+                {state.audioDataUri && (
+                    <div className="mt-4 flex items-center gap-2">
+                       <Volume2 className="h-5 w-5 text-muted-foreground" />
+                       <audio ref={audioRef} controls className="w-full h-10">
+                            Your browser does not support the audio element.
+                       </audio>
+                    </div>
+                )}
               </div>
             )}
           </CardContent>

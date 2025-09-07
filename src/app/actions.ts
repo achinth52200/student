@@ -6,6 +6,7 @@ import { provideAiDrivenWellbeingSupport } from '@/ai/flows/ai-driven-wellbeing-
 import { wellbeingChat } from '@/ai/flows/wellbeing-chat-flow'
 import { extractTransactionsFromImage } from '@/ai/flows/extract-transaction-from-image-flow';
 import { generatePersonalizedTips } from '@/ai/flows/generate-personalized-tips-flow';
+import { textToSpeech } from '@/ai/flows/text-to-speech-flow';
 import type { Transaction, Reminder, ScheduleItem } from '@/lib/types';
 
 const optimizeScheduleSchema = z.object({
@@ -71,6 +72,7 @@ const wellbeingSupportSchema = z.object({
 type WellbeingSupportState = {
   message?: string
   feedback?: string
+  audioDataUri?: string
   errors?: {
     stressLevel?: string[]
     emotionalRegulation?: string[]
@@ -100,12 +102,21 @@ export async function provideWellbeingSupportAction(
   }
 
   try {
-    const result = await provideAiDrivenWellbeingSupport(validatedFields.data)
+    const feedbackResult = await provideAiDrivenWellbeingSupport(validatedFields.data);
+    
+    if (!feedbackResult.feedback) {
+        return { message: 'Could not generate feedback at this time. Please try again.' }
+    }
+    
+    const audioResult = await textToSpeech({ text: feedbackResult.feedback });
+    
     return {
       message: 'Feedback generated successfully!',
-      feedback: result.feedback,
+      feedback: feedbackResult.feedback,
+      audioDataUri: audioResult.audioDataUri,
     }
   } catch (error) {
+    console.error(error);
     return {
       message: 'An error occurred while generating feedback. Please try again.',
     }
