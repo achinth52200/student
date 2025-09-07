@@ -9,8 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
-import {generate} from 'genkit/generate';
-import {Message, Role} from 'genkit/generate';
+import {generate, Message, Role} from 'genkit';
 
 const WellbeingChatInputSchema = z.object({
   history: z.array(
@@ -57,15 +56,19 @@ const wellbeingChatFlow = ai.defineFlow(
       content: [{text: msg.content}],
     }));
 
-    const response = await generate({
+    const {output} = await ai.generate({
       prompt: input.message,
       model: ai.model,
       history,
       config: prompt.config,
     });
+    
+    if (!output) {
+      return { response: "I'm sorry, I couldn't generate a response." };
+    }
 
     return {
-      response: response.text(),
+      response: output.text(),
     };
   }
 );
