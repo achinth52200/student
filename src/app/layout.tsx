@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -6,6 +7,7 @@ import { ReminderProvider } from "@/hooks/use-reminders";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoaderProvider } from "@/hooks/use-loader";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "StudentSync",
@@ -31,7 +33,9 @@ export default function RootLayout({
         <LoaderProvider>
             <AuthProvider>
               <ReminderProvider>
-                  <PageTransitionLoader />
+                  <Suspense>
+                    <PageTransitionLoader />
+                  </Suspense>
                   {children}
                   <Toaster />
               </ReminderProvider>
