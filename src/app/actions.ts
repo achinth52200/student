@@ -4,6 +4,8 @@ import { z } from 'zod'
 import { optimizeStudySchedule } from '@/ai/flows/optimize-study-schedule'
 import { provideAiDrivenWellbeingSupport } from '@/ai/flows/ai-driven-wellbeing-support'
 import { wellbeingChat } from '@/ai/flows/wellbeing-chat-flow'
+import { extractTransactionFromImage } from '@/ai/flows/extract-transaction-from-image-flow';
+import type { Transaction } from '@/lib/types';
 
 const optimizeScheduleSchema = z.object({
   courseDeadlines: z.string().min(1, 'Please provide course deadlines.'),
@@ -139,4 +141,46 @@ export async function wellbeingChatAction(
       error: 'An error occurred while getting a response. Please try again.',
     };
   }
+}
+
+const extractTransactionSchema = z.object({
+  photoDataUri: z.string(),
+});
+
+type ExtractTransactionState = {
+    transaction?: Omit<Transaction, 'id' | 'date' | 'status'>;
+    error?: string;
+}
+
+export async function extractTransactionAction(
+    prevState: ExtractTransactionState,
+    formData: FormData
+): Promise<ExtractTransactionState> {
+    const validatedFields = extractTransactionSchema.safeParse({
+        photoDataUri: formData.get('photoDataUri'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            error: 'Validation failed. Please provide a valid image.',
+        };
+    }
+
+    try {
+        const result = await extractTransactionFromImage(validatedFields.data);
+        if (result.transaction) {
+            return {
+                transaction: result.transaction,
+            };
+        } else {
+            return {
+                error: 'Could not extract transaction from the image. Please try another one.',
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        return {
+            error: 'An unexpected error occurred while analyzing the receipt. Please try again.',
+        };
+    }
 }

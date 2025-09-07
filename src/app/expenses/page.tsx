@@ -9,6 +9,7 @@ import { ExpenseTracker } from "@/components/dashboard/expense-tracker";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { Transaction } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { ReceiptUploader } from "@/components/dashboard/receipt-uploader";
 
 const initialTransactions: Transaction[] = [
     { id: '1', description: 'Groceries', amount: 75.50, type: 'expense', category: 'Groceries', date: '2024-07-15T10:00:00Z', status: 'Completed' },
@@ -43,6 +44,9 @@ export default function ExpensesPage() {
         <SidebarInset className="flex-1">
           <AppHeader />
           <main className="p-4 sm:p-6 lg:p-8">
+             <div className="flex justify-end mb-4">
+                <ReceiptUploader onTransactionExtracted={addTransaction} />
+            </div>
             <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
               <div className="grid grid-cols-1 gap-6 lg:col-span-2">
                 <ExpenseTracker 
