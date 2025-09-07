@@ -38,7 +38,7 @@ export function LoginForm() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background relative overflow-hidden">
        <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-primary/75 via-cyan-300/75 to-background animate-gradient" />
-      <Card className="mx-auto max-w-sm z-10 bg-background/80 backdrop-blur-sm border-white/20">
+      <Card className="mx-auto max-w-sm z-10 bg-card/60 backdrop-blur-lg border-white/20 shadow-xl">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-2 mb-4">
                <Logo className="w-8 h-8 text-primary" />
