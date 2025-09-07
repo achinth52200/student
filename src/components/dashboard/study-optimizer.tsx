@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
@@ -82,6 +82,7 @@ export function StudyOptimizer() {
                       placeholder="e.g., Math 101 Final - 2024-05-15"
                       className="h-32"
                     />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -97,6 +98,7 @@ export function StudyOptimizer() {
                       placeholder="e.g., Math 101 - High"
                       className="h-32"
                     />
+                    <FormMessage />
                   </FormItem>
                 )}
               />

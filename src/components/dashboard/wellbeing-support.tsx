@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState, useActionState } from "react";
+import { useEffect, useState } from "react";
+import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Sparkles, Bot } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 import { provideWellbeingSupportAction } from "@/app/actions";
 import {
@@ -21,6 +24,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +36,18 @@ const initialState = {
   feedback: "",
   errors: {},
 };
+
+const wellbeingSupportSchema = z.object({
+  stressLevel: z.coerce.number().min(1).max(10),
+  emotionalRegulation: z
+    .string()
+    .min(1, "Please describe your emotional state."),
+  physicalActivity: z
+    .string()
+    .min(1, "Please describe your physical activity."),
+  sleepQuality: z.string().min(1, "Please describe your sleep quality."),
+  studyHours: z.coerce.number().min(0),
+});
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -49,7 +65,16 @@ export function WellbeingSupport() {
     initialState
   );
   const { toast } = useToast();
-  const form = useForm();
+  const form = useForm<z.infer<typeof wellbeingSupportSchema>>({
+    resolver: zodResolver(wellbeingSupportSchema),
+    defaultValues: {
+      stressLevel: 5,
+      emotionalRegulation: "",
+      physicalActivity: "",
+      sleepQuality: "",
+      studyHours: 3,
+    },
+  });
   const [stressLevel, setStressLevel] = useState(5);
 
   useEffect(() => {
@@ -80,13 +105,13 @@ export function WellbeingSupport() {
             <FormField
               control={form.control}
               name="stressLevel"
-              defaultValue={stressLevel}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Stress Level</FormLabel>
                   <div className="flex items-center gap-4">
                     <FormControl>
                       <Slider
+                        name={field.name}
                         defaultValue={[stressLevel]}
                         min={1}
                         max={10}
@@ -101,6 +126,7 @@ export function WellbeingSupport() {
                       {stressLevel}
                     </span>
                   </div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -110,15 +136,15 @@ export function WellbeingSupport() {
                 name="emotionalRegulation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="emotionalRegulation">Emotional State</FormLabel>
+                    <FormLabel>Emotional State</FormLabel>
                     <FormControl>
                       <Textarea
-                        id="emotionalRegulation"
                         placeholder="e.g., Feeling a bit anxious about exams."
                         rows={3}
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -127,15 +153,15 @@ export function WellbeingSupport() {
                 name="physicalActivity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="physicalActivity">Physical Activity</FormLabel>
+                    <FormLabel>Physical Activity</FormLabel>
                     <FormControl>
                       <Textarea
-                        id="physicalActivity"
                         placeholder="e.g., Went for a 30-min run twice this week."
                         rows={3}
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -145,14 +171,14 @@ export function WellbeingSupport() {
               name="sleepQuality"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="sleepQuality">Sleep Quality</FormLabel>
+                  <FormLabel>Sleep Quality</FormLabel>
                   <FormControl>
                     <Textarea
-                      id="sleepQuality"
                       placeholder="e.g., Waking up a few times during the night."
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -161,17 +187,11 @@ export function WellbeingSupport() {
               name="studyHours"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="studyHours">Today's Study Hours</FormLabel>
+                  <FormLabel>Today's Study Hours</FormLabel>
                   <FormControl>
-                    <Input
-                      id="studyHours"
-                      type="number"
-                      defaultValue="3"
-                      min="0"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value,10))}
-                    />
+                    <Input type="number" min="0" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
