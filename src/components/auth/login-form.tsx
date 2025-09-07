@@ -22,89 +22,107 @@ import { useAuth } from "@/hooks/use-auth";
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const { setUser } = useAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd have auth logic here.
-    // We'll simulate a successful login and store user details.
-    // For this prototype, we'll derive a name from the email.
-    const name = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
-    setUser({ name, email });
-    
-    toast({
-        title: "Login Successful",
-        description: "Redirecting to your dashboard..."
-    });
-    router.push("/dashboard");
+    setIsLoading(true);
+
+    setTimeout(() => {
+        // In a real app, you'd have auth logic here.
+        // We'll simulate a successful login and store user details.
+        // For this prototype, we'll derive a name from the email.
+        const name = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        setUser({ name, email });
+        
+        toast({
+            title: "Login Successful",
+            description: "Redirecting to your dashboard..."
+        });
+        router.push("/dashboard");
+    }, 6000);
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background relative overflow-hidden">
        <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-primary/75 via-cyan-300/75 to-background animate-gradient" />
-      <Card className="mx-auto max-w-sm z-10 bg-card/60 backdrop-blur-lg border-white/20 shadow-xl">
-        <CardHeader className="text-center">
-            <div className="flex justify-center items-center gap-2 mb-4">
-               <Logo className="w-8 h-8 text-primary" />
-               <CardTitle className="text-3xl">StudentSync</CardTitle>
-            </div>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="ml-auto inline-block text-sm underline"
-                >
-                  Forgot your password?
-                </Link>
-              </div>
-               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-            </div>
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="underline">
-              Sign up
-            </Link>
+       {isLoading ? (
+          <div className="loader-wrapper">
+            <span className="loader-letter">L</span>
+            <span className="loader-letter">o</span>
+            <span className="loader-letter">a</span>
+            <span className="loader-letter">d</span>
+            <span className="loader-letter">i</span>
+            <span className="loader-letter">n</span>
+            <span className="loader-letter">g</span>
+            <div className="loader"></div>
           </div>
-        </CardContent>
-      </Card>
+       ) : (
+        <Card className="mx-auto max-w-sm z-10 bg-card/60 backdrop-blur-lg border-white/20 shadow-xl">
+            <CardHeader className="text-center">
+                <div className="flex justify-center items-center gap-2 mb-4">
+                <Logo className="w-8 h-8 text-primary" />
+                <CardTitle className="text-3xl">StudentSync</CardTitle>
+                </div>
+            <CardDescription>
+                Enter your email below to login to your account
+            </CardDescription>
+            </CardHeader>
+            <CardContent>
+            <form onSubmit={handleLogin} className="grid gap-4">
+                <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                    <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-9"
+                    />
+                </div>
+                </div>
+                <div className="grid gap-2">
+                <div className="flex items-center">
+                    <Label htmlFor="password">Password</Label>
+                    <Link
+                    href="/forgot-password"
+                    className="ml-auto inline-block text-sm underline"
+                    >
+                    Forgot your password?
+                    </Link>
+                </div>
+                <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-9"
+                    />
+                </div>
+                </div>
+                <Button type="submit" className="w-full">
+                Login
+                </Button>
+            </form>
+            <div className="mt-4 text-center text-sm">
+                Don&apos;t have an account?{" "}
+                <Link href="/signup" className="underline">
+                Sign up
+                </Link>
+            </div>
+            </CardContent>
+        </Card>
+       )}
     </div>
   );
 }
