@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Sparkles, Bot, BookCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
 
@@ -36,7 +37,7 @@ function SubmitButton() {
 }
 
 export function StudyOptimizer() {
-  const [state, formAction] = useFormState(
+  const [state, formAction] = useActionState(
     optimizeStudyScheduleAction,
     initialState
   );

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useEffect, useState, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Sparkles, Bot } from "lucide-react";
 import { useForm } from "react-hook-form";
 
@@ -44,7 +44,7 @@ function SubmitButton() {
 }
 
 export function WellbeingSupport() {
-  const [state, formAction] = useFormState(
+  const [state, formAction] = useActionState(
     provideWellbeingSupportAction,
     initialState
   );
