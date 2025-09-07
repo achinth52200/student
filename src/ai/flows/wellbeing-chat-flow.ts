@@ -62,7 +62,7 @@ const wellbeingChatFlow = ai.defineFlow(
       model: ai.model,
       prompt: input.message,
       history,
-      config: prompt.config,
+      system: prompt.config?.system,
     });
     
     if (!output) {
