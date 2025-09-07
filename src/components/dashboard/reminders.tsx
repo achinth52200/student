@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
-import { Bell, PlusCircle } from "lucide-react";
+import { Bell, PlusCircle, Trash2, MoreHorizontal } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -11,13 +12,13 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
-import type { Reminder } from "@/lib/types";
 import { useReminders } from "@/hooks/use-reminders";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 export function Reminders() {
-  const { reminders, addReminder, toggleReminder } = useReminders();
+  const { reminders, addReminder, setReminderStatus, deleteReminder } = useReminders();
   const [newReminder, setNewReminder] = useState("");
 
   const handleAddReminder = (e: React.FormEvent) => {
@@ -59,28 +60,37 @@ export function Reminders() {
             .map((reminder) => (
               <div
                 key={reminder.id}
-                className="flex items-center gap-3"
+                className="flex items-center gap-3 p-2 rounded-md hover:bg-accent/50"
               >
-                <Checkbox
-                  id={reminder.id}
-                  checked={reminder.completed}
-                  onCheckedChange={() => toggleReminder(reminder.id)}
-                />
                 <div className="flex-grow">
-                  <label
-                    htmlFor={reminder.id}
-                    className={`text-sm ${
-                      reminder.completed
-                        ? "text-muted-foreground line-through"
-                        : "font-medium"
-                    }`}
+                  <p
+                    className={cn("text-sm font-medium", reminder.completed && "text-muted-foreground line-through")}
                   >
                     {reminder.title}
-                  </label>
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     Due: {format(new Date(reminder.dueDate), "MMM dd, yyyy")}
                   </p>
                 </div>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">More options</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setReminderStatus(reminder.id, true)}>
+                            Done
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setReminderStatus(reminder.id, false)}>
+                            Not Done
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive" onClick={() => deleteReminder(reminder.id)}>
+                           <Trash2 className="mr-2 h-4 w-4"/> Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                 </DropdownMenu>
               </div>
             ))}
         </div>

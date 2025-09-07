@@ -31,6 +31,8 @@ type ReminderContextType = {
   reminders: Reminder[];
   addReminder: (reminder: Omit<Reminder, 'id'>) => void;
   toggleReminder: (id: string) => void;
+  setReminderStatus: (id: string, completed: boolean) => void;
+  deleteReminder: (id: string) => void;
 };
 
 const ReminderContext = createContext<ReminderContextType | undefined>(undefined);
@@ -69,6 +71,14 @@ export const ReminderProvider = ({ children }: { children: ReactNode }) => {
         return updated;
     });
   };
+  
+  const setReminderStatus = (id: string, completed: boolean) => {
+    setReminders(prev => {
+        const updated = prev.map(r => r.id === id ? { ...r, completed } : r);
+        updateStoredReminders(updated);
+        return updated;
+    });
+  };
 
   const toggleReminder = (id: string) => {
     setReminders(reminders.map(r => {
@@ -82,9 +92,17 @@ export const ReminderProvider = ({ children }: { children: ReactNode }) => {
         return r;
     }));
   };
+  
+  const deleteReminder = (id: string) => {
+    setReminders(prev => {
+        const updated = prev.filter(r => r.id !== id);
+        updateStoredReminders(updated);
+        return updated;
+    });
+  };
 
   return (
-    <ReminderContext.Provider value={{ reminders, addReminder, toggleReminder }}>
+    <ReminderContext.Provider value={{ reminders, addReminder, toggleReminder, setReminderStatus, deleteReminder }}>
       {children}
     </ReminderContext.Provider>
   );

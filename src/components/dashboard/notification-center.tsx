@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Bell } from 'lucide-react';
@@ -36,8 +37,8 @@ export function NotificationCenter() {
             </p>
           </div>
           <div className="grid gap-2">
-            {reminders.length > 0 ? (
-                 reminders.slice(0, 5).map((reminder) => (
+            {uncompletedReminders.length > 0 ? (
+                 uncompletedReminders.slice(0, 5).map((reminder) => (
                     <div
                         key={reminder.id}
                         className="flex items-center gap-3 p-2 rounded-md hover:bg-accent"
@@ -65,7 +66,7 @@ export function NotificationCenter() {
                     </div>
                  ))
             ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No reminders yet.</p>
+                <p className="text-sm text-muted-foreground text-center py-4">No pending reminders.</p>
             )}
           </div>
         </div>
