@@ -38,7 +38,7 @@ function SubmitButton() {
 }
 
 export function WellbeingChat() {
-  const [state, formAction] = useActionState(wellbeingChatAction, initialState);
+  const [state, formAction, isPending] = useActionState(wellbeingChatAction, initialState);
   const [messages, setMessages] = useState<Message[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -47,8 +47,8 @@ export function WellbeingChat() {
     if (state.response) {
       setMessages(prev => [...prev, { role: 'model', content: state.response }]);
     }
-  }, [state.response]);
-  
+  }, [state.response, state.error]);
+
   useEffect(() => {
     if(scrollAreaRef.current) {
         scrollAreaRef.current.scrollTo({
@@ -62,10 +62,16 @@ export function WellbeingChat() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const userMessage = formData.get('message') as string;
-
+    
     if (userMessage.trim()) {
-      setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-      formAction(formData);
+      const newMessages: Message[] = [...messages, { role: 'user', content: userMessage }];
+      setMessages(newMessages);
+
+      const newFormData = new FormData();
+      newFormData.append('message', userMessage);
+      newFormData.append('history', JSON.stringify(messages)); // Send previous messages as history
+
+      formAction(newFormData);
       formRef.current?.reset();
     }
   };
@@ -135,6 +141,7 @@ export function WellbeingChat() {
             placeholder="Type your message..."
             autoComplete="off"
             required
+            disabled={isPending}
           />
           <SubmitButton />
         </form>

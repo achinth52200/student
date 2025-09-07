@@ -55,7 +55,7 @@ const wellbeingChatFlow = ai.defineFlow(
       content: [{text: msg.content}],
     }));
 
-    const {output} = await ai.generate({
+    const {output} = await generate({
       prompt: input.message,
       model: ai.model,
       history,
