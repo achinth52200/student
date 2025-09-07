@@ -12,10 +12,8 @@ export default function RootPage() {
           <Logo className="w-16 h-16 text-primary" />
           <h1 className="text-5xl font-bold text-card-foreground">StudentSync</h1>
         </div>
-        <p className="text-xl text-muted-foreground mb-8">
-          Your all-in-one solution to streamline your student life.
-        </p>
-        <div className="flex justify-center gap-4">
+        
+        <div className="flex justify-center gap-4 mt-8">
           <Button asChild size="lg">
             <Link href="/login">Login</Link>
           </Button>
