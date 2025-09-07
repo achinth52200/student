@@ -29,12 +29,8 @@ export function ForgotPasswordForm() {
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd send a reset link here.
-    // For this prototype, we'll just move to the next step.
-    toast({
-        title: "Verification Sent",
-        description: "Please check your email for a password reset link.",
-    });
+    // For this prototype, we'll just move to the next step
+    // after the user enters their email.
     setStep(2);
   };
   
@@ -89,7 +85,7 @@ export function ForgotPasswordForm() {
                     </div>
                 </div>
                 <Button type="submit" className="w-full">
-                    Send Reset Link
+                    Proceed
                 </Button>
             </form>
           ) : (
