@@ -27,6 +27,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 export const menuItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -42,6 +43,11 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const { state: sidebarState } = useSidebar();
   const isActive = (href: string) => pathname === href;
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   const filteredMenuItems = menuItems.filter(item => {
     // Hide auth-related pages from the main sidebar navigation
@@ -81,19 +87,23 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <div className={cn("flex items-center gap-3", sidebarState === 'collapsed' && 'justify-center')}>
-            <Avatar className="h-9 w-9">
-              <AvatarFallback>{user?.name?.[0] ?? 'A'}</AvatarFallback>
-            </Avatar>
-            <div className={cn("flex flex-col", sidebarState === 'collapsed' && 'opacity-0 hidden')}>
-              <span className="text-sm font-medium">{user?.name ?? 'Alex Doe'}</span>
-              <span className="text-xs text-muted-foreground">
-                {user?.email ?? 'alex.doe@example.com'}
-              </span>
-            </div>
-          <Button variant="ghost" size="icon" onClick={handleLogout} className={cn("text-muted-foreground hover:text-foreground", sidebarState === 'expanded' && 'ml-auto')}>
-             <LogOut className="h-5 w-5"/>
-             <span className="sr-only">Logout</span>
-          </Button>
+            {isClient ? (
+              <>
+                <Avatar className="h-9 w-9">
+                  <AvatarFallback>{user?.name?.[0] ?? 'A'}</AvatarFallback>
+                </Avatar>
+                <div className={cn("flex flex-col", sidebarState === 'expanded' && 'opacity-100', sidebarState === 'collapsed' && 'opacity-0 hidden')}>
+                  <span className="text-sm font-medium">{user?.name ?? 'Alex Doe'}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {user?.email ?? 'alex.doe@example.com'}
+                  </span>
+                </div>
+                <Button variant="ghost" size="icon" onClick={handleLogout} className={cn("text-muted-foreground hover:text-foreground", sidebarState === 'expanded' && 'ml-auto')}>
+                  <LogOut className="h-5 w-5"/>
+                  <span className="sr-only">Logout</span>
+                </Button>
+              </>
+            ) : null}
         </div>
       </SidebarFooter>
     </Sidebar>
