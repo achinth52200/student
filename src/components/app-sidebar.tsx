@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -7,6 +8,7 @@ import {
   LayoutDashboard,
   Wallet,
   Bell,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -28,11 +30,17 @@ export const menuItems = [
   { href: "/study-planner", icon: BookOpen, label: "Study Planner" },
   { href: "/well-being", icon: HeartPulse, label: "Well-being" },
   { href: "/reminders", icon: Bell, label: "Reminders" },
+  { href: "/admin", icon: ShieldCheck, label: "Admin" },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
   const isActive = (href: string) => pathname === href;
+  
+  const filteredMenuItems = menuItems.filter(item => {
+    // Hide auth-related pages from the main sidebar navigation
+    return !['/login', '/signup'].includes(item.href);
+  });
 
   return (
     <Sidebar>
@@ -44,7 +52,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild

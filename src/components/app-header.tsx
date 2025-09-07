@@ -1,3 +1,4 @@
+
 "use client";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -33,10 +34,14 @@ export function AppHeader() {
       title: "Reminders",
       description: "Manage your tasks and deadlines.",
     },
+    "/admin": {
+      title: "Admin Panel",
+      description: "Manage users and system settings.",
+    }
   };
 
   const { title, description } =
-    titles[pathname] || titles["/dashboard"];
+    titles[pathname] || { title: 'StudentSync', description: 'Seamlessly sync your student life.'};
 
   return (
     <header className="flex h-16 items-center gap-4 border-b bg-card px-6">
