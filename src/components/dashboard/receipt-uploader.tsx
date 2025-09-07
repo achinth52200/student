@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Upload, Sparkles } from 'lucide-react';
+import { Upload, Sparkles, File, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { extractTransactionAction } from '@/app/actions';
 import type { Transaction } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 type ReceiptUploaderProps = {
   onTransactionExtracted: (
@@ -26,6 +27,7 @@ function UploadButton() {
     return (
         <>
              <Button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={pending}
             >
@@ -47,7 +49,11 @@ function UploadButton() {
                 ref={fileInputRef}
                 className="hidden"
                 accept="image/*"
-                onChange={(e) => e.target.form?.requestSubmit()}
+                onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                        e.target.form?.requestSubmit();
+                    }
+                }}
             />
         </>
     )
@@ -56,10 +62,8 @@ function UploadButton() {
 export function ReceiptUploader({
   onTransactionExtracted,
 }: ReceiptUploaderProps) {
-  const [state, formAction] = useActionState(
-    extractTransactionAction,
-    initialState
-  );
+  const [state, formAction, isPending] = useActionState(extractTransactionAction, initialState);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
@@ -73,6 +77,7 @@ export function ReceiptUploader({
         });
         return;
     }
+    setSelectedFile(file);
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -85,25 +90,38 @@ export function ReceiptUploader({
   }
 
   useEffect(() => {
-    if (state.transaction) {
+    if (!isPending && state.transaction) {
       onTransactionExtracted(state.transaction);
       toast({
         title: 'Success!',
         description: 'Transaction extracted from receipt.',
       });
       formRef.current?.reset();
-    } else if (state.error) {
+      // Keep selectedFile to show success state, it will be cleared on next upload
+    } else if (!isPending && state.error) {
        toast({
         variant: 'destructive',
         title: 'Upload Failed',
         description: state.error,
       });
     }
-  }, [state, onTransactionExtracted, toast]);
+  }, [state, onTransactionExtracted, toast, isPending]);
 
   return (
-      <form ref={formRef} action={handleAction} >
+      <form ref={formRef} action={handleAction} className="flex flex-col items-end gap-2" >
         <UploadButton />
+        {selectedFile && (
+             <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 border rounded-lg w-full justify-between">
+                <div className="flex items-center gap-2">
+                    <File className="h-4 w-4" />
+                    <span className="font-medium truncate max-w-[150px]">{selectedFile.name}</span>
+                </div>
+
+                {isPending && <Sparkles className="h-4 w-4 animate-spin text-primary" />}
+                {!isPending && state.transaction && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                {!isPending && state.error && <XCircle className="h-4 w-4 text-destructive" />}
+             </div>
+        )}
       </form>
   );
 }
