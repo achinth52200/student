@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -147,8 +148,7 @@ export function ExpenseTracker({ transactions, onAddTransaction, onDeleteTransac
                     <div className="flex flex-col items-end">
                        <span className={cn('flex items-center', t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400')}>
                         {t.type === "income" ? <ArrowDown className="mr-1 h-5 w-5 text-green-500" /> : <ArrowUp className="mr-1 h-5 w-5 text-red-500" />}
-                        <IndianRupee className="h-5 w-5" />
-                        {t.amount.toFixed(2)}
+                        ₹{t.amount.toFixed(2)}
                       </span>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant={'secondary'} className="capitalize">{t.category}</Badge>
