@@ -3,8 +3,9 @@ export type Transaction = {
   description: string;
   amount: number;
   type: 'income' | 'expense';
-  category: 'Groceries' | 'Transport' | 'Entertainment' | 'Utilities' | 'Salary' | 'Other';
+  category: 'Groceries' | 'Transport' | 'Entertainment' | 'Utilities' | 'Salary' | 'Other' | 'UPI';
   date: Date;
+  status: 'Completed' | 'Pending' | 'Failed';
 };
 
 export type Reminder = {
