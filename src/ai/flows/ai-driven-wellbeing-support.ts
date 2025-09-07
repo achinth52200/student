@@ -64,6 +64,7 @@ const prompt = ai.definePrompt({
   Study Hours: {{{studyHours}}}
 
   Provide feedback that is tailored to the student's situation, encouraging them to adopt healthy habits and coping mechanisms.
+  Keep the feedback concise and to the point, ideally in 2-3 sentences.
   Consider their study hours and suggest appropriate breaks and relaxation techniques.
   Suggest improvements for sleep quality, physical activity, and emotional regulation, providing concrete steps they can take.
   Offer support and encouragement to help them stay balanced during their studies.
