@@ -1,10 +1,10 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Sparkles, Bot, BookCheck, Download } from "lucide-react";
-import { useForm } from "react-hook-form";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -54,7 +54,6 @@ export function StudyOptimizer() {
     initialState
   );
   const { toast } = useToast();
-  const form = useForm();
   const { addReminder } = useReminders();
 
   useEffect(() => {
@@ -87,23 +86,21 @@ export function StudyOptimizer() {
     const doc = new jsPDF();
     
     // Add header
-    const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8" /><path d="M6 18h12" /><path d="M10 3v7c0 1.1-.9 2-2 2H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-5c-1.1 0-2-.9-2-2V3" /><path d="m14 3-4 8 4 8" /></svg>`;
-    doc.addSvgIcon(logoSvg, 14, 15, { width: 24, height: 24 });
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
-    doc.text("StudentSync", 40, 24);
+    doc.text("StudentSync", 14, 22);
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
-    doc.text("Your Optimized Study Schedule", 14, 40);
+    doc.text("Your Optimized Study Schedule", 14, 30);
 
 
     autoTable(doc, {
-      startY: 50,
+      startY: 40,
       head: [["Course", "Task", "Main Topic", "Core Topics", "Duration", "Suggested Time"]],
       body: state.schedule.map(item => 
         [item.course, item.task, item.mainTopic, item.coreTopics, item.duration, item.suggestedTime]
       ),
-      headStyles: { fillColor: [22, 163, 74] }, // Example: Green header
+      headStyles: { fillColor: [34, 197, 94] },
       didDrawPage: (data) => {
         // Footer
         const str = `Page ${doc.internal.getNumberOfPages()}`;
@@ -117,7 +114,6 @@ export function StudyOptimizer() {
 
   return (
     <Card>
-      <Form {...form}>
         <form action={formAction}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -132,7 +128,6 @@ export function StudyOptimizer() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField
-                control={form.control}
                 name="courseDeadlines"
                 render={() => (
                   <FormItem>
@@ -148,7 +143,6 @@ export function StudyOptimizer() {
                 )}
               />
               <FormField
-                control={form.control}
                 name="priorities"
                 render={() => (
                   <FormItem>
@@ -166,7 +160,6 @@ export function StudyOptimizer() {
             </div>
              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <FormField
-                    control={form.control}
                     name="mainTopic"
                     render={() => (
                     <FormItem>
@@ -177,7 +170,6 @@ export function StudyOptimizer() {
                     )}
                 />
                 <FormField
-                    control={form.control}
                     name="coreTopics"
                     render={() => (
                     <FormItem>
@@ -188,7 +180,6 @@ export function StudyOptimizer() {
                     )}
                 />
                  <FormField
-                    control={form.control}
                     name="duration"
                     render={() => (
                     <FormItem>
@@ -242,7 +233,6 @@ export function StudyOptimizer() {
             <SubmitButton />
           </CardFooter>
         </form>
-      </Form>
     </Card>
   );
 }
