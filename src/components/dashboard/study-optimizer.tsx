@@ -5,6 +5,9 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Sparkles, Bot, BookCheck, Download } from "lucide-react";
 import { useForm } from "react-hook-form";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 import { optimizeStudyScheduleAction } from "@/app/actions";
 import {
@@ -23,6 +26,7 @@ import type { ScheduleItem } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "../ui/input";
 import { useReminders } from "@/hooks/use-reminders";
+import { Logo } from "../icons";
 
 const initialState: {
   message?: string;
@@ -77,24 +81,38 @@ export function StudyOptimizer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.schedule]);
 
-  const downloadAsCSV = () => {
+  const downloadAsPDF = () => {
     if (!state.schedule) return;
 
-    const headers = ["Course", "Task", "Main Topic", "Core Topics", "Duration", "Suggested Time"];
-    const rows = state.schedule.map(item => 
-      [item.course, item.task, item.mainTopic, item.coreTopics, item.duration, item.suggestedTime]
-      .map(field => `"${field.replace(/"/g, '""')}"`) // Handle quotes
-      .join(',')
-    );
+    const doc = new jsPDF();
     
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "study_schedule.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Add header
+    const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8" /><path d="M6 18h12" /><path d="M10 3v7c0 1.1-.9 2-2 2H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-5c-1.1 0-2-.9-2-2V3" /><path d="m14 3-4 8 4 8" /></svg>`;
+    doc.addSvgIcon(logoSvg, 14, 15, { width: 24, height: 24 });
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("StudentSync", 40, 24);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Your Optimized Study Schedule", 14, 40);
+
+
+    autoTable(doc, {
+      startY: 50,
+      head: [["Course", "Task", "Main Topic", "Core Topics", "Duration", "Suggested Time"]],
+      body: state.schedule.map(item => 
+        [item.course, item.task, item.mainTopic, item.coreTopics, item.duration, item.suggestedTime]
+      ),
+      headStyles: { fillColor: [22, 163, 74] }, // Example: Green header
+      didDrawPage: (data) => {
+        // Footer
+        const str = `Page ${doc.internal.getNumberOfPages()}`;
+        doc.setFontSize(10);
+        doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
+      }
+    });
+
+    doc.save("study_schedule.pdf");
   }
 
   return (
@@ -188,9 +206,9 @@ export function StudyOptimizer() {
                         <Bot className="w-5 h-5" />
                         Optimized Schedule
                     </h4>
-                    <Button variant="outline" size="sm" onClick={downloadAsCSV}>
+                    <Button variant="outline" size="sm" onClick={downloadAsPDF}>
                         <Download className="mr-2 h-4 w-4" />
-                        Download CSV
+                        Download PDF
                     </Button>
                 </div>
                  <Table>
