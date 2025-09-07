@@ -1,13 +1,12 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useActionState } from 'react-dom';
+import { useEffect, useRef, useState, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Bot, Send, Sparkles, User } from 'lucide-react';
 
 import { wellbeingChatAction } from '@/app/actions';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
