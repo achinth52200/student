@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ReminderProvider } from "@/hooks/use-reminders";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LoaderProvider } from "@/hooks/use-loader";
-import { PageTransitionLoader } from "@/components/page-transition-loader";
+import { PageLoader } from "@/components/page-loader";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -33,10 +33,9 @@ export default function RootLayout({
         <LoaderProvider>
             <AuthProvider>
               <ReminderProvider>
-                  <Suspense>
-                    <PageTransitionLoader />
+                  <Suspense fallback={<PageLoader />}>
+                    {children}
                   </Suspense>
-                  {children}
                   <Toaster />
               </ReminderProvider>
             </AuthProvider>

@@ -11,6 +11,7 @@ import type { Transaction } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ReceiptUploader } from "@/components/dashboard/receipt-uploader";
 import { useAuth } from "@/hooks/use-auth";
+import { PageTransitionLoader } from "@/components/page-transition-loader";
 
 // Dynamically import ExpenseTracker with SSR turned off
 const ExpenseTracker = dynamic(
@@ -80,38 +81,41 @@ export default function ExpensesPage() {
   };
   
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen">
-        <AppSidebar />
-        <SidebarInset className="flex-1">
-          <AppHeader />
-          <main className="p-4 sm:p-6 lg:p-8">
-             <div className="flex justify-end mb-4">
-                <ReceiptUploader onTransactionsExtracted={addTransactions} />
-            </div>
-            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-              <div className="grid grid-cols-1 gap-6 lg:col-span-2">
-                <ExpenseTracker 
-                    transactions={transactions} 
-                    onAddTransaction={addTransaction} 
-                    onDeleteTransaction={deleteTransaction}
-                />
+    <>
+      <PageTransitionLoader />
+      <SidebarProvider>
+        <div className="flex min-h-screen">
+          <AppSidebar />
+          <SidebarInset className="flex-1">
+            <AppHeader />
+            <main className="p-4 sm:p-6 lg:p-8">
+               <div className="flex justify-end mb-4">
+                  <ReceiptUploader onTransactionsExtracted={addTransactions} />
               </div>
-              <div className="grid grid-cols-1 gap-6">
-                <Card className="flex flex-col">
-                    <CardHeader>
-                        <CardTitle>Budget Overview</CardTitle>
-                        <CardDescription>A visual breakdown of your finances.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                       <BudgetChart transactions={transactions} />
-                    </CardContent>
-                </Card>
+              <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 lg:col-span-2">
+                  <ExpenseTracker 
+                      transactions={transactions} 
+                      onAddTransaction={addTransaction} 
+                      onDeleteTransaction={deleteTransaction}
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-6">
+                  <Card className="flex flex-col">
+                      <CardHeader>
+                          <CardTitle>Budget Overview</CardTitle>
+                          <CardDescription>A visual breakdown of your finances.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                         <BudgetChart transactions={transactions} />
+                      </CardContent>
+                  </Card>
+                </div>
               </div>
-            </div>
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+            </main>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </>
   );
 }

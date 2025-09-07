@@ -12,6 +12,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { BudgetChart } from "@/components/dashboard/budget-chart";
 import type { Transaction } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth";
+import { PageTransitionLoader } from "@/components/page-transition-loader";
 
 const initialTransactions: Transaction[] = [
     { id: '1', description: 'Groceries', amount: 75.50, type: 'expense', category: 'Groceries', date: '2024-07-15T10:00:00Z', status: 'Completed' },
@@ -40,33 +41,36 @@ export default function DashboardPage() {
 
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen">
-        <AppSidebar />
-        <SidebarInset className="flex-1">
-          <AppHeader />
-          <main className="p-4 sm:p-6 lg:p-8">
-            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-              <div className="grid grid-cols-1 gap-6 lg:col-span-2">
-                 <WellbeingChat />
+    <>
+      <PageTransitionLoader />
+      <SidebarProvider>
+        <div className="flex min-h-screen">
+          <AppSidebar />
+          <SidebarInset className="flex-1">
+            <AppHeader />
+            <main className="p-4 sm:p-6 lg:p-8">
+              <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 lg:col-span-2">
+                   <WellbeingChat />
+                </div>
+                <div className="grid grid-cols-1 gap-6">
+                   <Card>
+                      <CardHeader>
+                          <CardTitle>Budget Overview</CardTitle>
+                          <CardDescription>A visual breakdown of your finances.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                          <BudgetChart transactions={transactions} />
+                      </CardContent>
+                  </Card>
+                  <Reminders />
+                  <PersonalizedTips />
+                </div>
               </div>
-              <div className="grid grid-cols-1 gap-6">
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Budget Overview</CardTitle>
-                        <CardDescription>A visual breakdown of your finances.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <BudgetChart transactions={transactions} />
-                    </CardContent>
-                </Card>
-                <Reminders />
-                <PersonalizedTips />
-              </div>
-            </div>
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+            </main>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </>
   );
 }
