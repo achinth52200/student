@@ -64,7 +64,15 @@ export function ExpenseTracker({ transactions, onAddTransaction, onDeleteTransac
   };
 
   const getCategoryIcon = (category: string) => {
-    return categoryIcons[category] || '📋';
+    // Check if the category is a default one, otherwise it's a person's name for UPI
+    if (categoryIcons[category]) {
+        return categoryIcons[category];
+    }
+    // For UPI payments to individuals, try to show the first letter of their name
+    if (category) {
+        return category.charAt(0).toUpperCase();
+    }
+    return '📋';
   }
   
   const allCategories = Array.from(new Set([...defaultCategories, ...transactions.map(t => t.category)]));
@@ -148,7 +156,7 @@ export function ExpenseTracker({ transactions, onAddTransaction, onDeleteTransac
                     <div className="flex flex-col items-end">
                        <span className={cn('flex items-center', t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400')}>
                         {t.type === "income" ? <ArrowDown className="mr-1 h-5 w-5 text-green-500" /> : <ArrowUp className="mr-1 h-5 w-5 text-red-500" />}
-                        ₹{t.amount.toFixed(2)}
+                        RS {t.amount.toFixed(2)}
                       </span>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant={'secondary'} className="capitalize">{t.category}</Badge>

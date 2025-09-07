@@ -19,7 +19,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       return (
         <div className="p-2 bg-card border rounded-lg shadow-sm">
           <p className="font-bold">{`${label}`}</p>
-          <p className="text-primary">{`Amount: ₹${payload[0].value.toFixed(2)}`}</p>
+          <p className="text-primary">{`Amount: RS ${payload[0].value.toFixed(2)}`}</p>
         </div>
       );
     }
@@ -97,7 +97,7 @@ export function BudgetChart({ transactions }: { transactions: Transaction[] }) {
                                 borderColor: "hsl(var(--border))",
                                 borderRadius: "var(--radius)",
                             }}
-                            formatter={(value) => `₹${Number(value).toFixed(2)}`}
+                            formatter={(value) => `RS ${Number(value).toFixed(2)}`}
                         />
                         <Pie
                             data={incomeChartData}
@@ -126,19 +126,19 @@ export function BudgetChart({ transactions }: { transactions: Transaction[] }) {
             <div className="flex items-center gap-2 font-medium text-green-600 dark:text-green-400">
                 <Banknote /> Total Income
             </div>
-            <span className="font-semibold">₹{income.toFixed(2)}</span>
+            <span className="font-semibold">RS {income.toFixed(2)}</span>
           </div>
           <div className="flex justify-between w-full text-sm">
             <div className="flex items-center gap-2 font-medium text-red-600 dark:text-red-400">
                 <Banknote /> Total Expenses
             </div>
-             <span className="font-semibold">₹{expenses.toFixed(2)}</span>
+             <span className="font-semibold">RS {expenses.toFixed(2)}</span>
           </div>
            <div className="flex justify-between w-full text-base font-bold">
             <div className="flex items-center gap-2">
                 <Wallet /> Current Balance
             </div>
-             <span>₹{balance.toFixed(2)}</span>
+             <span>RS {balance.toFixed(2)}</span>
           </div>
       </CardFooter>
     </>
