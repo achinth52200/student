@@ -19,14 +19,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import type { ScheduleItem } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "../ui/input";
 import { useReminders } from "@/hooks/use-reminders";
-import { Logo } from "../icons";
+import { Label } from "../ui/label";
 
 const initialState: {
   message?: string;
@@ -127,68 +126,38 @@ export function StudyOptimizer() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <FormField
-                name="courseDeadlines"
-                render={() => (
-                  <FormItem>
-                    <FormLabel htmlFor="courseDeadlines">Course Deadlines</FormLabel>
-                    <Textarea
-                      id="courseDeadlines"
-                      name="courseDeadlines"
-                      placeholder="e.g., Math 101 Final - 2024-05-15"
-                      className="h-32"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="priorities"
-                render={() => (
-                  <FormItem>
-                    <FormLabel htmlFor="priorities">Priorities</FormLabel>
-                    <Textarea
-                      id="priorities"
-                      name="priorities"
-                      placeholder="e.g., Math 101 - High"
-                      className="h-32"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="courseDeadlines">Course Deadlines</Label>
+                <Textarea
+                  id="courseDeadlines"
+                  name="courseDeadlines"
+                  placeholder="e.g., Math 101 Final - 2024-05-15"
+                  className="h-32"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="priorities">Priorities</Label>
+                <Textarea
+                  id="priorities"
+                  name="priorities"
+                  placeholder="e.g., Math 101 - High"
+                  className="h-32"
+                />
+              </div>
             </div>
              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <FormField
-                    name="mainTopic"
-                    render={() => (
-                    <FormItem>
-                        <FormLabel htmlFor="mainTopic">Main Topic</FormLabel>
-                        <Input id="mainTopic" name="mainTopic" placeholder="e.g., Algebra" />
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <FormField
-                    name="coreTopics"
-                    render={() => (
-                    <FormItem>
-                        <FormLabel htmlFor="coreTopics">Core Topics</FormLabel>
-                        <Input id="coreTopics" name="coreTopics" placeholder="e.g., Binomial theorem, Linear equations" />
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                 <FormField
-                    name="duration"
-                    render={() => (
-                    <FormItem>
-                        <FormLabel htmlFor="duration">Duration</FormLabel>
-                        <Input id="duration" name="duration" placeholder="e.g., 3 hours" />
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
+                <div className="space-y-2">
+                    <Label htmlFor="mainTopic">Main Topic</Label>
+                    <Input id="mainTopic" name="mainTopic" placeholder="e.g., Algebra" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="coreTopics">Core Topics</Label>
+                    <Input id="coreTopics" name="coreTopics" placeholder="e.g., Binomial theorem, Linear equations" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="duration">Duration</Label>
+                    <Input id="duration" name="duration" placeholder="e.g., 3 hours" />
+                </div>
             </div>
             {state.schedule && state.schedule.length > 0 && (
               <div className="rounded-lg border bg-secondary/50 p-4">
