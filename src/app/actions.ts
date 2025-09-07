@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { optimizeStudySchedule } from '@/ai/flows/optimize-study-schedule'
 import { provideAiDrivenWellbeingSupport } from '@/ai/flows/ai-driven-wellbeing-support'
+import { wellbeingChat } from '@/ai/flows/wellbeing-chat-flow'
 
 const optimizeScheduleSchema = z.object({
   courseDeadlines: z.string().min(1, 'Please provide course deadlines.'),
@@ -96,5 +97,46 @@ export async function provideWellbeingSupportAction(
     return {
       message: 'An error occurred while generating feedback. Please try again.',
     }
+  }
+}
+
+const wellbeingChatSchema = z.object({
+  history: z.string(), // JSON string of message history
+  message: z.string().min(1, 'Please enter a message.'),
+});
+
+type WellbeingChatState = {
+  response?: string;
+  error?: string;
+};
+
+export async function wellbeingChatAction(
+  prevState: WellbeingChatState,
+  formData: FormData
+): Promise<WellbeingChatState> {
+  const validatedFields = wellbeingChatSchema.safeParse({
+    history: formData.get('history'),
+    message: formData.get('message'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      error: 'Validation failed. Please check your input.',
+    };
+  }
+  
+  try {
+    const history = JSON.parse(validatedFields.data.history);
+    const result = await wellbeingChat({
+      history,
+      message: validatedFields.data.message,
+    });
+    return {
+      response: result.response,
+    };
+  } catch (error) {
+    return {
+      error: 'An error occurred while getting a response. Please try again.',
+    };
   }
 }
