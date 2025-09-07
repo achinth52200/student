@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ReminderProvider } from "@/hooks/use-reminders";
 import { AuthProvider } from "@/hooks/use-auth";
+import { LoaderProvider } from "@/hooks/use-loader";
+import { PageTransitionLoader } from "@/components/page-transition-loader";
 
 export const metadata: Metadata = {
   title: "StudentSync",
@@ -26,12 +28,15 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <AuthProvider>
-          <ReminderProvider>
-              {children}
-              <Toaster />
-          </ReminderProvider>
-        </AuthProvider>
+        <LoaderProvider>
+            <AuthProvider>
+              <ReminderProvider>
+                  <PageTransitionLoader />
+                  {children}
+                  <Toaster />
+              </ReminderProvider>
+            </AuthProvider>
+        </LoaderProvider>
       </body>
     </html>
   );
