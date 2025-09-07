@@ -67,48 +67,53 @@ export function ReceiptUploader({
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
-  const handleAction = async (formData: FormData) => {
+  const handleAction = (formData: FormData) => {
     const file = formData.get('receipt') as File;
-    if (!file || file.size === 0) {
-        toast({
-            variant: 'destructive',
-            title: 'Upload Failed',
-            description: 'Please select a file to upload.',
-        });
+     if (!file || file.size === 0) {
+        // This case should ideally be handled by the server action validation
         return;
     }
     setSelectedFile(file);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const dataUri = e.target?.result as string;
-        const newFormData = new FormData();
-        newFormData.append('photoDataUri', dataUri);
-        formAction(newFormData);
-    };
-    reader.readAsDataURL(file);
+    formAction(formData);
   }
 
   useEffect(() => {
-    if (!isPending && state.transaction) {
+    if (isPending) return;
+
+    if (state.transaction) {
       onTransactionExtracted(state.transaction);
       toast({
         title: 'Success!',
         description: 'Transaction extracted from receipt.',
       });
       formRef.current?.reset();
-      // Keep selectedFile to show success state, it will be cleared on next upload
-    } else if (!isPending && state.error) {
+      // Keep selectedFile to show success state, it will be cleared on next successful upload by the user
+    } else if (state.error) {
        toast({
         variant: 'destructive',
         title: 'Upload Failed',
         description: state.error,
       });
     }
-  }, [state, onTransactionExtracted, toast, isPending]);
+  // We only want this to run when the form is not pending, and the state has changed.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, isPending]);
 
   return (
-      <form ref={formRef} action={handleAction} className="flex flex-col items-end gap-2" >
+      <form 
+        ref={formRef} 
+        action={handleAction} 
+        className="flex flex-col items-end gap-2" 
+        onChange={(e) => {
+            // Automatically submit the form when a file is selected
+            const form = e.currentTarget;
+            const fileInput = form.elements.namedItem('receipt') as HTMLInputElement;
+            if (fileInput?.files && fileInput.files.length > 0) {
+                const formData = new FormData(form);
+                handleAction(formData);
+            }
+        }}
+      >
         <UploadButton />
         {selectedFile && (
              <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 border rounded-lg w-full justify-between">

@@ -144,7 +144,7 @@ export async function wellbeingChatAction(
 }
 
 const extractTransactionSchema = z.object({
-  photoDataUri: z.string(),
+  receipt: z.instanceof(File),
 });
 
 type ExtractTransactionState = {
@@ -157,17 +157,28 @@ export async function extractTransactionAction(
     formData: FormData
 ): Promise<ExtractTransactionState> {
     const validatedFields = extractTransactionSchema.safeParse({
-        photoDataUri: formData.get('photoDataUri'),
+        receipt: formData.get('receipt'),
     });
 
     if (!validatedFields.success) {
         return {
-            error: 'Validation failed. Please provide a valid image.',
+            error: 'Validation failed. Please provide a valid image file.',
         };
+    }
+    
+    const file = validatedFields.data.receipt;
+    if (file.size === 0) {
+        return {
+            error: 'Please upload a non-empty file.'
+        }
     }
 
     try {
-        const result = await extractTransactionFromImage(validatedFields.data);
+        const buffer = await file.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString('base64');
+        const photoDataUri = `data:${file.type};base64,${base64}`;
+
+        const result = await extractTransactionFromImage({ photoDataUri });
         if (result.transaction) {
             return {
                 transaction: result.transaction,
