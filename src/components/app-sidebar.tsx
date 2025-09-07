@@ -58,7 +58,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Logo className="w-6 h-6 text-primary" />
-          <h1 className={cn("text-lg font-semibold font-headline", sidebarState === 'collapsed' && 'opacity-0 hidden')}>StudentSync</h1>
+          <h1 className={cn("text-lg font-semibold font-headline whitespace-nowrap", sidebarState === 'collapsed' && 'opacity-0 hidden')}>StudentSync</h1>
         </div>
       </SidebarHeader>
       <SidebarContent>
