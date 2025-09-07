@@ -19,12 +19,14 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Logo } from "@/components/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 
 export const menuItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -38,6 +40,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { state: sidebarState } = useSidebar();
   const isActive = (href: string) => pathname === href;
   
   const filteredMenuItems = menuItems.filter(item => {
@@ -51,11 +54,11 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Logo className="w-6 h-6 text-primary" />
-          <h1 className="text-lg font-semibold font-headline">StudentSync</h1>
+          <h1 className={cn("text-lg font-semibold font-headline", sidebarState === 'collapsed' && 'opacity-0 hidden')}>StudentSync</h1>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -77,19 +80,17 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className={cn("flex items-center gap-3", sidebarState === 'collapsed' && 'justify-center')}>
             <Avatar className="h-9 w-9">
               <AvatarFallback>{user?.name?.[0] ?? 'A'}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col">
+            <div className={cn("flex flex-col", sidebarState === 'collapsed' && 'opacity-0 hidden')}>
               <span className="text-sm font-medium">{user?.name ?? 'Alex Doe'}</span>
               <span className="text-xs text-muted-foreground">
                 {user?.email ?? 'alex.doe@example.com'}
               </span>
             </div>
-          </div>
-          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" onClick={handleLogout} className={cn("text-muted-foreground hover:text-foreground", sidebarState === 'expanded' && 'ml-auto')}>
              <LogOut className="h-5 w-5"/>
              <span className="sr-only">Logout</span>
           </Button>
@@ -98,3 +99,5 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
+    

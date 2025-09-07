@@ -5,9 +5,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { menuItems } from "@/components/app-sidebar";
 import { NotificationCenter } from "@/components/dashboard/notification-center";
-import { Button } from "@/components/ui/button";
-import { Bell } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -41,7 +38,7 @@ export function AppHeader() {
 
   return (
     <header className="flex h-16 items-center gap-4 border-b bg-card px-6">
-      <SidebarTrigger className="md:hidden" />
+      <SidebarTrigger />
       <div className="flex-1">
         <h1 className="text-xl font-semibold font-headline">{title}</h1>
         <p className="text-sm text-muted-foreground">{description}</p>
@@ -50,3 +47,5 @@ export function AppHeader() {
     </header>
   );
 }
+
+    
