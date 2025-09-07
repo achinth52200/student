@@ -1,16 +1,12 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
+import { useState } from "react";
 import type { Transaction } from "@/lib/types";
-import { ArrowDownLeft, ArrowUpRight, Banknote, IndianRupee, RefreshCw } from "lucide-react";
+import { Plus, IndianRupee, Trash2, ArrowDown, ArrowUp } from "lucide-react";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -23,129 +19,95 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { syncTransactionsAction } from "@/app/actions";
-import { Button } from "../ui/button";
-import { useToast } from "@/hooks/use-toast";
 
-const initialTransactions: Transaction[] = [
-  {
-    id: "1",
-    description: "Received from Alex Doe",
-    amount: 250.0,
-    type: "income",
-    category: "UPI",
-    date: new Date("2024-06-12T14:30:00.000Z"),
-    status: "Completed",
-  },
-  {
-    id: "2",
-    description: "Paid to Coffee Shop",
-    amount: 15.5,
-    type: "expense",
-    category: "UPI",
-    date: new Date("2024-06-12T09:15:00.000Z"),
-    status: "Completed",
-  },
-  {
-    id: "3",
-    description: "Paid to Book Store",
-    amount: 85.0,
-    type: "expense",
-    category: "UPI",
-    date: new Date("2024-06-11T18:00:00.000Z"),
-    status: "Completed",
-  },
-  {
-    id: "4",
-    description: "Received from Jane Smith",
-    amount: 50.0,
-    type: "income",
-    category: "UPI",
-    date: new Date("2024-06-11T11:45:00.000Z"),
-    status: "Completed",
-  },
-  {
-    id: "5",
-    description: "Paid to Movie Theater",
-    amount: 32.0,
-    type: "expense",
-    category: "UPI",
-    date: new Date("2024-06-10T20:00:00.000Z"),
-    status: "Failed"
-  },
-   {
-    id: "6",
-    description: "Paid for Groceries",
-    amount: 75.2,
-    type: "expense",
-    category: "UPI",
-    date: new Date("2024-06-10T17:30:00.000Z"),
-    status: "Completed",
-  },
-];
-
-const initialState = {
-  transactions: [],
-  message: '',
-};
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} variant="outline">
-      <RefreshCw className={cn("mr-2 h-4 w-4", pending && "animate-spin")} />
-      {pending ? "Syncing..." : "Sync Transactions"}
-    </Button>
-  );
+const categoryIcons: Record<Transaction['category'], string> = {
+    'Groceries': '🛒',
+    'Transport': '🚌',
+    'Entertainment': '🎬',
+    'Utilities': '💡',
+    'Salary': '💰',
+    'Other': '📋',
+    'UPI': '📲'
 }
 
-export function ExpenseTracker() {
-  const [transactions, setTransactions] =
-    useState<Transaction[]>(initialTransactions);
-  const [state, formAction] = useActionState(syncTransactionsAction, initialState);
-  const { toast } = useToast();
+type ExpenseTrackerProps = {
+    transactions: Transaction[];
+    onAddTransaction: (transaction: Omit<Transaction, 'id' | 'date' | 'status'>) => void;
+    onDeleteTransaction: (id: string) => void;
+}
 
-  useEffect(() => {
-    if (state.transactions && state.transactions.length > 0) {
-      // Filter out transactions that are already in the list
-      const newTransactions = state.transactions.filter(
-        (newT) => !transactions.some((existingT) => existingT.id === newT.id)
-      );
-
-      if (newTransactions.length > 0) {
-        setTransactions(prev => [...newTransactions, ...prev]);
-        toast({
-          title: "Success",
-          description: "New transactions have been synced.",
-        });
-      } else {
-        toast({
-          title: "Already up to date",
-          description: "No new transactions found.",
-        });
-      }
-    } else if (state.message && !state.transactions) {
-       toast({
-        variant: "destructive",
-        title: "Error",
-        description: state.message,
-      });
-    }
-  }, [state, toast, transactions]);
+export function ExpenseTracker({ transactions, onAddTransaction, onDeleteTransaction }: ExpenseTrackerProps) {
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [type, setType] = useState<'income' | 'expense'>('expense');
+  const [category, setCategory] = useState<Transaction['category']>('Other');
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!description || !amount) return;
+    onAddTransaction({
+      description,
+      amount: parseFloat(amount),
+      type,
+      category,
+    });
+    setDescription("");
+    setAmount("");
+  };
 
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Banknote /> Transaction History
-        </CardTitle>
+        <CardTitle>Manual Transactions</CardTitle>
         <CardDescription>
-          Here is your recent UPI transaction history.
+          Add, view, and manage your transactions manually.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-6">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-2 items-end p-4 rounded-lg border bg-card-foreground/5">
+            <div className="md:col-span-2">
+                <label className="text-xs font-medium" htmlFor="description">Description</label>
+                <Input id="description" placeholder="e.g., Coffee" value={description} onChange={e => setDescription(e.target.value)} required />
+            </div>
+             <div>
+                <label className="text-xs font-medium" htmlFor="amount">Amount</label>
+                <Input id="amount" type="number" placeholder="e.g., 5.50" value={amount} onChange={e => setAmount(e.target.value)} required />
+            </div>
+            <div className="flex gap-2">
+                <div>
+                    <label className="text-xs font-medium">Type</label>
+                     <Select onValueChange={(v: any) => setType(v)} defaultValue={type}>
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="expense">Expense</SelectItem>
+                            <SelectItem value="income">Income</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <div>
+                    <label className="text-xs font-medium">Category</label>
+                     <Select onValueChange={(v: any) => setCategory(v)} defaultValue={category}>
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.keys(categoryIcons).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+            <Button type="submit" className="w-full">
+                <Plus className="mr-2"/> Add
+            </Button>
+        </form>
+
         <div className="relative h-[400px] overflow-auto">
           <Table>
             <TableHeader className="sticky top-0 bg-card">
@@ -156,15 +118,11 @@ export function ExpenseTracker() {
             </TableHeader>
             <TableBody>
               {transactions.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((t) => (
-                <TableRow key={t.id} className="cursor-pointer hover:bg-muted/50">
+                <TableRow key={t.id}>
                   <TableCell>
                     <div className="flex items-center gap-4">
-                       <div className={cn("flex h-10 w-10 items-center justify-center rounded-full", t.type === 'income' ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50')}>
-                        {t.type === "income" ? (
-                          <ArrowDownLeft className="h-5 w-5 text-green-600 dark:text-green-400" />
-                        ) : (
-                          <ArrowUpRight className="h-5 w-5 text-red-600 dark:text-red-400" />
-                        )}
+                       <div className={cn("flex h-10 w-10 items-center justify-center rounded-full text-xl", t.type === 'income' ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50')}>
+                        {categoryIcons[t.category]}
                       </div>
                       <div className="flex flex-col">
                         <span className="font-medium">{t.description}</span>
@@ -178,14 +136,17 @@ export function ExpenseTracker() {
                     className={`text-right font-semibold text-lg`}
                   >
                     <div className="flex flex-col items-end">
-                       <span className={cn('flex items-center', t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-foreground')}>
-                        {t.type === "income" ? "+" : "-"}
+                       <span className={cn('flex items-center', t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400')}>
+                        {t.type === "income" ? <ArrowDown className="mr-1 h-5 w-5 text-green-500" /> : <ArrowUp className="mr-1 h-5 w-5 text-red-500" />}
                         <IndianRupee className="h-5 w-5" />
                         {t.amount.toFixed(2)}
                       </span>
-                      <Badge variant={t.status === 'Completed' ? 'secondary' : 'destructive'} className="mt-1">
-                        {t.status}
-                      </Badge>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant={'secondary'} className="capitalize">{t.category}</Badge>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => onDeleteTransaction(t.id)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -194,11 +155,6 @@ export function ExpenseTracker() {
           </Table>
         </div>
       </CardContent>
-       <CardFooter className="border-t pt-6 justify-end">
-        <form action={formAction}>
-          <SubmitButton />
-        </form>
-      </CardFooter>
     </Card>
   );
 }

@@ -4,8 +4,6 @@ import { z } from 'zod'
 import { optimizeStudySchedule } from '@/ai/flows/optimize-study-schedule'
 import { provideAiDrivenWellbeingSupport } from '@/ai/flows/ai-driven-wellbeing-support'
 import { wellbeingChat } from '@/ai/flows/wellbeing-chat-flow'
-import { getRecentTransactions } from '@/ai/flows/get-transactions-flow'
-import type { Transaction } from '@/lib/types'
 
 const optimizeScheduleSchema = z.object({
   courseDeadlines: z.string().min(1, 'Please provide course deadlines.'),
@@ -140,26 +138,5 @@ export async function wellbeingChatAction(
     return {
       error: 'An error occurred while getting a response. Please try again.',
     };
-  }
-}
-
-type SyncTransactionsState = {
-  transactions?: Transaction[];
-  message?: string;
-}
-
-export async function syncTransactionsAction(
-  prevState: SyncTransactionsState
-): Promise<SyncTransactionsState> {
-  try {
-    const result = await getRecentTransactions();
-    return {
-      transactions: result.transactions,
-      message: 'Transactions synced successfully!',
-    }
-  } catch (error) {
-    return {
-      message: 'An error occurred while syncing transactions. Please try again.',
-    }
   }
 }
