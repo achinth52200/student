@@ -71,8 +71,7 @@ export function AppSidebar() {
       <SidebarFooter>
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
-            <AvatarImage src="https://picsum.photos/100" alt="User" data-ai-hint="person face" />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarFallback>A</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <span className="text-sm font-medium">Alex Doe</span>

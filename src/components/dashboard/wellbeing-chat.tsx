@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useActionState } from 'react';
+import { useActionState } from 'react-dom';
 import { useFormStatus } from 'react-dom';
 import { Bot, Send, Sparkles, User } from 'lucide-react';
 
@@ -100,7 +101,6 @@ export function WellbeingChat() {
                 </div>
                 {message.role === 'user' && (
                   <Avatar className="h-8 w-8">
-                     <AvatarImage src="https://picsum.photos/100" alt="User" data-ai-hint="person face" />
                     <AvatarFallback>
                       <User className="h-5 w-5" />
                     </AvatarFallback>
