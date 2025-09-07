@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Bell, PlusCircle } from "lucide-react";
 import {
   Card,
@@ -19,19 +19,19 @@ const initialReminders: Reminder[] = [
   {
     id: "1",
     title: "Submit Math assignment",
-    dueDate: new Date(new Date().setDate(new Date().getDate() + 2)),
+    dueDate: new Date("2024-06-12T00:00:00.000Z"),
     completed: false,
   },
   {
     id: "2",
     title: "Group project meeting",
-    dueDate: new Date(new Date().setDate(new Date().getDate() + 3)),
+    dueDate: new Date("2024-06-13T00:00:00.000Z"),
     completed: false,
   },
   {
     id: "3",
     title: "Renew library books",
-    dueDate: new Date(new Date().setDate(new Date().getDate() - 1)),
+    dueDate: new Date("2024-06-09T00:00:00.000Z"),
     completed: true,
   },
 ];
@@ -58,6 +58,10 @@ export function Reminders() {
       reminders.map((r) => (r.id === id ? { ...r, completed: !r.completed } : r))
     );
   };
+  
+  const sortedReminders = useMemo(() => {
+    return [...reminders].sort((a, b) => (a.completed ? 1 : -1) || a.id.localeCompare(b.id));
+  }, [reminders]);
 
   return (
     <Card>
@@ -79,8 +83,7 @@ export function Reminders() {
           </Button>
         </form>
         <div className="space-y-3 h-[180px] overflow-y-auto pr-2">
-          {reminders
-            .sort((a, b) => (a.completed ? 1 : -1))
+          {sortedReminders
             .map((reminder) => (
               <div
                 key={reminder.id}
