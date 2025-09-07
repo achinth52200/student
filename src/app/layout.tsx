@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ReminderProvider } from "@/hooks/use-reminders";
+import { AuthProvider } from "@/hooks/use-auth";
 
 export const metadata: Metadata = {
   title: "StudentSync",
@@ -25,10 +26,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <ReminderProvider>
-            {children}
-            <Toaster />
-        </ReminderProvider>
+        <AuthProvider>
+          <ReminderProvider>
+              {children}
+              <Toaster />
+          </ReminderProvider>
+        </AuthProvider>
       </body>
     </html>
   );

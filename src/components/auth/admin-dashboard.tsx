@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAuth } from "@/hooks/use-auth";
 
 type User = {
     name: string;
@@ -35,16 +36,19 @@ export function AdminDashboard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
+  const { setUser } = useAuth();
 
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
     const newUser = { name, email };
     setUsers([...users, newUser]);
     
-    // In a real app, you would also get a password or generate one
+    // As per the request, "quick login" to the newly created user
+    setUser(newUser);
+    
     toast({
         title: "User Created Successfully",
-        description: `An account for ${email} has been created. They can now log in.`,
+        description: `An account for ${email} has been created and you are now logged in as them.`,
     });
 
     // Reset form

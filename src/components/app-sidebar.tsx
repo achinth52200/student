@@ -21,10 +21,11 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Logo } from "@/components/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 export const menuItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -38,6 +39,7 @@ export const menuItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, logout } = useAuth();
   const isActive = (href: string) => pathname === href;
   
   const filteredMenuItems = menuItems.filter(item => {
@@ -46,7 +48,7 @@ export function AppSidebar() {
   });
 
   const handleLogout = () => {
-    // In a real app, you'd also clear the user's session/token here
+    logout();
     router.push('/login');
   }
 
@@ -80,12 +82,12 @@ export function AppSidebar() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              <AvatarFallback>A</AvatarFallback>
+              <AvatarFallback>{user?.name?.[0] ?? 'A'}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Alex Doe</span>
+              <span className="text-sm font-medium">{user?.name ?? 'Alex Doe'}</span>
               <span className="text-xs text-muted-foreground">
-                alex.doe@example.com
+                {user?.email ?? 'alex.doe@example.com'}
               </span>
             </div>
           </div>

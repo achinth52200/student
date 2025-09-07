@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 export function SignupForm() {
   const [name, setName] = useState("");
@@ -25,11 +26,13 @@ export function SignupForm() {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const { toast } = useToast();
+  const { setUser } = useAuth();
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you'd have signup logic here.
     // We'll simulate a successful signup and treat first user as admin.
+    setUser({ name, email });
      toast({
         title: "Signup Successful!",
         description: "You are now the admin. Redirecting to login...",

@@ -17,17 +17,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   const { toast } = useToast();
+  const { setUser } = useAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you'd have auth logic here.
-    // We'll simulate a successful login.
+    // We'll simulate a successful login and store user details.
+    // For this prototype, we'll derive a name from the email.
+    const name = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    setUser({ name, email });
+    
     toast({
         title: "Login Successful",
         description: "Redirecting to your dashboard..."
