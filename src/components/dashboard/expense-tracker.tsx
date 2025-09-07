@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -154,7 +155,7 @@ export function ExpenseTracker() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.sort((a,b) => b.date.getTime() - a.date.getTime()).map((t) => (
+              {transactions.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((t) => (
                 <TableRow key={t.id} className="cursor-pointer hover:bg-muted/50">
                   <TableCell>
                     <div className="flex items-center gap-4">
@@ -168,7 +169,7 @@ export function ExpenseTracker() {
                       <div className="flex flex-col">
                         <span className="font-medium">{t.description}</span>
                         <span className="text-sm text-muted-foreground">
-                           {format(t.date, "MMM dd, yyyy 'at' hh:mm a")}
+                           {format(new Date(t.date), "MMM dd, yyyy 'at' hh:mm a")}
                         </span>
                       </div>
                     </div>

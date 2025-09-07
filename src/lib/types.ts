@@ -4,7 +4,7 @@ export type Transaction = {
   amount: number;
   type: 'income' | 'expense';
   category: 'Groceries' | 'Transport' | 'Entertainment' | 'Utilities' | 'Salary' | 'Other' | 'UPI';
-  date: Date;
+  date: string | Date;
   status: 'Completed' | 'Pending' | 'Failed';
 };
 
