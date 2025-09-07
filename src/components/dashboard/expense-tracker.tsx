@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import type { Transaction } from "@/lib/types";
-import { ArrowDownLeft, ArrowUpRight, Banknote, IndianRupee, Wallet } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Banknote, IndianRupee, RefreshCw } from "lucide-react";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -21,6 +24,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { syncTransactionsAction } from "@/app/actions";
+import { Button } from "../ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const initialTransactions: Transaction[] = [
   {
@@ -79,9 +85,54 @@ const initialTransactions: Transaction[] = [
   },
 ];
 
+const initialState = {
+  transactions: [],
+  message: '',
+};
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} variant="outline">
+      <RefreshCw className={cn("mr-2 h-4 w-4", pending && "animate-spin")} />
+      {pending ? "Syncing..." : "Sync Transactions"}
+    </Button>
+  );
+}
+
 export function ExpenseTracker() {
   const [transactions, setTransactions] =
     useState<Transaction[]>(initialTransactions);
+  const [state, formAction] = useActionState(syncTransactionsAction, initialState);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.transactions && state.transactions.length > 0) {
+      // Filter out transactions that are already in the list
+      const newTransactions = state.transactions.filter(
+        (newT) => !transactions.some((existingT) => existingT.id === newT.id)
+      );
+
+      if (newTransactions.length > 0) {
+        setTransactions(prev => [...newTransactions, ...prev]);
+        toast({
+          title: "Success",
+          description: "New transactions have been synced.",
+        });
+      } else {
+        toast({
+          title: "Already up to date",
+          description: "No new transactions found.",
+        });
+      }
+    } else if (state.message && !state.transactions) {
+       toast({
+        variant: "destructive",
+        title: "Error",
+        description: state.message,
+      });
+    }
+  }, [state, toast, transactions]);
 
   return (
     <Card className="h-full flex flex-col">
@@ -103,7 +154,7 @@ export function ExpenseTracker() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.map((t) => (
+              {transactions.sort((a,b) => b.date.getTime() - a.date.getTime()).map((t) => (
                 <TableRow key={t.id} className="cursor-pointer hover:bg-muted/50">
                   <TableCell>
                     <div className="flex items-center gap-4">
@@ -142,6 +193,11 @@ export function ExpenseTracker() {
           </Table>
         </div>
       </CardContent>
+       <CardFooter className="border-t pt-6 justify-end">
+        <form action={formAction}>
+          <SubmitButton />
+        </form>
+      </CardFooter>
     </Card>
   );
 }
