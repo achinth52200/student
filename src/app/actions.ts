@@ -5,8 +5,8 @@ import { optimizeStudySchedule } from '@/ai/flows/optimize-study-schedule'
 import { provideAiDrivenWellbeingSupport } from '@/ai/flows/ai-driven-wellbeing-support'
 import { wellbeingChat } from '@/ai/flows/wellbeing-chat-flow'
 import { extractTransactionsFromImage } from '@/ai/flows/extract-transaction-from-image-flow';
-import type { Transaction } from '@/lib/types';
-import type { ScheduleItem } from '@/lib/types';
+import { generatePersonalizedTips } from '@/ai/flows/generate-personalized-tips-flow';
+import type { Transaction, Reminder, ScheduleItem } from '@/lib/types';
 
 const optimizeScheduleSchema = z.object({
   courseDeadlines: z.string().min(1, 'Please provide course deadlines.'),
@@ -205,4 +205,57 @@ export async function extractTransactionAction(
             error: 'An unexpected error occurred while analyzing the receipt. Please try again.',
         };
     }
+}
+
+
+const TransactionSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  amount: z.number(),
+  type: z.enum(['income', 'expense']),
+  category: z.string(),
+  date: z.string(),
+  status: z.enum(['Completed', 'Pending', 'Failed']),
+});
+
+const ReminderSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    dueDate: z.string(),
+    completed: z.boolean(),
+});
+
+const generateTipsSchema = z.object({
+  transactions: z.array(TransactionSchema),
+  reminders: z.array(ReminderSchema),
+});
+
+
+type Tip = {
+    icon: "PiggyBank" | "GraduationCap" | "HeartPulse" | "Lightbulb";
+    text: string;
+}
+
+type GenerateTipsState = {
+  tips?: Tip[];
+  error?: string;
+};
+
+export async function generatePersonalizedTipsAction(
+  transactions: Transaction[],
+  reminders: Reminder[]
+): Promise<GenerateTipsState> {
+  // Convert dates to string representations
+  const safeTransactions = transactions.map(t => ({...t, date: new Date(t.date).toISOString()}));
+  const safeReminders = reminders.map(r => ({...r, dueDate: new Date(r.dueDate).toISOString()}));
+
+  try {
+    const result = await generatePersonalizedTips({ transactions: safeTransactions, reminders: safeReminders });
+    return { tips: result.tips };
+  } catch (error) {
+    console.error("Error generating tips:", error);
+    return {
+      error: 'Failed to generate personalized tips. Please try again later.',
+    };
+  }
 }
