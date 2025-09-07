@@ -8,8 +8,8 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {generate, Message} from 'genkit';
 import {z} from 'zod';
-import {generate, Message, Role} from 'genkit';
 
 const WellbeingChatInputSchema = z.object({
   history: z.array(
@@ -23,9 +23,7 @@ const WellbeingChatInputSchema = z.object({
 export type WellbeingChatInput = z.infer<typeof WellbeingChatInputSchema>;
 
 const WellbeingChatOutputSchema = z.object({
-  response: z
-    .string()
-    .describe('The AI’s response to the user’s message.'),
+  response: z.string().describe('The AI’s response to the user’s message.'),
 });
 export type WellbeingChatOutput = z.infer<typeof WellbeingChatOutputSchema>;
 
@@ -51,17 +49,17 @@ const wellbeingChatFlow = ai.defineFlow(
   },
   async input => {
     const history: Message[] = input.history.map(msg => ({
-      role: msg.role as Role,
+      role: msg.role,
       content: [{text: msg.content}],
     }));
 
     const {output} = await generate({
-      prompt: input.message,
       model: ai.model,
+      prompt: input.message,
       history,
       config: prompt.config,
     });
-
+    
     if (!output) {
       return { response: "I'm sorry, I couldn't generate a response." };
     }

@@ -47,8 +47,10 @@ export function WellbeingChat() {
     if (state.response) {
       setMessages(prev => [...prev, { role: 'model', content: state.response }]);
     }
-  }, [state.response, state.error]);
-
+    // We don't want to re-trigger this when state.error changes, only on new responses.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.response]);
+  
   useEffect(() => {
     if(scrollAreaRef.current) {
         scrollAreaRef.current.scrollTo({
@@ -124,15 +126,19 @@ export function WellbeingChat() {
           ref={formRef}
           action={formAction}
           onSubmit={(e) => {
-            const form = e.currentTarget as HTMLFormElement;
-            const formData = new FormData(form);
+            const formData = new FormData(e.currentTarget);
             const message = formData.get('message') as string;
+            
             if (message.trim()) {
-              setMessages((prev) => [...prev, { role: 'user', content: message }]);
-              form.reset();
+                setMessages((prev) => [...prev, { role: 'user', content: message }]);
+                // The action will be called automatically, no need for formAction(formData)
             } else {
               e.preventDefault();
             }
+            // Reset form after a short delay to allow the action to capture the data
+            setTimeout(() => {
+                formRef.current?.reset();
+            }, 0)
           }}
           className="flex items-center gap-2 border-t pt-4"
         >
