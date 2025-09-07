@@ -62,13 +62,13 @@ const wellbeingChatFlow = ai.defineFlow(
       history,
       config: prompt.config,
     });
-    
+
     if (!output) {
       return { response: "I'm sorry, I couldn't generate a response." };
     }
 
     return {
-      response: output.text(),
+      response: output.text,
     };
   }
 );

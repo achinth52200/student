@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { BudgetChart } from "@/components/dashboard/budget-chart";
 import { PersonalizedTips } from "@/components/dashboard/personalized-tips";
 import { Reminders } from "@/components/dashboard/reminders";
+import { WellbeingChat } from "@/components/dashboard/wellbeing-chat";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function DashboardPage() {
@@ -17,6 +18,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 gap-6 lg:col-span-2">
                 <h2 className="text-xl font-semibold">Recent Reports</h2>
                 <BudgetChart />
+                <WellbeingChat />
               </div>
               <div className="grid grid-cols-1 gap-6">
                 <Reminders />
