@@ -58,9 +58,8 @@ export function StudyOptimizer() {
   useEffect(() => {
     if (state.message && state.errors && Object.keys(state.errors).length > 0) {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: state.message,
+        title: "Incomplete Details",
+        description: "Please enter details for all fields to create a schedule.",
       });
     }
   }, [state, toast]);
