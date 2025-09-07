@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -47,8 +48,11 @@ export function LoginForm() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background relative overflow-hidden">
-       <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-primary/75 via-cyan-300/75 to-background animate-gradient" />
+    <div className={cn(
+        "flex items-center justify-center min-h-screen relative overflow-hidden transition-colors duration-300",
+        isLoading ? "bg-black" : "bg-background"
+    )}>
+       {!isLoading && <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-primary/75 via-cyan-300/75 to-background animate-gradient" />}
        {isLoading ? (
           <div className="loader-wrapper">
             <span className="loader-letter">L</span>
