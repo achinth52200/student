@@ -9,6 +9,7 @@ import {
   Wallet,
   Bell,
   ShieldCheck,
+  LogOut,
 } from "lucide-react";
 
 import {
@@ -22,7 +23,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/icons";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "./ui/button";
 
 export const menuItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -35,12 +37,18 @@ export const menuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const isActive = (href: string) => pathname === href;
   
   const filteredMenuItems = menuItems.filter(item => {
     // Hide auth-related pages from the main sidebar navigation
     return !['/login', '/signup'].includes(item.href);
   });
+
+  const handleLogout = () => {
+    // In a real app, you'd also clear the user's session/token here
+    router.push('/login');
+  }
 
   return (
     <Sidebar>
@@ -69,16 +77,22 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9">
-            <AvatarFallback>A</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">Alex Doe</span>
-            <span className="text-xs text-muted-foreground">
-              alex.doe@example.com
-            </span>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9">
+              <AvatarFallback>A</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">Alex Doe</span>
+              <span className="text-xs text-muted-foreground">
+                alex.doe@example.com
+              </span>
+            </div>
           </div>
+          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
+             <LogOut className="h-5 w-5"/>
+             <span className="sr-only">Logout</span>
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>
