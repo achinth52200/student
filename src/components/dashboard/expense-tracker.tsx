@@ -25,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-const categoryIcons: Record<Transaction['category'], string> = {
+const categoryIcons: Record<string, string> = {
     'Groceries': '🛒',
     'Transport': '🚌',
     'Entertainment': '🎬',
@@ -34,6 +34,8 @@ const categoryIcons: Record<Transaction['category'], string> = {
     'Other': '📋',
     'UPI': '📲'
 }
+
+const defaultCategories = ['Groceries', 'Transport', 'Entertainment', 'Utilities', 'Salary', 'Other', 'UPI'];
 
 type ExpenseTrackerProps = {
     transactions: Transaction[];
@@ -59,6 +61,13 @@ export function ExpenseTracker({ transactions, onAddTransaction, onDeleteTransac
     setDescription("");
     setAmount("");
   };
+
+  const getCategoryIcon = (category: string) => {
+    return categoryIcons[category] || '📋';
+  }
+  
+  const allCategories = Array.from(new Set([...defaultCategories, ...transactions.map(t => t.category)]));
+
 
   return (
     <Card className="h-full flex flex-col">
@@ -98,7 +107,7 @@ export function ExpenseTracker({ transactions, onAddTransaction, onDeleteTransac
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            {Object.keys(categoryIcons).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            {allCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
@@ -122,7 +131,7 @@ export function ExpenseTracker({ transactions, onAddTransaction, onDeleteTransac
                   <TableCell>
                     <div className="flex items-center gap-4">
                        <div className={cn("flex h-10 w-10 items-center justify-center rounded-full text-xl", t.type === 'income' ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50')}>
-                        {categoryIcons[t.category]}
+                        {getCategoryIcon(t.category)}
                       </div>
                       <div className="flex flex-col">
                         <span className="font-medium">{t.description}</span>

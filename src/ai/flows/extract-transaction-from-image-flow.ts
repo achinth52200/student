@@ -25,7 +25,7 @@ const TransactionSchema = z.object({
   description: z.string().describe("The description or merchant of the transaction."),
   amount: z.number().describe("The total amount of the transaction."),
   type: z.enum(['income', 'expense']).describe("The type of transaction (income or expense). Most receipts will be expenses."),
-  category: z.enum(['Groceries' , 'Transport' , 'Entertainment' , 'Utilities' , 'Salary' , 'Other' , 'UPI']).describe("The most likely category for the transaction."),
+  category: z.string().describe("The most likely category for the transaction (e.g., Groceries, Transport, Entertainment, Utilities, Salary, Other)."),
 });
 
 const ExtractTransactionOutputSchema = z.object({

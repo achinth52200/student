@@ -3,7 +3,7 @@ export type Transaction = {
   description: string;
   amount: number;
   type: 'income' | 'expense';
-  category: 'Groceries' | 'Transport' | 'Entertainment' | 'Utilities' | 'Salary' | 'Other' | 'UPI';
+  category: string;
   date: string | Date;
   status: 'Completed' | 'Pending' | 'Failed';
 };
