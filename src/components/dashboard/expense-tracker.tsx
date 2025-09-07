@@ -154,7 +154,7 @@ export function ExpenseTracker() {
                     }`}
                   >
                     {t.type === "income" ? "+" : "-"}
-                    ${t.amount.toFixed(2)}
+                    ₹{t.amount.toFixed(2)}
                   </TableCell>
                 </TableRow>
               ))}
