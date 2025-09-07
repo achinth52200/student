@@ -1,7 +1,9 @@
+
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import type { Reminder } from '@/lib/types';
+import { useAuth } from './use-auth';
 
 const initialReminders: Reminder[] = [
   {
@@ -34,17 +36,51 @@ type ReminderContextType = {
 const ReminderContext = createContext<ReminderContextType | undefined>(undefined);
 
 export const ReminderProvider = ({ children }: { children: ReactNode }) => {
-  const [reminders, setReminders] = useState<Reminder[]>(initialReminders);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const { user } = useAuth();
+  const storageKey = user ? `reminders_${user.email}` : '';
+
+  useEffect(() => {
+    if (storageKey) {
+        const storedReminders = localStorage.getItem(storageKey);
+        if (storedReminders) {
+            setReminders(JSON.parse(storedReminders).map((r: Reminder) => ({...r, dueDate: new Date(r.dueDate)})));
+        } else {
+            // Seed with initial data if none exists
+            localStorage.setItem(storageKey, JSON.stringify(initialReminders));
+            setReminders(initialReminders);
+        }
+    } else {
+        setReminders([]); // Clear reminders on logout
+    }
+  }, [storageKey]);
+
+  const updateStoredReminders = (newReminders: Reminder[]) => {
+      if (storageKey) {
+          localStorage.setItem(storageKey, JSON.stringify(newReminders));
+      }
+  }
 
   const addReminder = (reminder: Omit<Reminder, 'id'>) => {
-    const newReminder = { ...reminder, id: crypto.randomUUID() };
-    setReminders(prev => [newReminder, ...prev]);
+    setReminders(prev => {
+        const newReminder = { ...reminder, id: crypto.randomUUID() };
+        const updated = [newReminder, ...prev];
+        updateStoredReminders(updated);
+        return updated;
+    });
   };
 
   const toggleReminder = (id: string) => {
-    setReminders(reminders.map(r => 
-      r.id === id ? { ...r, completed: !r.completed } : r
-    ));
+    setReminders(reminders.map(r => {
+        if (r.id === id) {
+            const updatedReminder = { ...r, completed: !r.completed };
+            // Also update storage
+            const updatedList = reminders.map(rem => rem.id === id ? updatedReminder : rem);
+            updateStoredReminders(updatedList);
+            return updatedReminder;
+        }
+        return r;
+    }));
   };
 
   return (

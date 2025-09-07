@@ -10,6 +10,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { Transaction } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ReceiptUploader } from "@/components/dashboard/receipt-uploader";
+import { useAuth } from "@/hooks/use-auth";
 
 // Dynamically import ExpenseTracker with SSR turned off
 const ExpenseTracker = dynamic(
@@ -27,16 +28,43 @@ const initialTransactions: Transaction[] = [
 ];
 
 export default function ExpensesPage() {
-  const [transactions, setTransactions] = React.useState<Transaction[]>(initialTransactions);
+  const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+  const { user } = useAuth();
+  const storageKey = user ? `transactions_${user.email}` : '';
+
+  React.useEffect(() => {
+    if (storageKey) {
+      const storedTransactions = localStorage.getItem(storageKey);
+      if (storedTransactions) {
+        setTransactions(JSON.parse(storedTransactions));
+      } else {
+        // Seed with initial data if no data exists for the user
+        localStorage.setItem(storageKey, JSON.stringify(initialTransactions));
+        setTransactions(initialTransactions);
+      }
+    } else {
+      setTransactions([]);
+    }
+  }, [storageKey]);
+
+  const updateStoredTransactions = (newTransactions: Transaction[]) => {
+      if (storageKey) {
+        localStorage.setItem(storageKey, JSON.stringify(newTransactions));
+      }
+  }
 
   const addTransactions = (newTransactions: Omit<Transaction, 'id' | 'status' | 'date'>[]) => {
-    const transactionsToAdd: Transaction[] = newTransactions.map(transaction => ({
-      ...transaction,
-      id: crypto.randomUUID(),
-      date: new Date().toISOString(),
-      status: 'Completed'
-    }));
-    setTransactions(prev => [...transactionsToAdd, ...prev]);
+    setTransactions(prev => {
+        const transactionsToAdd: Transaction[] = newTransactions.map(transaction => ({
+          ...transaction,
+          id: crypto.randomUUID(),
+          date: new Date().toISOString(),
+          status: 'Completed'
+        }));
+        const updated = [...transactionsToAdd, ...prev];
+        updateStoredTransactions(updated);
+        return updated;
+    });
   };
   
   const addTransaction = (transaction: Omit<Transaction, 'id' | 'status' | 'date'>) => {
@@ -44,7 +72,11 @@ export default function ExpensesPage() {
   };
 
   const deleteTransaction = (id: string) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
+    setTransactions(prev => {
+        const updated = prev.filter(t => t.id !== id);
+        updateStoredTransactions(updated);
+        return updated;
+    });
   };
   
   return (

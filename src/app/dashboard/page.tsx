@@ -11,6 +11,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { BudgetChart } from "@/components/dashboard/budget-chart";
 import type { Transaction } from "@/lib/types";
+import { useAuth } from "@/hooks/use-auth";
 
 const initialTransactions: Transaction[] = [
     { id: '1', description: 'Groceries', amount: 75.50, type: 'expense', category: 'Groceries', date: '2024-07-15T10:00:00Z', status: 'Completed' },
@@ -19,7 +20,24 @@ const initialTransactions: Transaction[] = [
 ];
 
 export default function DashboardPage() {
-  const [transactions, setTransactions] = React.useState<Transaction[]>(initialTransactions);
+  const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+  const { user } = useAuth();
+
+  React.useEffect(() => {
+    if (user && typeof window !== 'undefined') {
+      const storedTransactions = localStorage.getItem(`transactions_${user.email}`);
+      if (storedTransactions) {
+        setTransactions(JSON.parse(storedTransactions));
+      } else {
+        // For demonstration, you might want to seed initial data for new users
+        setTransactions(initialTransactions);
+        localStorage.setItem(`transactions_${user.email}`, JSON.stringify(initialTransactions));
+      }
+    } else {
+        setTransactions(initialTransactions);
+    }
+  }, [user]);
+
 
   return (
     <SidebarProvider>
