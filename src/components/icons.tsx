@@ -7,7 +7,7 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       viewBox="0 0 100 100"
       {...props}
     >
-      <circle cx="50" cy="50" r="40" stroke="black" strokeWidth="3" fill="red" />
+      <circle cx="50" cy="50" r="40" stroke="black" strokeWidth="3" fill="white" />
     </svg>
   );
 }
