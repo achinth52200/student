@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
-import { Upload, Sparkles, AlertCircle } from 'lucide-react';
+import { useState, useRef, useEffect, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { Upload, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { extractTransactionAction } from '@/app/actions';
 import type { Transaction } from '@/lib/types';
@@ -41,7 +41,7 @@ function SubmitButton() {
 export function ReceiptUploader({
   onTransactionExtracted,
 }: ReceiptUploaderProps) {
-  const [state, formAction] = useFormState(
+  const [state, formAction] = useActionState(
     extractTransactionAction,
     initialState
   );
@@ -97,7 +97,13 @@ export function ReceiptUploader({
 
   return (
     <>
-      <form ref={formRef} action={formAction} className="hidden">
+      <form ref={formRef} action={() => {
+        if (imageData) {
+            const formData = new FormData();
+            formData.append('photoDataUri', imageData);
+            formAction(formData);
+        }
+      }} className="hidden">
         <input type="hidden" name="photoDataUri" value={imageData || ''} />
       </form>
       <Button
