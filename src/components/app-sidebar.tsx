@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Wallet,
   Bell,
-  ShieldCheck,
   LogOut,
 } from "lucide-react";
 
@@ -33,7 +32,6 @@ export const menuItems = [
   { href: "/study-planner", icon: BookOpen, label: "Study Planner" },
   { href: "/well-being", icon: HeartPulse, label: "Well-being" },
   { href: "/reminders", icon: Bell, label: "Reminders" },
-  { href: "/admin", icon: ShieldCheck, label: "Admin" },
 ];
 
 export function AppSidebar() {

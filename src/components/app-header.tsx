@@ -34,10 +34,6 @@ export function AppHeader() {
       title: "Reminders",
       description: "Manage your tasks and deadlines.",
     },
-    "/admin": {
-      title: "Admin Panel",
-      description: "Manage users and system settings.",
-    }
   };
 
   const { title, description } =

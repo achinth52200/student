@@ -31,11 +31,10 @@ export function SignupForm() {
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you'd have signup logic here.
-    // We'll simulate a successful signup and treat first user as admin.
     setUser({ name, email });
      toast({
         title: "Signup Successful!",
-        description: "You are now the admin. Redirecting to login...",
+        description: "Your account has been created. Redirecting to login...",
     });
     router.push("/login");
   };
