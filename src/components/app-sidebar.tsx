@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/icons";
 import { usePathname } from "next/navigation";
 
-const menuItems = [
+export const menuItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/expenses", icon: Wallet, label: "Expenses" },
   { href: "/study-planner", icon: BookOpen, label: "Study Planner" },
@@ -32,10 +32,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-
-  // For this single-page dashboard, we'll just highlight the main dashboard link.
-  // In a multi-page app, you'd compare `pathname` to `item.href`.
-  const isActive = (href: string) => pathname.startsWith(href);
+  const isActive = (href: string) => pathname === href;
 
   return (
     <Sidebar>
@@ -54,7 +51,7 @@ export function AppSidebar() {
                 isActive={isActive(item.href)}
                 tooltip={{ children: item.label, side: "right" }}
               >
-                <Link href={"/dashboard"}>
+                <Link href={item.href}>
                   <item.icon />
                   <span>{item.label}</span>
                 </Link>
