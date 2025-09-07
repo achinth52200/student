@@ -1,8 +1,14 @@
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BudgetChart } from "@/components/dashboard/budget-chart";
-import { ExpenseTracker } from "@/components/dashboard/expense-tracker";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import dynamic from "next/dynamic";
+
+const ExpenseTracker = dynamic(
+  () => import("@/components/dashboard/expense-tracker").then((mod) => mod.ExpenseTracker),
+  { ssr: false }
+);
+
 
 export default function ExpensesPage() {
   return (
