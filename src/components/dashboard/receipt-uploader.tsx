@@ -10,13 +10,13 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 type ReceiptUploaderProps = {
-  onTransactionExtracted: (
-    transaction: Omit<Transaction, 'id' | 'date' | 'status'>
+  onTransactionsExtracted: (
+    transactions: Omit<Transaction, 'id' | 'date' | 'status'>[]
   ) => void;
 };
 
 const initialState = {
-  transaction: undefined,
+  transactions: undefined,
   error: undefined,
 };
 
@@ -60,7 +60,7 @@ function UploadButton() {
 }
 
 export function ReceiptUploader({
-  onTransactionExtracted,
+  onTransactionsExtracted,
 }: ReceiptUploaderProps) {
   const [state, formAction, isPending] = useActionState(extractTransactionAction, initialState);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -80,11 +80,11 @@ export function ReceiptUploader({
   useEffect(() => {
     if (isPending) return;
 
-    if (state.transaction) {
-      onTransactionExtracted(state.transaction);
+    if (state.transactions) {
+      onTransactionsExtracted(state.transactions);
       toast({
         title: 'Success!',
-        description: 'Transaction extracted from receipt.',
+        description: `Extracted ${state.transactions.length} transaction(s) from the receipt.`,
       });
       formRef.current?.reset();
       // Keep selectedFile to show success state, it will be cleared on next successful upload by the user
@@ -123,7 +123,7 @@ export function ReceiptUploader({
                 </div>
 
                 {isPending && <Sparkles className="h-4 w-4 animate-spin text-primary" />}
-                {!isPending && state.transaction && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                {!isPending && state.transactions && <CheckCircle2 className="h-4 w-4 text-green-500" />}
                 {!isPending && state.error && <XCircle className="h-4 w-4 text-destructive" />}
              </div>
         )}

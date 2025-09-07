@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { optimizeStudySchedule } from '@/ai/flows/optimize-study-schedule'
 import { provideAiDrivenWellbeingSupport } from '@/ai/flows/ai-driven-wellbeing-support'
 import { wellbeingChat } from '@/ai/flows/wellbeing-chat-flow'
-import { extractTransactionFromImage } from '@/ai/flows/extract-transaction-from-image-flow';
+import { extractTransactionsFromImage } from '@/ai/flows/extract-transaction-from-image-flow';
 import type { Transaction } from '@/lib/types';
 
 const optimizeScheduleSchema = z.object({
@@ -148,7 +148,7 @@ const extractTransactionSchema = z.object({
 });
 
 type ExtractTransactionState = {
-    transaction?: Omit<Transaction, 'id' | 'date' | 'status'>;
+    transactions?: Omit<Transaction, 'id' | 'date' | 'status'>[];
     error?: string;
 }
 
@@ -178,14 +178,15 @@ export async function extractTransactionAction(
         const base64 = Buffer.from(buffer).toString('base64');
         const photoDataUri = `data:${file.type};base64,${base64}`;
 
-        const result = await extractTransactionFromImage({ photoDataUri });
-        if (result.transaction) {
+        const result = await extractTransactionsFromImage({ photoDataUri });
+        
+        if (result.transactions && result.transactions.length > 0) {
             return {
-                transaction: result.transaction,
+                transactions: result.transactions,
             };
         } else {
             return {
-                error: 'Could not extract transaction from the image. Please try another one.',
+                error: 'Could not extract any transactions from the image. Please try another one.',
             }
         }
     } catch (error) {

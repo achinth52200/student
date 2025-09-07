@@ -1,66 +1,67 @@
 'use server';
 /**
- * @fileOverview An AI-powered flow to extract transaction details from an image.
+ * @fileOverview An AI-powered flow to extract multiple transaction details from an image.
  *
- * - extractTransactionFromImage - A function that analyzes an image of a receipt and returns structured transaction data.
- * - ExtractTransactionInput - The input type for the extractTransactionFromImage function.
- * - ExtractTransactionOutput - The return type for the extractTransactionFromImage function.
+ * - extractTransactionsFromImage - A function that analyzes an image of a receipt or statement and returns structured transaction data.
+ * - ExtractTransactionsInput - The input type for the extractTransactionsFromImage function.
+ * - ExtractTransactionsOutput - The return type for the extractTransactionsFromImage function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import type { Transaction } from '@/lib/types';
+import {z} from 'zod';
 
-const ExtractTransactionInputSchema = z.object({
+const ExtractTransactionsInputSchema = z.object({
   photoDataUri: z
     .string()
     .describe(
-      "A photo of a receipt, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "A photo of a receipt or transaction history, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
 });
-export type ExtractTransactionInput = z.infer<typeof ExtractTransactionInputSchema>;
+export type ExtractTransactionsInput = z.infer<typeof ExtractTransactionsInputSchema>;
 
 
 const TransactionSchema = z.object({
-  description: z.string().describe("The description or merchant of the transaction."),
+  description: z.string().describe("The description or merchant of the transaction. For personal transfers (like UPI), this should be the recipient's name."),
   amount: z.number().describe("The total amount of the transaction."),
-  type: z.enum(['income', 'expense']).describe("The type of transaction (income or expense). Most receipts will be expenses."),
-  category: z.string().describe("The most likely category for the transaction (e.g., Groceries, Transport, Entertainment, Utilities, Salary, Other)."),
+  type: z.enum(['income', 'expense']).describe("The type of transaction (income or expense)."),
+  category: z.string().describe("The most likely category. For personal transfers (like UPI), use the recipient's name as the category."),
 });
 
-const ExtractTransactionOutputSchema = z.object({
-    transaction: TransactionSchema.nullable().describe("The extracted transaction details. If no transaction can be found, this should be null.")
+const ExtractTransactionsOutputSchema = z.object({
+    transactions: z.array(TransactionSchema).describe("The list of extracted transactions. If no transactions can be found, this should be an empty array.")
 });
 
-export type ExtractTransactionOutput = z.infer<typeof ExtractTransactionOutputSchema>;
+export type ExtractTransactionsOutput = z.infer<typeof ExtractTransactionsOutputSchema>;
 
-export async function extractTransactionFromImage(input: ExtractTransactionInput): Promise<ExtractTransactionOutput> {
-  return extractTransactionFromImageFlow(input);
+export async function extractTransactionsFromImage(input: ExtractTransactionsInput): Promise<ExtractTransactionsOutput> {
+  return extractTransactionsFromImageFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'extractTransactionPrompt',
-  input: {schema: ExtractTransactionInputSchema},
-  output: {schema: ExtractTransactionOutputSchema},
-  prompt: `You are an expert at extracting structured data from images of receipts.
+  name: 'extractTransactionsPrompt',
+  input: {schema: ExtractTransactionsInputSchema},
+  output: {schema: ExtractTransactionsOutputSchema},
+  prompt: `You are an expert at extracting structured data from images of receipts or transaction histories.
 
-Analyze the following receipt image and extract the key transaction details.
+Analyze the following image and extract all key transaction details for every transaction you find.
 
 - The 'description' should be the name of the merchant or store.
+- For personal payments like UPI, the 'description' should be the name of the person receiving the payment.
 - The 'amount' should be the final total of the transaction.
-- The 'type' should almost always be 'expense'. Only classify as 'income' if it is clearly a return or refund receipt.
-- For 'category', make a reasonable guess based on the merchant. If it's a supermarket, use 'Groceries'. If it's a restaurant or cafe, use 'Entertainment'. If it is unclear, use 'Other'.
+- The 'type' should be 'expense' for payments made, and 'income' for money received.
+- For 'category', make a reasonable guess based on the merchant (e.g., 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Salary', 'Other').
+- For personal payments (like UPI), use the recipient's name as the 'category'. This is important for tracking payments to individuals.
 
-If you cannot confidently determine the details of a transaction from the image, return null for the transaction.
+If you cannot find any transactions in the image, return an empty array for the transactions.
 
 Image: {{media url=photoDataUri}}`,
 });
 
-const extractTransactionFromImageFlow = ai.defineFlow(
+const extractTransactionsFromImageFlow = ai.defineFlow(
   {
-    name: 'extractTransactionFromImageFlow',
-    inputSchema: ExtractTransactionInputSchema,
-    outputSchema: ExtractTransactionOutputSchema,
+    name: 'extractTransactionsFromImageFlow',
+    inputSchema: ExtractTransactionsInputSchema,
+    outputSchema: ExtractTransactionsOutputSchema,
   },
   async input => {
     const {output} = await prompt(input);

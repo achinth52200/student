@@ -29,14 +29,18 @@ const initialTransactions: Transaction[] = [
 export default function ExpensesPage() {
   const [transactions, setTransactions] = React.useState<Transaction[]>(initialTransactions);
 
-  const addTransaction = (transaction: Omit<Transaction, 'id' | 'status' | 'date'>) => {
-    const newTransaction: Transaction = {
+  const addTransactions = (newTransactions: Omit<Transaction, 'id' | 'status' | 'date'>[]) => {
+    const transactionsToAdd: Transaction[] = newTransactions.map(transaction => ({
       ...transaction,
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
       status: 'Completed'
-    };
-    setTransactions(prev => [newTransaction, ...prev]);
+    }));
+    setTransactions(prev => [...transactionsToAdd, ...prev]);
+  };
+  
+  const addTransaction = (transaction: Omit<Transaction, 'id' | 'status' | 'date'>) => {
+    addTransactions([transaction]);
   };
 
   const deleteTransaction = (id: string) => {
@@ -51,7 +55,7 @@ export default function ExpensesPage() {
           <AppHeader />
           <main className="p-4 sm:p-6 lg:p-8">
              <div className="flex justify-end mb-4">
-                <ReceiptUploader onTransactionExtracted={addTransaction} />
+                <ReceiptUploader onTransactionsExtracted={addTransactions} />
             </div>
             <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
               <div className="grid grid-cols-1 gap-6 lg:col-span-2">
