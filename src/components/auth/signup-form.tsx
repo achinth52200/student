@@ -39,7 +39,7 @@ export function SignupForm() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
       <Card className="mx-auto max-w-sm z-10">
          <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-2 mb-4">
