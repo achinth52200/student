@@ -14,53 +14,25 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import type { Reminder } from "@/lib/types";
-
-const initialReminders: Reminder[] = [
-  {
-    id: "1",
-    title: "Submit Math assignment",
-    dueDate: new Date("2024-06-12T00:00:00.000Z"),
-    completed: false,
-  },
-  {
-    id: "2",
-    title: "Group project meeting",
-    dueDate: new Date("2024-06-13T00:00:00.000Z"),
-    completed: false,
-  },
-  {
-    id: "3",
-    title: "Renew library books",
-    dueDate: new Date("2024-06-09T00:00:00.000Z"),
-    completed: true,
-  },
-];
+import { useReminders } from "@/hooks/use-reminders";
 
 export function Reminders() {
-  const [reminders, setReminders] = useState(initialReminders);
+  const { reminders, addReminder, toggleReminder } = useReminders();
   const [newReminder, setNewReminder] = useState("");
 
   const handleAddReminder = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newReminder) return;
-    const reminder: Reminder = {
-      id: new Date().toISOString(),
+    addReminder({
       title: newReminder,
       dueDate: new Date(new Date().setDate(new Date().getDate() + 7)), // Default to 1 week
       completed: false,
-    };
-    setReminders([reminder, ...reminders]);
+    });
     setNewReminder("");
-  };
-
-  const toggleReminder = (id: string) => {
-    setReminders(
-      reminders.map((r) => (r.id === id ? { ...r, completed: !r.completed } : r))
-    );
   };
   
   const sortedReminders = useMemo(() => {
-    return [...reminders].sort((a, b) => (a.completed ? 1 : -1) || a.id.localeCompare(b.id));
+    return [...reminders].sort((a, b) => (a.completed ? 1 : -1) || new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
   }, [reminders]);
 
   return (
@@ -106,7 +78,7 @@ export function Reminders() {
                     {reminder.title}
                   </label>
                   <p className="text-xs text-muted-foreground">
-                    Due: {format(reminder.dueDate, "MMM dd, yyyy")}
+                    Due: {format(new Date(reminder.dueDate), "MMM dd, yyyy")}
                   </p>
                 </div>
               </div>

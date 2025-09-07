@@ -6,18 +6,25 @@ import { provideAiDrivenWellbeingSupport } from '@/ai/flows/ai-driven-wellbeing-
 import { wellbeingChat } from '@/ai/flows/wellbeing-chat-flow'
 import { extractTransactionsFromImage } from '@/ai/flows/extract-transaction-from-image-flow';
 import type { Transaction } from '@/lib/types';
+import type { ScheduleItem } from '@/lib/types';
 
 const optimizeScheduleSchema = z.object({
   courseDeadlines: z.string().min(1, 'Please provide course deadlines.'),
   priorities: z.string().min(1, 'Please provide course priorities.'),
+  mainTopic: z.string().min(1, 'Please provide a main topic.'),
+  coreTopics: z.string().min(1, 'Please provide core topics.'),
+  duration: z.string().min(1, 'Please provide a duration.'),
 })
 
 type OptimizeScheduleState = {
   message?: string
-  schedule?: string
+  schedule?: ScheduleItem[]
   errors?: {
     courseDeadlines?: string[]
     priorities?: string[]
+    mainTopic?: string[]
+    coreTopics?: string[]
+    duration?: string[]
   }
 }
 
@@ -28,6 +35,9 @@ export async function optimizeStudyScheduleAction(
   const validatedFields = optimizeScheduleSchema.safeParse({
     courseDeadlines: formData.get('courseDeadlines'),
     priorities: formData.get('priorities'),
+    mainTopic: formData.get('mainTopic'),
+    coreTopics: formData.get('coreTopics'),
+    duration: formData.get('duration'),
   })
 
   if (!validatedFields.success) {

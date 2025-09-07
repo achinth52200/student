@@ -11,6 +11,15 @@ export type Transaction = {
 export type Reminder = {
   id: string;
   title: string;
-  dueDate: Date;
+  dueDate: Date | string;
   completed: boolean;
 };
+
+export type ScheduleItem = {
+    course: string;
+    task: string;
+    mainTopic: string;
+    coreTopics: string;
+    duration: string;
+    suggestedTime: string;
+}
