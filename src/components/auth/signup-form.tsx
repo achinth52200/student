@@ -38,9 +38,9 @@ export function SignupForm() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
-      <Card className="mx-auto max-w-sm z-10">
+    <div className="flex items-center justify-center min-h-screen bg-background relative overflow-hidden">
+      <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-primary/30 via-cyan-300/30 to-background animate-gradient" />
+      <Card className="mx-auto max-w-sm z-10 bg-background/80 backdrop-blur-sm">
          <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-2 mb-4">
                <Logo className="w-8 h-8 text-primary" />
