@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useEffect } from "react";
-import { useFormStatus, useFormState } from "react-dom";
+import { useEffect, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { Sparkles, Bot, BookCheck, Download } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -26,15 +26,17 @@ import { Input } from "../ui/input";
 import { useReminders } from "@/hooks/use-reminders";
 import { Label } from "../ui/label";
 
-const initialState: {
-  message?: string;
-  schedule?: ScheduleItem[];
-  errors?: any;
-} = {
-  message: "",
-  schedule: undefined,
-  errors: {},
-};
+type OptimizeScheduleState = {
+  message?: string
+  schedule?: ScheduleItem[]
+  errors?: {
+    courseDeadlines?: string[]
+    priorities?: string[]
+    mainTopic?: string[]
+    coreTopics?: string[]
+    duration?: string[]
+  }
+}
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -47,12 +49,14 @@ function SubmitButton() {
 }
 
 export function StudyOptimizer() {
-  const [state, formAction] = useFormState(
-    optimizeStudyScheduleAction,
-    initialState
-  );
+  const [state, setState] = useState<OptimizeScheduleState>({});
   const { toast } = useToast();
   const { addReminder } = useReminders();
+
+  const handleAction = async (formData: FormData) => {
+    const result = await optimizeStudyScheduleAction(formData);
+    setState(result);
+  }
 
   useEffect(() => {
     if (state.message && state.errors && Object.keys(state.errors).length > 0) {
@@ -111,7 +115,7 @@ export function StudyOptimizer() {
 
   return (
     <Card>
-        <form action={formAction}>
+        <form action={handleAction}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BookCheck className="text-accent-foreground" />

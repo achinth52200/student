@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useFormStatus, useFormState } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import { Bot, Send, Sparkles, User } from 'lucide-react';
 
 import { wellbeingChatAction } from '@/app/actions';
@@ -18,9 +18,9 @@ type Message = {
   content: string;
 };
 
-const initialState = {
-  response: '',
-  error: '',
+type WellbeingChatState = {
+  response?: string;
+  error?: string;
 };
 
 function SubmitButton() {
@@ -38,18 +38,26 @@ function SubmitButton() {
 }
 
 export function WellbeingChat() {
-  const [state, formAction] = useFormState(wellbeingChatAction, initialState);
+  const [state, setState] = useState<WellbeingChatState>({});
   const { pending } = useFormStatus();
   const [messages, setMessages] = useState<Message[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  
+  const handleAction = async (formData: FormData) => {
+      const message = formData.get('message') as string;
+      if (!message.trim()) return;
+
+      setMessages((prev) => [...prev, { role: 'user', content: message }]);
+      
+      const result = await wellbeingChatAction(formData);
+      setState(result);
+  }
 
   useEffect(() => {
     if (state.response) {
       setMessages(prev => [...prev, { role: 'model', content: state.response }]);
     }
-    // We don't want to re-trigger this when state.error changes, only on new responses.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.response]);
   
   useEffect(() => {
@@ -124,21 +132,12 @@ export function WellbeingChat() {
         </ScrollArea>
         <form
           ref={formRef}
-          action={formAction}
+          action={handleAction}
           onSubmit={(e) => {
             const formData = new FormData(e.currentTarget);
-            const message = formData.get('message') as string;
-            
-            if (message.trim()) {
-                setMessages((prev) => [...prev, { role: 'user', content: message }]);
-                // The action will be called automatically, no need for formAction(formData)
-            } else {
-              e.preventDefault();
-            }
-            // Reset form after a short delay to allow the action to capture the data
-            setTimeout(() => {
-                formRef.current?.reset();
-            }, 0)
+            handleAction(formData);
+            formRef.current?.reset();
+            e.preventDefault();
           }}
           className="flex items-center gap-2 border-t pt-4"
         >

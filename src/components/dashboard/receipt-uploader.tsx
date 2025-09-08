@@ -1,23 +1,17 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import { Upload, Sparkles, File, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { extractTransactionAction } from '@/app/actions';
 import type { Transaction } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 type ReceiptUploaderProps = {
   onTransactionsExtracted: (
     transactions: Omit<Transaction, 'id' | 'date' | 'status'>[]
   ) => void;
-};
-
-const initialState = {
-  transactions: undefined,
-  error: undefined,
 };
 
 function UploadButton() {
@@ -62,59 +56,51 @@ function UploadButton() {
 export function ReceiptUploader({
   onTransactionsExtracted,
 }: ReceiptUploaderProps) {
-  const [state, formAction] = useFormState(extractTransactionAction, initialState);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-  const { toast } = useToast();
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [result, setResult] = useState<{
+        transactions?: Omit<Transaction, 'id' | 'date' | 'status'>[];
+        error?: string;
+    } | null>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+    const { toast } = useToast();
     const { pending } = useFormStatus();
 
-
-  const handleAction = (formData: FormData) => {
-    const file = formData.get('receipt') as File;
-     if (!file || file.size === 0) {
-        // This case should ideally be handled by the server action validation
-        return;
+    const handleAction = async (formData: FormData) => {
+        const file = formData.get('receipt') as File;
+        if (!file || file.size === 0) {
+            return;
+        }
+        setSelectedFile(file);
+        const res = await extractTransactionAction(formData);
+        setResult(res);
     }
-    setSelectedFile(file);
-    formAction(formData);
-  }
 
-  useEffect(() => {
-    if (pending) return;
+    useEffect(() => {
+        if (pending || !result) return;
 
-    if (state.transactions) {
-      onTransactionsExtracted(state.transactions);
-      toast({
-        title: 'Success!',
-        description: `Extracted ${state.transactions.length} transaction(s) from the receipt.`,
-      });
-      formRef.current?.reset();
-      // Keep selectedFile to show success state, it will be cleared on next successful upload by the user
-    } else if (state.error) {
-       toast({
-        variant: 'destructive',
-        title: 'Upload Failed',
-        description: state.error,
-      });
-    }
-  // We only want this to run when the form is not pending, and the state has changed.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, pending]);
+        if (result.transactions) {
+            onTransactionsExtracted(result.transactions);
+            toast({
+                title: 'Success!',
+                description: `Extracted ${result.transactions.length} transaction(s) from the receipt.`,
+            });
+            formRef.current?.reset();
+        } else if (result.error) {
+            toast({
+                variant: 'destructive',
+                title: 'Upload Failed',
+                description: result.error,
+            });
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [result, pending]);
 
-  return (
+
+    return (
       <form 
         ref={formRef} 
         action={handleAction} 
-        className="flex flex-col items-end gap-2" 
-        onChange={(e) => {
-            // Automatically submit the form when a file is selected
-            const form = e.currentTarget;
-            const fileInput = form.elements.namedItem('receipt') as HTMLInputElement;
-            if (fileInput?.files && fileInput.files.length > 0) {
-                const formData = new FormData(form);
-                handleAction(formData);
-            }
-        }}
+        className="flex flex-col items-end gap-2"
       >
         <UploadButton />
         {selectedFile && (
@@ -125,8 +111,8 @@ export function ReceiptUploader({
                 </div>
 
                 {pending && <Sparkles className="h-4 w-4 animate-spin text-primary" />}
-                {!pending && state.transactions && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-                {!pending && state.error && <XCircle className="h-4 w-4 text-destructive" />}
+                {!pending && result?.transactions && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                {!pending && result?.error && <XCircle className="h-4 w-4 text-destructive" />}
              </div>
         )}
       </form>

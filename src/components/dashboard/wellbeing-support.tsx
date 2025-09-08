@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useFormStatus, useFormState } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { Sparkles, Bot, Volume2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,12 +31,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 
-const initialState = {
-  message: "",
-  feedback: "",
-  audioDataUri: "",
-  errors: {},
-};
+type WellbeingSupportState = {
+  message?: string
+  feedback?: string
+  audioDataUri?: string
+  errors?: {
+    stressLevel?: string[]
+    emotionalRegulation?: string[]
+    physicalActivity?: string[]
+    sleepQuality?: string[]
+    studyHours?: string[]
+  }
+}
 
 const wellbeingSupportSchema = z.object({
   stressLevel: z.coerce.number().min(1).max(10),
@@ -61,10 +67,7 @@ function SubmitButton() {
 }
 
 export function WellbeingSupport() {
-  const [state, formAction] = useFormState(
-    provideWellbeingSupportAction,
-    initialState
-  );
+  const [state, setState] = useState<WellbeingSupportState>({});
   const { toast } = useToast();
   const form = useForm<z.infer<typeof wellbeingSupportSchema>>({
     resolver: zodResolver(wellbeingSupportSchema),
@@ -78,6 +81,11 @@ export function WellbeingSupport() {
   });
   const [stressLevel, setStressLevel] = useState(5);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  const handleAction = async (formData: FormData) => {
+    const result = await provideWellbeingSupportAction(formData);
+    setState(result);
+  }
 
   useEffect(() => {
     if (state.message && state.errors) {
@@ -99,7 +107,7 @@ export function WellbeingSupport() {
   return (
     <Card>
       <Form {...form}>
-        <form action={formAction}>
+        <form action={handleAction}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="text-accent-foreground" />

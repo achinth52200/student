@@ -30,7 +30,6 @@ type OptimizeScheduleState = {
 }
 
 export async function optimizeStudyScheduleAction(
-  prevState: OptimizeScheduleState,
   formData: FormData
 ): Promise<OptimizeScheduleState> {
   const validatedFields = optimizeScheduleSchema.safeParse({
@@ -83,7 +82,6 @@ type WellbeingSupportState = {
 }
 
 export async function provideWellbeingSupportAction(
-  prevState: WellbeingSupportState,
   formData: FormData
 ): Promise<WellbeingSupportState> {
   const validatedFields = wellbeingSupportSchema.safeParse({
@@ -134,7 +132,6 @@ type WellbeingChatState = {
 };
 
 export async function wellbeingChatAction(
-  prevState: WellbeingChatState,
   formData: FormData
 ): Promise<WellbeingChatState> {
   const validatedFields = wellbeingChatSchema.safeParse({
@@ -174,7 +171,6 @@ type ExtractTransactionState = {
 }
 
 export async function extractTransactionAction(
-    prevState: ExtractTransactionState,
     formData: FormData
 ): Promise<ExtractTransactionState> {
     const validatedFields = extractTransactionSchema.safeParse({
