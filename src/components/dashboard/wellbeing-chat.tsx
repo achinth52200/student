@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useEffect, useRef, useState, useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useFormStatus, useFormState } from 'react-dom';
 import { Bot, Send, Sparkles, User } from 'lucide-react';
 
 import { wellbeingChatAction } from '@/app/actions';
@@ -38,7 +38,8 @@ function SubmitButton() {
 }
 
 export function WellbeingChat() {
-  const [state, formAction, isPending] = useActionState(wellbeingChatAction, initialState);
+  const [state, formAction] = useFormState(wellbeingChatAction, initialState);
+  const { pending } = useFormStatus();
   const [messages, setMessages] = useState<Message[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -107,7 +108,7 @@ export function WellbeingChat() {
                 )}
               </div>
             ))}
-             {isPending && (
+             {pending && (
               <div className="flex items-start gap-3">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>
@@ -151,7 +152,7 @@ export function WellbeingChat() {
             placeholder="Type your message..."
             autoComplete="off"
             required
-            disabled={isPending}
+            disabled={pending}
           />
           <SubmitButton />
         </form>

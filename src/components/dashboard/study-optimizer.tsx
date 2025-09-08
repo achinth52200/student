@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useEffect, useActionState } from "react";
-import { useFormStatus } from "react-dom";
+import { useEffect } from "react";
+import { useFormStatus, useFormState } from "react-dom";
 import { Sparkles, Bot, BookCheck, Download } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -47,7 +47,7 @@ function SubmitButton() {
 }
 
 export function StudyOptimizer() {
-  const [state, formAction] = useActionState(
+  const [state, formAction] = useFormState(
     optimizeStudyScheduleAction,
     initialState
   );

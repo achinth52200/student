@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect, useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import { Upload, Sparkles, File, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { extractTransactionAction } from '@/app/actions';
@@ -62,10 +62,12 @@ function UploadButton() {
 export function ReceiptUploader({
   onTransactionsExtracted,
 }: ReceiptUploaderProps) {
-  const [state, formAction, isPending] = useActionState(extractTransactionAction, initialState);
+  const [state, formAction] = useFormState(extractTransactionAction, initialState);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
+    const { pending } = useFormStatus();
+
 
   const handleAction = (formData: FormData) => {
     const file = formData.get('receipt') as File;
@@ -78,7 +80,7 @@ export function ReceiptUploader({
   }
 
   useEffect(() => {
-    if (isPending) return;
+    if (pending) return;
 
     if (state.transactions) {
       onTransactionsExtracted(state.transactions);
@@ -97,7 +99,7 @@ export function ReceiptUploader({
     }
   // We only want this to run when the form is not pending, and the state has changed.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, isPending]);
+  }, [state, pending]);
 
   return (
       <form 
@@ -122,9 +124,9 @@ export function ReceiptUploader({
                     <span className="font-medium truncate max-w-[150px]">{selectedFile.name}</span>
                 </div>
 
-                {isPending && <Sparkles className="h-4 w-4 animate-spin text-primary" />}
-                {!isPending && state.transactions && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-                {!isPending && state.error && <XCircle className="h-4 w-4 text-destructive" />}
+                {pending && <Sparkles className="h-4 w-4 animate-spin text-primary" />}
+                {!pending && state.transactions && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                {!pending && state.error && <XCircle className="h-4 w-4 text-destructive" />}
              </div>
         )}
       </form>
