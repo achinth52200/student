@@ -17,7 +17,7 @@ export function PageLoader() {
         <div className="page-loader-circle"></div>
         <div className="page-loader-circle"></div>
         <div className="page-loader-shadow"></div>
-        <div className="page-loader-shadow"></div>
+        <div className="page-loader--shadow"></div>
         <div className="page-loader-shadow"></div>
       </div>
     </div>
