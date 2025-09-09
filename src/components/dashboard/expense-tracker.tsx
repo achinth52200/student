@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import type { Transaction } from "@/lib/types";
-import { Plus, IndianRupee, Trash2, ArrowDown, ArrowUp } from "lucide-react";
+import { Plus, Trash2, ArrowDown, ArrowUp } from "lucide-react";
 import {
   Card,
   CardContent,
