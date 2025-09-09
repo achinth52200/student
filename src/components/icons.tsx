@@ -18,7 +18,7 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
             fontWeight="bold"
             fontFamily="sans-serif"
         >
-            SC
+            SS
         </text>
     </svg>
   );
