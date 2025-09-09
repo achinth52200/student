@@ -44,7 +44,7 @@ export function LoginForm() {
             description: "Redirecting to your dashboard..."
         });
         router.push("/dashboard");
-    }, 1000);
+    }, 5000);
   };
 
   return (
