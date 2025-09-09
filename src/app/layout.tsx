@@ -8,11 +8,19 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { LoaderProvider } from "@/hooks/use-loader";
 import { PageLoader } from "@/components/page-loader";
 import { Suspense } from "react";
+import { Inter as FontSans } from "next/font/google"
+import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
   title: "StudentSync",
   description: "Seamlessly sync your student life.",
+  manifest: "/manifest.ts",
 };
+
+const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
 
 export default function RootLayout({
   children,
@@ -29,7 +37,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased">
+      <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
         <LoaderProvider>
             <AuthProvider>
               <ReminderProvider>
