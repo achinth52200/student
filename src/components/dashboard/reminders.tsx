@@ -16,19 +16,37 @@ import { format } from "date-fns";
 import { useReminders } from "@/hooks/use-reminders";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Reminders() {
   const { reminders, addReminder, setReminderStatus, deleteReminder } = useReminders();
   const [newReminder, setNewReminder] = useState("");
+  const { user } = useAuth();
 
-  const handleAddReminder = (e: React.FormEvent) => {
+  const handleAddReminder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newReminder) return;
+    if (!newReminder || !user) return;
+    
+    // Add to local state via context
     addReminder({
       title: newReminder,
       dueDate: new Date(new Date().setDate(new Date().getDate() + 7)), // Default to 1 week
       completed: false,
     });
+    
+    // Add to Firestore to trigger notification
+    try {
+        await addDoc(collection(db, `users/${user.email}/notifications`), {
+            title: `New reminder: ${newReminder}`,
+            createdAt: serverTimestamp(),
+            isRead: false,
+        });
+    } catch (error) {
+        console.error("Error adding notification: ", error);
+    }
+    
     setNewReminder("");
   };
   
