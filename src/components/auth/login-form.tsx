@@ -50,7 +50,7 @@ export function LoginForm() {
   return (
     <div className={cn(
         "flex items-center justify-center min-h-screen relative overflow-hidden transition-colors duration-300",
-        isLoading ? "bg-card" : "bg-background"
+        isLoading ? "bg-black" : "bg-background"
     )}>
        {!isLoading && <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-primary/75 via-cyan-300/75 to-background animate-gradient" />}
        {isLoading ? (
