@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const categoryIcons: Record<string, string> = {
     'Groceries': '🛒',
@@ -159,7 +160,16 @@ export function ExpenseTracker({ transactions, onAddTransaction, onDeleteTransac
                         RS {t.amount.toFixed(2)}
                       </span>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant={'secondary'} className="capitalize">{t.category}</Badge>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant={'secondary'} className="capitalize max-w-[100px] truncate">{t.category}</Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{t.category}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => onDeleteTransaction(t.id)}>
                             <Trash2 className="h-4 w-4" />
                         </Button>
