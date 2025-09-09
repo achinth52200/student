@@ -6,7 +6,6 @@ import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { PersonalizedTips } from "@/components/dashboard/personalized-tips";
 import { Reminders } from "@/components/dashboard/reminders";
-import { WellbeingChat } from "@/components/dashboard/wellbeing-chat";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { BudgetChart } from "@/components/dashboard/budget-chart";
@@ -49,11 +48,8 @@ export default function DashboardPage() {
           <SidebarInset className="flex-1">
             <AppHeader />
             <main className="p-4 sm:p-6 lg:p-8">
-              <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+              <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="grid grid-cols-1 gap-6 lg:col-span-2">
-                   <WellbeingChat />
-                </div>
-                <div className="grid grid-cols-1 gap-6">
                    <Card>
                       <CardHeader>
                           <CardTitle>Budget Overview</CardTitle>
@@ -63,6 +59,8 @@ export default function DashboardPage() {
                           <BudgetChart transactions={transactions} />
                       </CardContent>
                   </Card>
+                </div>
+                <div className="grid grid-cols-1 gap-6">
                   <Reminders />
                   <PersonalizedTips />
                 </div>
