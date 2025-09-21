@@ -94,14 +94,14 @@
 }
 
 .glass-effect {
-    background-color: hsla(0, 0%, 100%, 0.3) !important;
+    background-color: hsla(0, 0%, 100%, 0.2) !important;
     backdrop-filter: blur(20px);
-    border: 1px solid hsla(0, 0%, 100%, 0.4) !important;
+    border: 1px solid hsla(0, 0%, 100%, 0.3) !important;
 }
 
 .dark .glass-effect {
-    background-color: hsla(220, 15%, 20%, 0.3) !important;
-    border-color: hsla(220, 15%, 25%, 0.5) !important;
+    background-color: hsla(220, 15%, 20%, 0.2) !important;
+    border-color: hsla(220, 15%, 25%, 0.4) !important;
 }
 
 /* From Uiverse.io by dexter-st */ 
@@ -350,5 +350,7 @@
 
 
 
+
+    
 
     
