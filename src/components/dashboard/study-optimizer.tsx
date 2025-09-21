@@ -134,7 +134,7 @@ export function StudyOptimizer() {
                   id="courseDeadlines"
                   name="courseDeadlines"
                   placeholder="e.g., Math 101 Final - 2024-05-15"
-                  className="h-32"
+                  className="h-32 bg-transparent"
                 />
               </div>
               <div className="space-y-2">
@@ -143,7 +143,7 @@ export function StudyOptimizer() {
                   id="priorities"
                   name="priorities"
                   placeholder="e.g., Math 101 - High"
-                  className="h-32"
+                  className="h-32 bg-transparent"
                 />
               </div>
             </div>
