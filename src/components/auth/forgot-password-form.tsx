@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
 import { useToast } from "@/hooks/use-toast";
+import { auth } from "@/lib/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -25,17 +27,25 @@ export function ForgotPasswordForm() {
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This is a simulation, so we just show a success message.
-    toast({
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({
         title: "Password Reset Email Sent",
-        description: "If this were a real app, an email would be sent to reset your password.",
-    });
-    router.push("/login");
-  }
+        description: "Check your inbox for a link to reset your password.",
+      });
+      router.push("/login");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background relative overflow-hidden">
-      <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-blue-500/50 via-purple-500/50 to-teal-500/50 animate-gradient" />
+      <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-blue-500/30 via-purple-500/30 to-teal-500/30 animate-gradient" />
       <Card className="mx-auto max-w-sm z-10 bg-card/60 backdrop-blur-lg border-white/20 shadow-xl">
         <CardHeader className="text-center">
           <div className="flex justify-center items-center gap-2 mb-4">
@@ -47,27 +57,27 @@ export function ForgotPasswordForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-             <form onSubmit={handlePasswordReset} className="grid gap-4">
-                <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                        <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="m@example.com"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="pl-9"
-                        />
-                    </div>
-                </div>
-                <Button type="submit" className="w-full">
-                    Send Reset Email
-                </Button>
-            </form>
-           <div className="mt-4 text-center text-sm">
+          <form onSubmit={handlePasswordReset} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full">
+              Send Reset Email
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
             Remembered your password?{" "}
             <Link href="/login" className="underline">
               Login
@@ -78,5 +88,3 @@ export function ForgotPasswordForm() {
     </div>
   );
 }
-
-    

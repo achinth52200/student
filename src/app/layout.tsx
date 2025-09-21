@@ -38,7 +38,6 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
-         <div className="absolute top-0 -z-10 h-full w-full bg-[length:400%_400%] bg-gradient-to-br from-blue-500/30 via-purple-500/30 to-teal-500/30 animate-gradient"></div>
         <LoaderProvider>
           <AuthProvider>
             <ReminderProvider>
@@ -53,5 +52,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-    

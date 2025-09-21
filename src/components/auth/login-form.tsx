@@ -19,6 +19,8 @@ import { Logo } from "../icons";
 import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -26,135 +28,136 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { user } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // In a real app, you would validate credentials.
-    // Here, we just simulate a successful login.
-    const mockUser = {
-      uid: 'simulated-user-id',
-      email: email,
-      displayName: email.split('@')[0],
-    };
-    login(mockUser as any); // Using 'as any' because it's a mock
-
-    toast({
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
         title: "Login Successful",
-        description: "Redirecting to your dashboard..."
-    });
-    router.push("/dashboard");
-    
+        description: "Redirecting to your dashboard...",
+      });
+      router.push("/dashboard");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message,
+      });
+    }
     setIsLoading(false);
   };
-  
-   const handleGoogleSignIn = async () => {
-    const mockUser = {
-      uid: 'simulated-google-user-id',
-      email: 'user@google.com',
-      displayName: 'Google User',
-    };
-    login(mockUser as any);
-    toast({
+
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      toast({
         title: "Login Successful",
-        description: "Redirecting to your dashboard..."
-    });
-    router.push("/dashboard");
+        description: "Redirecting to your dashboard...",
+      });
+      router.push("/dashboard");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Google Sign-In Failed",
+        description: error.message,
+      });
+    }
+  };
+  
+  if (user) {
+    router.push('/dashboard');
+    return null;
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background relative overflow-hidden">
-       <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-blue-500/50 via-purple-500/50 to-teal-500/50 animate-gradient" />
-        <Card className="mx-auto max-w-sm z-10 bg-card/60 backdrop-blur-lg border-white/20 shadow-xl">
-            <CardHeader className="text-center">
-                <div className="flex justify-center items-center gap-2 mb-4">
-                <Logo className="w-8 h-8 text-primary" />
-                <CardTitle className="text-3xl">StudentSync</CardTitle>
-                </div>
-            <CardDescription>
-                Enter your email below to login to your account
-            </CardDescription>
-            </CardHeader>
-            <CardContent>
-            <form onSubmit={handleLogin} className="grid gap-4">
-                <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                    <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-9"
-                    disabled={isLoading}
-                    />
-                </div>
-                </div>
-                <div className="grid gap-2">
-                <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
-                    <Link
-                    href="/forgot-password"
-                    className="ml-auto inline-block text-sm underline"
-                    >
-                    Forgot your password?
-                    </Link>
-                </div>
-                <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9"
-                    disabled={isLoading}
-                    />
-                </div>
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                      Logging in...
-                    </>
-                  ) : "Login"}
-                </Button>
-            </form>
-             <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">
-                    Or continue with
-                    </span>
-                </div>
+      <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-blue-500/30 via-purple-500/30 to-teal-500/30 animate-gradient" />
+      <Card className="mx-auto max-w-sm z-10 bg-card/60 backdrop-blur-lg border-white/20 shadow-xl">
+        <CardHeader className="text-center">
+          <div className="flex justify-center items-center gap-2 mb-4">
+            <Logo className="w-8 h-8 text-primary" />
+            <CardTitle className="text-3xl">StudentSync</CardTitle>
+          </div>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-9"
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
-                <GoogleIcon className="mr-2 h-4 w-4" />
-                Sign in with Google
-            </Button>
-            <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <Link href="/signup" className="underline">
-                Sign up
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Password</Label>
+                <Link
+                  href="/forgot-password"
+                  className="ml-auto inline-block text-sm underline"
+                >
+                  Forgot your password?
                 </Link>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-9"
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-            </CardContent>
-        </Card>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                  Logging in...
+                </>
+              ) : "Login"}
+            </Button>
+          </form>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+            <GoogleIcon className="mr-2 h-4 w-4" />
+            Sign in with Google
+          </Button>
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="underline">
+              Sign up
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
-
-
-    
