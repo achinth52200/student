@@ -250,7 +250,12 @@ const Sidebar = React.forwardRef<
         >
           <div
             data-sidebar="sidebar"
-            className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow glass-effect"
+            className={cn(
+                "flex h-full w-full flex-col bg-sidebar glass-effect", 
+                "group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow",
+                "group-data-[variant=sidebar]:rounded-lg",
+                 side === "left" ? "group-data-[variant=sidebar]:rounded-l-none" : "group-data-[variant=sidebar]:rounded-r-none"
+            )}
           >
             {children}
           </div>
@@ -763,6 +768,3 @@ export {
   SidebarTrigger,
   useSidebar,
 }
-
-    
-    
