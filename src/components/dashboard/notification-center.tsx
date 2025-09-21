@@ -8,30 +8,63 @@ import { format } from 'date-fns';
 import { Badge } from '../ui/badge';
 import React from 'react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc, updateDoc, where, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc, updateDoc, where, getDocs, Timestamp } from 'firebase/firestore';
 import { ScrollArea } from '../ui/scroll-area';
+import { useAuth } from '@/hooks/use-auth';
 
 type Notification = {
     id: string;
     title: string;
-    createdAt: Date;
+    createdAt: Timestamp;
     userId: string;
     isRead: boolean;
 };
 
-// This component is currently disabled as it requires user authentication.
 export function NotificationCenter() {
+  const { user } = useAuth();
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
   const [isOpen, setIsOpen] = React.useState(false);
   
-  const unreadCount = 0;
+  React.useEffect(() => {
+    if (!user) return;
+
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+      limit(20)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
+      setNotifications(notifs);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const handleMarkAsRead = async () => {
+    if (!user) return;
+    const unreadNotifications = notifications.filter(n => !n.isRead);
+    const promises = unreadNotifications.map(n => updateDoc(doc(db, 'notifications', n.id), { isRead: true }));
+    await Promise.all(promises);
+  };
+  
+  const handlePopoverOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open && unreadCount > 0) {
+      handleMarkAsRead();
+    }
+  }
 
   const handleDeleteNotification = async (notificationId: string) => {
-    // Requires user context
+    await deleteDoc(doc(db, 'notifications', notificationId));
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handlePopoverOpenChange}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
@@ -69,7 +102,7 @@ export function NotificationCenter() {
                                 {notification.title}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                                {format(new Date(notification.createdAt), "MMM dd, yyyy 'at' hh:mm a")}
+                                {notification.createdAt && format(notification.createdAt.toDate(), "MMM dd, yyyy 'at' hh:mm a")}
                             </p>
                           </div>
                            <Button 

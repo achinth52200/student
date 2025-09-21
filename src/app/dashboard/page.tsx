@@ -14,6 +14,7 @@ import { PageTransitionLoader } from "@/components/page-transition-loader";
 import { getRecentTransactions } from "@/ai/flows/get-transactions-flow";
 import { db } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "@/hooks/use-auth";
 
 const initialTransactions: Transaction[] = [
     { id: '1', description: 'Groceries', amount: 75.50, type: 'expense', category: 'Groceries', date: '2024-07-15T10:00:00Z', status: 'Completed' },
@@ -21,10 +22,10 @@ const initialTransactions: Transaction[] = [
     { id: '3', description: 'Bus fare', amount: 20, type: 'expense', category: 'Transport', date: '2024-07-16T08:00:00Z', status: 'Completed' },
 ];
 
-const storageKey = 'transactions_guest';
-
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+  const storageKey = user ? `transactions_${user.uid}` : 'transactions_guest';
 
   React.useEffect(() => {
     const storedTransactions = localStorage.getItem(storageKey);
@@ -34,9 +35,11 @@ export default function DashboardPage() {
       localStorage.setItem(storageKey, JSON.stringify(initialTransactions));
       setTransactions(initialTransactions);
     }
-  }, []);
+  }, [storageKey]);
   
   React.useEffect(() => {
+    if (!user) return;
+
     const interval = setInterval(async () => {
       try {
         const { transactions: newTransactions } = await getRecentTransactions();
@@ -46,6 +49,16 @@ export default function DashboardPage() {
           localStorage.setItem(storageKey, JSON.stringify(updatedTransactions));
           return updatedTransactions;
         });
+        
+        // Create notifications for new transactions
+        for (const transaction of newTransactions) {
+          await addDoc(collection(db, "notifications"), {
+            userId: user.uid,
+            title: `New ${transaction.type}: RS ${transaction.amount.toFixed(2)} for ${transaction.description}`,
+            createdAt: serverTimestamp(),
+            isRead: false,
+          });
+        }
 
       } catch (error) {
         console.error("Failed to fetch new transactions", error);
@@ -53,7 +66,7 @@ export default function DashboardPage() {
     }, 15000); // Fetch every 15 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [storageKey, user]);
 
 
   return (

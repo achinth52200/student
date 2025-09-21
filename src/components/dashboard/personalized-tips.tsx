@@ -14,6 +14,7 @@ import { generatePersonalizedTipsAction } from "@/app/actions";
 import type { Reminder, Transaction } from "@/lib/types";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
 
 type Tip = {
   icon: "PiggyBank" | "GraduationCap" | "HeartPulse" | "Lightbulb";
@@ -44,6 +45,7 @@ const staticTips: Tip[] = [
 
 
 export function PersonalizedTips() {
+  const { user } = useAuth();
   const [tips, setTips] = useState<Tip[]>(staticTips);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,8 +53,9 @@ export function PersonalizedTips() {
     setIsLoading(true);
 
     try {
-      const transactionsStr = localStorage.getItem(`transactions_guest`);
-      const remindersStr = localStorage.getItem(`reminders_guest`);
+      const storageKeySuffix = user ? user.uid : 'guest';
+      const transactionsStr = localStorage.getItem(`transactions_${storageKeySuffix}`);
+      const remindersStr = localStorage.getItem(`reminders_${storageKeySuffix}`);
 
       const transactions: Transaction[] = transactionsStr ? JSON.parse(transactionsStr) : [];
       const reminders: Reminder[] = remindersStr ? JSON.parse(remindersStr) : [];
@@ -62,7 +65,6 @@ export function PersonalizedTips() {
       if (result.tips && result.tips.length > 0) {
         setTips(result.tips);
       } else {
-        // Fallback to static tips if AI fails or returns none
         setTips(staticTips);
       }
     } catch (error) {
@@ -71,7 +73,7 @@ export function PersonalizedTips() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchTips();

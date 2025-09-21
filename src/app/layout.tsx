@@ -9,6 +9,7 @@ import { PageLoader } from "@/components/page-loader";
 import { Suspense } from "react";
 import { Inter as FontSans } from "next/font/google"
 import { cn } from "@/lib/utils"
+import { AuthProvider } from "@/hooks/use-auth";
 
 export const metadata: Metadata = {
   title: "StudentSync",
@@ -39,12 +40,14 @@ export default function RootLayout({
       <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
          <div className="absolute top-0 -z-10 h-full w-full bg-white dark:bg-slate-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
         <LoaderProvider>
+          <AuthProvider>
             <ReminderProvider>
                 <Suspense fallback={<PageLoader />}>
                   {children}
                 </Suspense>
                 <Toaster />
             </ReminderProvider>
+          </AuthProvider>
         </LoaderProvider>
       </body>
     </html>

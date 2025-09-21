@@ -7,14 +7,14 @@ import { auth } from '@/lib/firebase';
 import { useLoader } from './use-loader';
 
 type AuthContextType = {
-  user: User | null;
+  user: User | null | undefined; // undefined while loading, null if not logged in
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {

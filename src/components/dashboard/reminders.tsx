@@ -18,22 +18,35 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Reminders() {
   const { reminders, addReminder, setReminderStatus, deleteReminder } = useReminders();
   const [newReminder, setNewReminder] = useState("");
+  const { user } = useAuth();
 
   const handleAddReminder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newReminder) return;
     
-    // Add to local state via context
+    const newDueDate = new Date();
+    newDueDate.setDate(newDueDate.getDate() + 7);
+
     addReminder({
       title: newReminder,
-      dueDate: new Date(new Date().setDate(new Date().getDate() + 7)), // Default to 1 week
+      dueDate: newDueDate,
       completed: false,
     });
     
+    if (user) {
+        await addDoc(collection(db, "notifications"), {
+            userId: user.uid,
+            title: `New reminder set: ${newReminder}`,
+            createdAt: serverTimestamp(),
+            isRead: false,
+        });
+    }
+
     setNewReminder("");
   };
   

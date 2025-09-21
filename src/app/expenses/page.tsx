@@ -11,6 +11,7 @@ import type { Transaction } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ReceiptUploader } from "@/components/dashboard/receipt-uploader";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
+import { useAuth } from "@/hooks/use-auth";
 
 // Dynamically import ExpenseTracker with SSR turned off
 const ExpenseTracker = dynamic(
@@ -27,24 +28,22 @@ const initialTransactions: Transaction[] = [
     { id: '6', description: 'Scholarship', amount: 1000, type: 'income', category: 'Salary', date: '2024-07-18T11:00:00Z', status: 'Completed' },
 ];
 
-const storageKey = 'transactions_guest';
-
 export default function ExpensesPage() {
+  const { user } = useAuth();
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+  const storageKey = user ? `transactions_${user.uid}` : 'transactions_guest';
 
   React.useEffect(() => {
     const storedTransactions = localStorage.getItem(storageKey);
     if (storedTransactions) {
       setTransactions(JSON.parse(storedTransactions));
     } else {
-      // Seed with initial data if no data exists for the user
       localStorage.setItem(storageKey, JSON.stringify(initialTransactions));
       setTransactions(initialTransactions);
     }
-  }, []);
+  }, [storageKey]);
   
   React.useEffect(() => {
-    // This effect is to listen for changes in localStorage from other tabs/windows
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === storageKey && event.newValue) {
         setTransactions(JSON.parse(event.newValue));
@@ -53,7 +52,7 @@ export default function ExpensesPage() {
     
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [storageKey]);
 
   const updateStoredTransactions = (newTransactions: Transaction[]) => {
       localStorage.setItem(storageKey, JSON.stringify(newTransactions));
