@@ -5,7 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AtSign, Lock } from "lucide-react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
+import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +55,31 @@ export function LoginForm() {
         setIsLoading(false);
     }
   };
+  
+   const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    const provider = new GoogleAuthProvider();
+    try {
+        await signInWithPopup(auth, provider);
+        toast({
+            title: "Login Successful",
+            description: "Redirecting to your dashboard..."
+        });
+        router.push("/dashboard");
+    } catch (error: any) {
+        let description = "An unexpected error occurred.";
+        if (error.code === 'auth/popup-closed-by-user') {
+            description = "The sign-in popup was closed. Please try again.";
+        }
+        toast({
+            variant: "destructive",
+            title: "Google Sign-In Failed",
+            description,
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  }
 
   return (
     <div className={cn(
@@ -126,6 +152,20 @@ export function LoginForm() {
                 Login
                 </Button>
             </form>
+             <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">
+                    Or continue with
+                    </span>
+                </div>
+            </div>
+            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+                <GoogleIcon className="mr-2 h-4 w-4" />
+                Sign in with Google
+            </Button>
             <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
                 <Link href="/signup" className="underline">

@@ -5,7 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AtSign, Lock, User } from "lucide-react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
@@ -19,17 +19,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
+import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
 
 export function SignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: name });
@@ -45,8 +48,35 @@ export function SignupForm() {
         title: "Signup Failed",
         description: error.message || "An unexpected error occurred.",
       });
+    } finally {
+        setIsLoading(false);
     }
   };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    const provider = new GoogleAuthProvider();
+    try {
+        await signInWithPopup(auth, provider);
+        toast({
+            title: "Sign-up Successful!",
+            description: "Your account has been created. Redirecting to dashboard...",
+        });
+        router.push("/dashboard");
+    } catch (error: any) {
+        let description = "An unexpected error occurred.";
+        if (error.code === 'auth/popup-closed-by-user') {
+            description = "The sign-up popup was closed. Please try again.";
+        }
+        toast({
+            variant: "destructive",
+            title: "Google Sign-up Failed",
+            description,
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background relative overflow-hidden">
@@ -104,10 +134,24 @@ export function SignupForm() {
                 />
                </div>
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isLoading}>
               Create an account
             </Button>
           </form>
+           <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">
+                    Or continue with
+                    </span>
+                </div>
+            </div>
+            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
+                <GoogleIcon className="mr-2 h-4 w-4" />
+                Sign up with Google
+            </Button>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
             <Link href="/login" className="underline">
