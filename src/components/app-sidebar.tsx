@@ -43,11 +43,6 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const { state: sidebarState } = useSidebar();
   const isActive = (href: string) => pathname === href;
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
   
   const filteredMenuItems = menuItems.filter(item => {
     // Hide auth-related pages from the main sidebar navigation
@@ -87,15 +82,15 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <div className={cn("flex items-center gap-3", sidebarState === 'collapsed' && 'justify-center')}>
-            {isClient ? (
+            {user ? (
               <>
                 <Avatar className="h-9 w-9">
-                  <AvatarFallback>{user?.name?.[0] ?? 'A'}</AvatarFallback>
+                  <AvatarFallback>{user.name?.[0] ?? 'A'}</AvatarFallback>
                 </Avatar>
-                <div className={cn("flex flex-col", sidebarState === 'expanded' && 'opacity-100', sidebarState === 'collapsed' && 'opacity-0 hidden')}>
-                  <span className="text-sm font-medium">{user?.name ?? 'Alex Doe'}</span>
+                 <div className={cn("flex flex-col", sidebarState === 'expanded' ? 'opacity-100' : 'opacity-0 hidden')}>
+                  <span className="text-sm font-medium">{user.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {user?.email ?? 'alex.doe@example.com'}
+                    {user.email}
                   </span>
                 </div>
                 <Button variant="ghost" size="icon" onClick={handleLogout} className={cn("text-muted-foreground hover:text-foreground", sidebarState === 'expanded' && 'ml-auto')}>
@@ -103,7 +98,11 @@ export function AppSidebar() {
                   <span className="sr-only">Logout</span>
                 </Button>
               </>
-            ) : null}
+            ) : (
+                 <Avatar className="h-9 w-9">
+                  <AvatarFallback>A</AvatarFallback>
+                </Avatar>
+            )}
         </div>
       </SidebarFooter>
     </Sidebar>
