@@ -50,7 +50,7 @@ export default function DashboardPage() {
             <main className="p-4 sm:p-6 lg:p-8">
               <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="grid grid-cols-1 gap-6 lg:col-span-2">
-                   <Card>
+                   <Card className="transform-gpu transition-transform duration-300 ease-in-out md:hover:scale-105 md:hover:shadow-2xl">
                       <CardHeader>
                           <CardTitle>Budget Overview</CardTitle>
                           <CardDescription>A visual breakdown of your finances.</CardDescription>
