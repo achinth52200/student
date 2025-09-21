@@ -88,7 +88,7 @@ export function ExpenseTracker({ transactions, onAddTransaction, onDeleteTransac
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-6">
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-2 items-end p-4 rounded-lg border bg-card-foreground/5">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-2 items-end p-4 rounded-lg border bg-card-foreground/5 transform-gpu transition-transform duration-300 ease-in-out md:hover:scale-105 md:hover:shadow-2xl">
             <div className="md:col-span-2">
                 <label className="text-xs font-medium" htmlFor="description">Description</label>
                 <Input id="description" placeholder="e.g., Coffee" value={description} onChange={e => setDescription(e.target.value)} required />
