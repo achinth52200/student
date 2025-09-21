@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AtSign, Lock, User } from "lucide-react";
+import { AtSign, Lock, User, Sparkles } from "lucide-react";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
@@ -54,7 +54,6 @@ export function SignupForm() {
   };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true);
     const provider = new GoogleAuthProvider();
     try {
         await signInWithPopup(auth, provider);
@@ -73,8 +72,6 @@ export function SignupForm() {
             title: "Google Sign-up Failed",
             description,
         });
-    } finally {
-        setIsLoading(false);
     }
   }
 
@@ -102,6 +99,7 @@ export function SignupForm() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="pl-9"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -117,6 +115,7 @@ export function SignupForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-9"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -131,11 +130,17 @@ export function SignupForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-9"
+                    disabled={isLoading}
                 />
                </div>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              Create an account
+              {isLoading ? (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : "Create an account"}
             </Button>
           </form>
            <div className="relative my-4">
@@ -148,7 +153,7 @@ export function SignupForm() {
                     </span>
                 </div>
             </div>
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
+            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
                 <GoogleIcon className="mr-2 h-4 w-4" />
                 Sign up with Google
             </Button>

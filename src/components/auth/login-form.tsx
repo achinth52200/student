@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AtSign, Lock } from "lucide-react";
+import { AtSign, Lock, Sparkles } from "lucide-react";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
@@ -57,7 +57,6 @@ export function LoginForm() {
   };
   
    const handleGoogleSignIn = async () => {
-    setIsLoading(true);
     const provider = new GoogleAuthProvider();
     try {
         await signInWithPopup(auth, provider);
@@ -76,29 +75,12 @@ export function LoginForm() {
             title: "Google Sign-In Failed",
             description,
         });
-    } finally {
-        setIsLoading(false);
     }
   }
 
   return (
-    <div className={cn(
-        "flex items-center justify-center min-h-screen relative overflow-hidden transition-colors duration-300",
-        isLoading ? "bg-black" : "bg-background"
-    )}>
-       {!isLoading && <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-primary/75 via-cyan-300/75 to-background animate-gradient" />}
-       {isLoading ? (
-          <div className="loader-wrapper">
-            <span className="loader-letter">L</span>
-            <span className="loader-letter">o</span>
-            <span className="loader-letter">a</span>
-            <span className="loader-letter">d</span>
-            <span className="loader-letter">i</span>
-            <span className="loader-letter">n</span>
-            <span className="loader-letter">g</span>
-            <div className="loader"></div>
-          </div>
-       ) : (
+    <div className="flex items-center justify-center min-h-screen bg-background relative overflow-hidden">
+       <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-primary/75 via-cyan-300/75 to-background animate-gradient" />
         <Card className="mx-auto max-w-sm z-10 bg-card/60 backdrop-blur-lg border-white/20 shadow-xl">
             <CardHeader className="text-center">
                 <div className="flex justify-center items-center gap-2 mb-4">
@@ -123,6 +105,7 @@ export function LoginForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-9"
+                    disabled={isLoading}
                     />
                 </div>
                 </div>
@@ -145,11 +128,17 @@ export function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-9"
+                    disabled={isLoading}
                     />
                 </div>
                 </div>
-                <Button type="submit" className="w-full">
-                Login
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                      Logging in...
+                    </>
+                  ) : "Login"}
                 </Button>
             </form>
              <div className="relative my-4">
@@ -174,7 +163,6 @@ export function LoginForm() {
             </div>
             </CardContent>
         </Card>
-       )}
     </div>
   );
 }
