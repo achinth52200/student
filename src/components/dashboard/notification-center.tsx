@@ -29,7 +29,7 @@ export function NotificationCenter() {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   React.useEffect(() => {
-    if (!user) return;
+    if (!user || !user.email) return;
 
     const q = query(
         collection(db, `users/${user.email}/notifications`), 
@@ -50,7 +50,7 @@ export function NotificationCenter() {
   }, [user]);
   
   const handleDeleteNotification = async (notificationId: string) => {
-    if (!user) return;
+    if (!user || !user.email) return;
     const notifRef = doc(db, `users/${user.email}/notifications`, notificationId);
     await deleteDoc(notifRef);
   };

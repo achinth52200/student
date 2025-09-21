@@ -27,7 +27,7 @@ export function Reminders() {
 
   const handleAddReminder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newReminder || !user) return;
+    if (!newReminder || !user || !user.email) return;
     
     // Add to local state via context
     addReminder({
