@@ -55,7 +55,7 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="glass-effect">
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Logo className="w-6 h-6 text-primary" />
@@ -88,8 +88,8 @@ export function AppSidebar() {
                   <AvatarFallback>{user.name?.[0] ?? 'A'}</AvatarFallback>
                 </Avatar>
                  <div className={cn("flex flex-col", sidebarState === 'expanded' ? 'opacity-100' : 'opacity-0 hidden')}>
-                  <span className="text-sm font-medium">{user.name}</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-sm font-semibold">{user.name}</span>
+                  <span className="text-xs text-sidebar-foreground/80">
                     {user.email}
                   </span>
                 </div>
@@ -108,3 +108,5 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
+    
