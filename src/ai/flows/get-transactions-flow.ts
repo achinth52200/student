@@ -17,7 +17,7 @@ const TransactionSchema = z.object({
   amount: z.number(),
   type: z.enum(['income', 'expense']),
   category: z.enum(['Groceries' , 'Transport' , 'Entertainment' , 'Utilities' , 'Salary' , 'Other' , 'UPI']),
-  date: z.string().transform((str) => new Date(str)), // Keep as string for schema, transform in code if needed
+  date: z.string(),
   status: z.enum(['Completed', 'Pending', 'Failed']),
 });
 
@@ -97,7 +97,6 @@ const allMockTransactions: Omit<Transaction, 'date' | 'id'>[] = [
 export async function getRecentTransactions(): Promise<RecentTransactionsOutput> {
   return getRecentTransactionsFlow();
 }
-
 
 const getRecentTransactionsFlow = ai.defineFlow(
   {

@@ -12,6 +12,9 @@ import { BudgetChart } from "@/components/dashboard/budget-chart";
 import type { Transaction } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
+import { getRecentTransactions } from "@/ai/flows/get-transactions-flow";
+import { db } from "@/lib/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 const initialTransactions: Transaction[] = [
     { id: '1', description: 'Groceries', amount: 75.50, type: 'expense', category: 'Groceries', date: '2024-07-15T10:00:00Z', status: 'Completed' },
@@ -22,21 +25,50 @@ const initialTransactions: Transaction[] = [
 export default function DashboardPage() {
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const { user } = useAuth();
+  const storageKey = user ? `transactions_${user.email}` : '';
 
   React.useEffect(() => {
-    if (user && typeof window !== 'undefined') {
-      const storedTransactions = localStorage.getItem(`transactions_${user.email}`);
+    if (storageKey) {
+      const storedTransactions = localStorage.getItem(storageKey);
       if (storedTransactions) {
         setTransactions(JSON.parse(storedTransactions));
       } else {
-        // For demonstration, you might want to seed initial data for new users
+        localStorage.setItem(storageKey, JSON.stringify(initialTransactions));
         setTransactions(initialTransactions);
-        localStorage.setItem(`transactions_${user.email}`, JSON.stringify(initialTransactions));
       }
     } else {
-        setTransactions(initialTransactions);
+        setTransactions([]);
     }
-  }, [user]);
+  }, [storageKey]);
+  
+  React.useEffect(() => {
+    if (!user || !user.email) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const { transactions: newTransactions } = await getRecentTransactions();
+
+        setTransactions(prev => {
+          const updatedTransactions = [...newTransactions, ...prev];
+          localStorage.setItem(storageKey, JSON.stringify(updatedTransactions));
+          return updatedTransactions;
+        });
+
+        // Create notifications for new transactions
+        for (const t of newTransactions) {
+            await addDoc(collection(db, `users/${user.email}/notifications`), {
+                title: `New ${t.type}: ${t.description} for RS ${t.amount.toFixed(2)}`,
+                createdAt: serverTimestamp(),
+                isRead: false,
+            });
+        }
+      } catch (error) {
+        console.error("Failed to fetch new transactions", error);
+      }
+    }, 15000); // Fetch every 15 seconds
+
+    return () => clearInterval(interval);
+  }, [user, storageKey]);
 
 
   return (

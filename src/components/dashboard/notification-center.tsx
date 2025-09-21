@@ -4,12 +4,11 @@
 import { Bell, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useReminders } from '@/hooks/use-reminders';
 import { format } from 'date-fns';
 import { Badge } from '../ui/badge';
 import React from 'react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc, updateDoc, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { ScrollArea } from '../ui/scroll-area';
 
@@ -48,6 +47,26 @@ export function NotificationCenter() {
 
     return () => unsubscribe();
   }, [user]);
+
+  const markAllAsRead = async () => {
+    if (!user || !user.email) return;
+    const q = query(
+        collection(db, `users/${user.email}/notifications`),
+        where('isRead', '==', false)
+    );
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+        await updateDoc(doc.ref, { isRead: true });
+    });
+  };
+
+  React.useEffect(() => {
+    if (isOpen && unreadCount > 0) {
+        // Mark notifications as read when popover is opened
+        markAllAsRead();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
   
   const handleDeleteNotification = async (notificationId: string) => {
     if (!user || !user.email) return;
@@ -86,7 +105,10 @@ export function NotificationCenter() {
                           key={notification.id}
                           className="flex items-center gap-3 p-2 rounded-md hover:bg-accent group"
                       >
-                          <div className="flex-grow">
+                          {!notification.isRead && (
+                            <span className="h-2 w-2 rounded-full bg-primary" />
+                          )}
+                          <div className="flex-grow ml-1">
                             <p className="text-sm font-medium">
                                 {notification.title}
                             </p>

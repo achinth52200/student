@@ -47,6 +47,18 @@ export default function ExpensesPage() {
       setTransactions([]);
     }
   }, [storageKey]);
+  
+  React.useEffect(() => {
+    // This effect is to listen for changes in localStorage from other tabs/windows
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === storageKey && event.newValue) {
+        setTransactions(JSON.parse(event.newValue));
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [storageKey]);
 
   const updateStoredTransactions = (newTransactions: Transaction[]) => {
       if (storageKey) {
