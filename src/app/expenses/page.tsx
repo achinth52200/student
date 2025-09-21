@@ -10,7 +10,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { Transaction } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ReceiptUploader } from "@/components/dashboard/receipt-uploader";
-import { useAuth } from "@/hooks/use-auth";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
 
 // Dynamically import ExpenseTracker with SSR turned off
@@ -28,25 +27,21 @@ const initialTransactions: Transaction[] = [
     { id: '6', description: 'Scholarship', amount: 1000, type: 'income', category: 'Salary', date: '2024-07-18T11:00:00Z', status: 'Completed' },
 ];
 
+const storageKey = 'transactions_guest';
+
 export default function ExpensesPage() {
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
-  const { user } = useAuth();
-  const storageKey = user ? `transactions_${user.email}` : '';
 
   React.useEffect(() => {
-    if (storageKey) {
-      const storedTransactions = localStorage.getItem(storageKey);
-      if (storedTransactions) {
-        setTransactions(JSON.parse(storedTransactions));
-      } else {
-        // Seed with initial data if no data exists for the user
-        localStorage.setItem(storageKey, JSON.stringify(initialTransactions));
-        setTransactions(initialTransactions);
-      }
+    const storedTransactions = localStorage.getItem(storageKey);
+    if (storedTransactions) {
+      setTransactions(JSON.parse(storedTransactions));
     } else {
-      setTransactions([]);
+      // Seed with initial data if no data exists for the user
+      localStorage.setItem(storageKey, JSON.stringify(initialTransactions));
+      setTransactions(initialTransactions);
     }
-  }, [storageKey]);
+  }, []);
   
   React.useEffect(() => {
     // This effect is to listen for changes in localStorage from other tabs/windows
@@ -58,12 +53,10 @@ export default function ExpensesPage() {
     
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [storageKey]);
+  }, []);
 
   const updateStoredTransactions = (newTransactions: Transaction[]) => {
-      if (storageKey) {
-        localStorage.setItem(storageKey, JSON.stringify(newTransactions));
-      }
+      localStorage.setItem(storageKey, JSON.stringify(newTransactions));
   }
 
   const addTransactions = (newTransactions: Omit<Transaction, 'id' | 'status' | 'date'>[]) => {

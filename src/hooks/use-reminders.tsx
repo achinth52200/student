@@ -3,7 +3,6 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import type { Reminder } from '@/lib/types';
-import { useAuth } from './use-auth';
 
 const initialReminders: Reminder[] = [
   {
@@ -26,6 +25,7 @@ const initialReminders: Reminder[] = [
   },
 ];
 
+const storageKey = 'reminders_guest';
 
 type ReminderContextType = {
   reminders: Reminder[];
@@ -39,28 +39,20 @@ const ReminderContext = createContext<ReminderContextType | undefined>(undefined
 
 export const ReminderProvider = ({ children }: { children: ReactNode }) => {
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const { user } = useAuth();
-  const storageKey = user ? `reminders_${user.email}` : '';
 
   useEffect(() => {
-    if (storageKey) {
-        const storedReminders = localStorage.getItem(storageKey);
-        if (storedReminders) {
-            setReminders(JSON.parse(storedReminders).map((r: Reminder) => ({...r, dueDate: new Date(r.dueDate)})));
-        } else {
-            // Seed with initial data if none exists
-            localStorage.setItem(storageKey, JSON.stringify(initialReminders));
-            setReminders(initialReminders);
-        }
+    const storedReminders = localStorage.getItem(storageKey);
+    if (storedReminders) {
+        setReminders(JSON.parse(storedReminders).map((r: Reminder) => ({...r, dueDate: new Date(r.dueDate)})));
     } else {
-        setReminders([]); // Clear reminders on logout
+        // Seed with initial data if none exists
+        localStorage.setItem(storageKey, JSON.stringify(initialReminders));
+        setReminders(initialReminders);
     }
-  }, [storageKey]);
+  }, []);
 
   const updateStoredReminders = (newReminders: Reminder[]) => {
-      if (storageKey) {
-          localStorage.setItem(storageKey, JSON.stringify(newReminders));
-      }
+      localStorage.setItem(storageKey, JSON.stringify(newReminders));
   }
 
   const addReminder = (reminder: Omit<Reminder, 'id'>) => {

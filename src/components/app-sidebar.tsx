@@ -23,9 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Logo } from "@/components/icons";
-import { usePathname, useRouter } from "next/navigation";
-import { Button } from "./ui/button";
-import { useAuth } from "@/hooks/use-auth";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -39,21 +37,9 @@ export const menuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, logout } = useAuth();
   const { state: sidebarState } = useSidebar();
   const isActive = (href: string) => pathname === href;
   
-  const filteredMenuItems = menuItems.filter(item => {
-    // Hide auth-related pages from the main sidebar navigation
-    return !['/login', '/signup'].includes(item.href);
-  });
-
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  }
-
   return (
     <Sidebar collapsible="icon" className="glass-effect">
       <SidebarHeader>
@@ -64,7 +50,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {filteredMenuItems.map((item) => (
+          {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
@@ -82,27 +68,9 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <div className={cn("flex items-center gap-3", sidebarState === 'collapsed' && 'justify-center')}>
-            {user ? (
-              <>
-                <Avatar className="h-9 w-9">
-                  <AvatarFallback>{user.displayName?.[0] ?? 'A'}</AvatarFallback>
-                </Avatar>
-                 <div className={cn("flex flex-col", sidebarState === 'expanded' ? 'opacity-100' : 'opacity-0 hidden')}>
-                  <span className="text-sm font-semibold text-sidebar-foreground">{user.displayName}</span>
-                  <span className="text-xs text-sidebar-foreground/80">
-                    {user.email}
-                  </span>
-                </div>
-                <Button variant="ghost" size="icon" onClick={handleLogout} className={cn("text-muted-foreground hover:text-foreground", sidebarState === 'expanded' && 'ml-auto')}>
-                  <LogOut className="h-5 w-5"/>
-                  <span className="sr-only">Logout</span>
-                </Button>
-              </>
-            ) : (
-                 <Avatar className="h-9 w-9">
-                  <AvatarFallback>A</AvatarFallback>
-                </Avatar>
-            )}
+             <Avatar className="h-9 w-9">
+              <AvatarFallback>A</AvatarFallback>
+            </Avatar>
         </div>
       </SidebarFooter>
     </Sidebar>

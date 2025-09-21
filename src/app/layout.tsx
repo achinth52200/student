@@ -4,7 +4,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ReminderProvider } from "@/hooks/use-reminders";
-import { AuthProvider } from "@/hooks/use-auth";
 import { LoaderProvider } from "@/hooks/use-loader";
 import { PageLoader } from "@/components/page-loader";
 import { Suspense } from "react";
@@ -40,19 +39,14 @@ export default function RootLayout({
       <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
          <div className="absolute top-0 -z-10 h-full w-full bg-white dark:bg-slate-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
         <LoaderProvider>
-            <AuthProvider>
-              <ReminderProvider>
-                  <Suspense fallback={<PageLoader />}>
-                    {children}
-                  </Suspense>
-                  <Toaster />
-              </ReminderProvider>
-            </AuthProvider>
+            <ReminderProvider>
+                <Suspense fallback={<PageLoader />}>
+                  {children}
+                </Suspense>
+                <Toaster />
+            </ReminderProvider>
         </LoaderProvider>
       </body>
     </html>
   );
 }
-
-
-    

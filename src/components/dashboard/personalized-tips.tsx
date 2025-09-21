@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { generatePersonalizedTipsAction } from "@/app/actions";
 import type { Reminder, Transaction } from "@/lib/types";
-import { useAuth } from "@/hooks/use-auth";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 
@@ -47,15 +46,13 @@ const staticTips: Tip[] = [
 export function PersonalizedTips() {
   const [tips, setTips] = useState<Tip[]>(staticTips);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
 
   const fetchTips = React.useCallback(async () => {
-    if (!user) return;
     setIsLoading(true);
 
     try {
-      const transactionsStr = localStorage.getItem(`transactions_${user.email}`);
-      const remindersStr = localStorage.getItem(`reminders_${user.email}`);
+      const transactionsStr = localStorage.getItem(`transactions_guest`);
+      const remindersStr = localStorage.getItem(`reminders_guest`);
 
       const transactions: Transaction[] = transactionsStr ? JSON.parse(transactionsStr) : [];
       const reminders: Reminder[] = remindersStr ? JSON.parse(remindersStr) : [];
@@ -74,14 +71,11 @@ export function PersonalizedTips() {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    // Fetch tips on component mount if user is available
-    if (user) {
-      fetchTips();
-    }
-  }, [user, fetchTips]);
+    fetchTips();
+  }, [fetchTips]);
 
   return (
     <Card>

@@ -10,7 +10,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { BudgetChart } from "@/components/dashboard/budget-chart";
 import type { Transaction } from "@/lib/types";
-import { useAuth } from "@/hooks/use-auth";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
 import { getRecentTransactions } from "@/ai/flows/get-transactions-flow";
 import { db } from "@/lib/firebase";
@@ -22,28 +21,22 @@ const initialTransactions: Transaction[] = [
     { id: '3', description: 'Bus fare', amount: 20, type: 'expense', category: 'Transport', date: '2024-07-16T08:00:00Z', status: 'Completed' },
 ];
 
+const storageKey = 'transactions_guest';
+
 export default function DashboardPage() {
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
-  const { user } = useAuth();
-  const storageKey = user ? `transactions_${user.email}` : '';
 
   React.useEffect(() => {
-    if (storageKey) {
-      const storedTransactions = localStorage.getItem(storageKey);
-      if (storedTransactions) {
-        setTransactions(JSON.parse(storedTransactions));
-      } else {
-        localStorage.setItem(storageKey, JSON.stringify(initialTransactions));
-        setTransactions(initialTransactions);
-      }
+    const storedTransactions = localStorage.getItem(storageKey);
+    if (storedTransactions) {
+      setTransactions(JSON.parse(storedTransactions));
     } else {
-        setTransactions([]);
+      localStorage.setItem(storageKey, JSON.stringify(initialTransactions));
+      setTransactions(initialTransactions);
     }
-  }, [storageKey]);
+  }, []);
   
   React.useEffect(() => {
-    if (!user || !user.email) return;
-
     const interval = setInterval(async () => {
       try {
         const { transactions: newTransactions } = await getRecentTransactions();
@@ -54,21 +47,13 @@ export default function DashboardPage() {
           return updatedTransactions;
         });
 
-        // Create notifications for new transactions
-        for (const t of newTransactions) {
-            await addDoc(collection(db, `users/${user.email}/notifications`), {
-                title: `New ${t.type}: ${t.description} for RS ${t.amount.toFixed(2)}`,
-                createdAt: serverTimestamp(),
-                isRead: false,
-            });
-        }
       } catch (error) {
         console.error("Failed to fetch new transactions", error);
       }
     }, 15000); // Fetch every 15 seconds
 
     return () => clearInterval(interval);
-  }, [user, storageKey]);
+  }, []);
 
 
   return (

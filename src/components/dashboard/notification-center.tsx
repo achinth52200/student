@@ -9,7 +9,6 @@ import { Badge } from '../ui/badge';
 import React from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc, updateDoc, where, getDocs } from 'firebase/firestore';
-import { useAuth } from '@/hooks/use-auth';
 import { ScrollArea } from '../ui/scroll-area';
 
 type Notification = {
@@ -20,58 +19,15 @@ type Notification = {
     isRead: boolean;
 };
 
+// This component is currently disabled as it requires user authentication.
 export function NotificationCenter() {
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
   const [isOpen, setIsOpen] = React.useState(false);
-  const { user } = useAuth();
   
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = 0;
 
-  React.useEffect(() => {
-    if (!user || !user.email) return;
-
-    const q = query(
-        collection(db, `users/${user.email}/notifications`), 
-        orderBy('createdAt', 'desc'),
-        limit(20)
-    );
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const notifs = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt.toDate(),
-      })) as Notification[];
-      setNotifications(notifs);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
-
-  const markAllAsRead = async () => {
-    if (!user || !user.email) return;
-    const q = query(
-        collection(db, `users/${user.email}/notifications`),
-        where('isRead', '==', false)
-    );
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
-        await updateDoc(doc.ref, { isRead: true });
-    });
-  };
-
-  React.useEffect(() => {
-    if (isOpen && unreadCount > 0) {
-        // Mark notifications as read when popover is opened
-        markAllAsRead();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-  
   const handleDeleteNotification = async (notificationId: string) => {
-    if (!user || !user.email) return;
-    const notifRef = doc(db, `users/${user.email}/notifications`, notificationId);
-    await deleteDoc(notifRef);
+    // Requires user context
   };
 
   return (

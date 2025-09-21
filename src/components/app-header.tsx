@@ -2,7 +2,6 @@
 "use client";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { NotificationCenter } from "@/components/dashboard/notification-center";
 import { cn } from "@/lib/utils";
 
 export function AppHeader() {
@@ -16,7 +15,6 @@ export function AppHeader() {
         <h1 className="text-xl font-semibold font-headline">{title}</h1>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
-      <NotificationCenter />
     </header>
   );
 }
