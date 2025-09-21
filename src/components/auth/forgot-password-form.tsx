@@ -5,9 +5,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AtSign } from "lucide-react";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,20 +25,12 @@ export function ForgotPasswordForm() {
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-        await sendPasswordResetEmail(auth, email);
-        toast({
-            title: "Password Reset Email Sent",
-            description: "Please check your inbox to reset your password.",
-        });
-        router.push("/login");
-    } catch (error: any) {
-        toast({
-            variant: "destructive",
-            title: "Error Sending Email",
-            description: error.message || "An unexpected error occurred.",
-        });
-    }
+    // This is a simulation, so we just show a success message.
+    toast({
+        title: "Password Reset Email Sent",
+        description: "If this were a real app, an email would be sent to reset your password.",
+    });
+    router.push("/login");
   }
 
   return (

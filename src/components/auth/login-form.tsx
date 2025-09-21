@@ -5,9 +5,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AtSign, Lock, Sparkles } from "lucide-react";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
 import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -29,53 +26,45 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        toast({
-            title: "Login Successful",
-            description: "Redirecting to your dashboard..."
-        });
-        router.push("/dashboard");
-    } catch (error: any) {
-        let description = "An unexpected error occurred. Please try again.";
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-            description = "No account found with this email. Please sign up.";
-        }
-        toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description,
-        });
-    } finally {
-        setIsLoading(false);
-    }
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // In a real app, you would validate credentials.
+    // Here, we just simulate a successful login.
+    const mockUser = {
+      uid: 'simulated-user-id',
+      email: email,
+      displayName: email.split('@')[0],
+    };
+    login(mockUser as any); // Using 'as any' because it's a mock
+
+    toast({
+        title: "Login Successful",
+        description: "Redirecting to your dashboard..."
+    });
+    router.push("/dashboard");
+    
+    setIsLoading(false);
   };
   
    const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-        await signInWithPopup(auth, provider);
-        toast({
-            title: "Login Successful",
-            description: "Redirecting to your dashboard..."
-        });
-        router.push("/dashboard");
-    } catch (error: any) {
-        let description = "An unexpected error occurred.";
-        if (error.code === 'auth/popup-closed-by-user') {
-            description = "The sign-in popup was closed. Please try again.";
-        }
-        toast({
-            variant: "destructive",
-            title: "Google Sign-In Failed",
-            description,
-        });
-    }
+    const mockUser = {
+      uid: 'simulated-google-user-id',
+      email: 'user@google.com',
+      displayName: 'Google User',
+    };
+    login(mockUser as any);
+    toast({
+        title: "Login Successful",
+        description: "Redirecting to your dashboard..."
+    });
+    router.push("/dashboard");
   }
 
   return (

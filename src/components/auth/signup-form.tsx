@@ -5,9 +5,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AtSign, Lock, User, Sparkles } from "lucide-react";
-import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
 import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 export function SignupForm() {
   const [name, setName] = useState("");
@@ -29,50 +27,43 @@ export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: name });
-      
-      toast({
-          title: "Signup Successful!",
-          description: "Your account has been created. Redirecting to login...",
-      });
-      router.push("/login");
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Signup Failed",
-        description: error.message || "An unexpected error occurred.",
-      });
-    } finally {
-        setIsLoading(false);
-    }
+
+    // Simulate network delay and account creation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const mockUser = {
+        uid: `simulated-${email}-${Date.now()}`,
+        email: email,
+        displayName: name,
+    };
+    login(mockUser as any);
+
+    toast({
+        title: "Signup Successful!",
+        description: "Your account has been created. Redirecting to dashboard...",
+    });
+    router.push("/dashboard");
+
+    setIsLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-        await signInWithPopup(auth, provider);
-        toast({
-            title: "Sign-up Successful!",
-            description: "Your account has been created. Redirecting to dashboard...",
-        });
-        router.push("/dashboard");
-    } catch (error: any) {
-        let description = "An unexpected error occurred.";
-        if (error.code === 'auth/popup-closed-by-user') {
-            description = "The sign-up popup was closed. Please try again.";
-        }
-        toast({
-            variant: "destructive",
-            title: "Google Sign-up Failed",
-            description,
-        });
-    }
+    const mockUser = {
+      uid: 'simulated-google-user-id',
+      email: 'user@google.com',
+      displayName: 'Google User',
+    };
+    login(mockUser as any);
+    toast({
+        title: "Sign-up Successful!",
+        description: "Your account has been created. Redirecting to dashboard...",
+    });
+    router.push("/dashboard");
   }
 
   return (
