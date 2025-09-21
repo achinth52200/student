@@ -15,17 +15,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const { setIsLoading } = useLoader();
 
   useEffect(() => {
-    setIsLoading(true);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [setIsLoading]);
+  }, []);
   
 
   const logout = async () => {
