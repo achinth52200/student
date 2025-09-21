@@ -41,10 +41,14 @@ export function LoginForm() {
         });
         router.push("/dashboard");
     } catch (error: any) {
+        let description = "An unexpected error occurred. Please try again.";
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            description = "No account found with this email. Please sign up.";
+        }
         toast({
             variant: "destructive",
             title: "Login Failed",
-            description: error.message || "An unexpected error occurred.",
+            description,
         });
     } finally {
         setIsLoading(false);
