@@ -5,6 +5,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AtSign, Lock } from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,7 +20,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
 export function LoginForm() {
@@ -26,25 +28,27 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { setUser } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
-        // In a real app, you'd have auth logic here.
-        // We'll simulate a successful login and store user details.
-        // For this prototype, we'll derive a name from the email.
-        const name = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
-        setUser({ name, email });
-        
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
         toast({
             title: "Login Successful",
             description: "Redirecting to your dashboard..."
         });
         router.push("/dashboard");
-    }, 5000);
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: error.message || "An unexpected error occurred.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (

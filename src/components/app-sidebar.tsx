@@ -85,10 +85,10 @@ export function AppSidebar() {
             {user ? (
               <>
                 <Avatar className="h-9 w-9">
-                  <AvatarFallback>{user.name?.[0] ?? 'A'}</AvatarFallback>
+                  <AvatarFallback>{user.displayName?.[0] ?? 'A'}</AvatarFallback>
                 </Avatar>
                  <div className={cn("flex flex-col", sidebarState === 'expanded' ? 'opacity-100' : 'opacity-0 hidden')}>
-                  <span className="text-sm font-semibold">{user.name}</span>
+                  <span className="text-sm font-semibold text-sidebar-foreground">{user.displayName}</span>
                   <span className="text-xs text-sidebar-foreground/80">
                     {user.email}
                   </span>
@@ -108,5 +108,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
-    

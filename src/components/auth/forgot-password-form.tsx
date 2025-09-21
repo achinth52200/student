@@ -4,7 +4,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AtSign, Lock, KeyRound } from "lucide-react";
+import { AtSign } from "lucide-react";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,36 +23,25 @@ import { useToast } from "@/hooks/use-toast";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [step, setStep] = useState(1);
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For this prototype, we'll just move to the next step
-    // after the user enters their email.
-    setStep(2);
-  };
-  
-  const handlePasswordReset = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Password Mismatch",
-        description: "The passwords you entered do not match.",
-      });
-      return;
+    try {
+        await sendPasswordResetEmail(auth, email);
+        toast({
+            title: "Password Reset Email Sent",
+            description: "Please check your inbox to reset your password.",
+        });
+        router.push("/login");
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Error Sending Email",
+            description: error.message || "An unexpected error occurred.",
+        });
     }
-    
-    // In a real app, you'd update the user's password here.
-    toast({
-        title: "Password Updated!",
-        description: "Your password has been changed successfully. Please log in.",
-    });
-    router.push("/login");
   }
 
   return (
@@ -63,12 +54,11 @@ export function ForgotPasswordForm() {
             <CardTitle className="text-3xl">StudentSync</CardTitle>
           </div>
           <CardDescription>
-            {step === 1 ? "Enter your email to reset your password" : "Create a new password"}
+            Enter your email to reset your password
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {step === 1 ? (
-             <form onSubmit={handleEmailSubmit} className="grid gap-4">
+             <form onSubmit={handlePasswordReset} className="grid gap-4">
                 <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
                     <div className="relative">
@@ -85,44 +75,9 @@ export function ForgotPasswordForm() {
                     </div>
                 </div>
                 <Button type="submit" className="w-full">
-                    Proceed
+                    Send Reset Email
                 </Button>
             </form>
-          ) : (
-             <form onSubmit={handlePasswordReset} className="grid gap-4">
-                <div className="grid gap-2">
-                    <Label htmlFor="password">New Password</Label>
-                    <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="pl-9"
-                        />
-                    </div>
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="confirm-password">Confirm New Password</Label>
-                    <div className="relative">
-                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="confirm-password"
-                            type="password"
-                            required
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="pl-9"
-                        />
-                    </div>
-                </div>
-                <Button type="submit" className="w-full">
-                    Reset Password
-                </Button>
-            </form>
-          )}
            <div className="mt-4 text-center text-sm">
             Remembered your password?{" "}
             <Link href="/login" className="underline">

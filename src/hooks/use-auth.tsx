@@ -2,53 +2,39 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-
-type User = {
-  name: string;
-  email: string;
-};
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useLoader } from './use-loader';
 
 type AuthContextType = {
   user: User | null;
-  setUser: (user: User | null) => void;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = 'student_sync_auth_user';
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, _setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const { setIsLoading } = useLoader();
 
   useEffect(() => {
-    // On initial load, try to get the user from localStorage
-    try {
-        const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
-        if (storedUser) {
-            _setUser(JSON.parse(storedUser));
-        }
-    } catch (error) {
-        console.error("Failed to parse user from localStorage", error);
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-    }
-  }, []);
+    setIsLoading(true);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setIsLoading(false);
+    });
 
-  const setUser = (user: User | null) => {
-    _setUser(user);
-    if (user) {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-    } else {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-    }
-  }
+    return () => unsubscribe();
+  }, [setIsLoading]);
+  
 
-  const logout = () => {
+  const logout = async () => {
+    await signOut(auth);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout }}>
+    <AuthContext.Provider value={{ user, logout }}>
       {children}
     </AuthContext.Provider>
   );

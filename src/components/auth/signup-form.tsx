@@ -5,6 +5,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AtSign, Lock, User } from "lucide-react";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +20,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
 
 export function SignupForm() {
   const [name, setName] = useState("");
@@ -26,17 +27,25 @@ export function SignupForm() {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const { toast } = useToast();
-  const { setUser } = useAuth();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd have signup logic here.
-    setUser({ name, email });
-     toast({
-        title: "Signup Successful!",
-        description: "Your account has been created. Redirecting to login...",
-    });
-    router.push("/login");
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: name });
+      
+      toast({
+          title: "Signup Successful!",
+          description: "Your account has been created. Redirecting to login...",
+      });
+      router.push("/login");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Signup Failed",
+        description: error.message || "An unexpected error occurred.",
+      });
+    }
   };
 
   return (
