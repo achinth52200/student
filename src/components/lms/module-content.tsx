@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Paperclip, File as FileIcon, Upload, Bot, Sparkles, Volume2, X } from 'lucide-react';
+import { Paperclip, File as FileIcon, Upload, Bot, Sparkles, Volume2, X, Eye } from 'lucide-react';
 import type { Module, ModuleFile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -69,6 +69,22 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
     setIsSummarizing(false);
   };
 
+  const handleViewFile = (file: ModuleFile) => {
+    if (file.content) {
+        const newWindow = window.open();
+        if (newWindow) {
+            newWindow.document.write(`<iframe src="${file.content}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+            newWindow.document.title = file.name;
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Popup Blocked",
+                description: "Please allow popups for this site to view the document.",
+            });
+        }
+    }
+  };
+
   return (
     <div className="p-4 bg-muted/50 rounded-lg space-y-4">
       <div className="flex justify-between items-center">
@@ -92,9 +108,14 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
                     <FileIcon className="h-4 w-4 text-primary flex-shrink-0" />
                     <span className="truncate" title={file.name}>{file.name}</span>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => onFileDelete(file.id)}>
-                      <X className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleViewFile(file)}>
+                        <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => onFileDelete(file.id)}>
+                        <X className="h-4 w-4" />
+                    </Button>
+                  </div>
               </div>
           ))}
       </div>
