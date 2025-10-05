@@ -50,7 +50,7 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
     
     const result = await summarizeModuleAction(fileDataUri);
     
-    if (result.summary && result.audioDataUri) {
+    if (result && result.summary && result.audioDataUri) {
       onSummaryUpdate(result.summary, result.audioDataUri);
       if (audioRef.current) {
         audioRef.current.src = result.audioDataUri;
@@ -63,7 +63,7 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
         toast({
             variant: "destructive",
             title: "Summarization Failed",
-            description: result.error || "Could not generate summary. Please try again."
+            description: result?.error || "Could not generate summary. Please try again."
         })
     }
     setIsSummarizing(false);

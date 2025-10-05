@@ -286,7 +286,7 @@ export async function summarizeModuleAction(
 
   if (!validatedFields.success) {
     return {
-      error: 'Invalid input for summarization.',
+      error: 'Invalid input for summarization. File data URI is missing.',
     };
   }
 
