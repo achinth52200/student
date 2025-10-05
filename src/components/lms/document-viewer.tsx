@@ -16,6 +16,9 @@ export function DocumentViewer({ fileName, fileContent, fileType }: DocumentView
     if (fileType === 'application/pdf' && fileContent) {
       try {
         const base64String = fileContent.split(',')[1];
+        if (!base64String) {
+            throw new Error("Invalid Data URI: no base64 content found.");
+        }
         const byteCharacters = atob(base64String);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -38,14 +41,14 @@ export function DocumentViewer({ fileName, fileContent, fileType }: DocumentView
     }
   }, [fileContent, fileType]);
 
-  // PDFs can be rendered directly in an iframe using a Blob URL
+  // Use <embed> for PDFs as it is often more reliable than iframes for blob URLs
   if (fileType === 'application/pdf') {
     if (objectUrl) {
         return (
             <div className="w-full h-full">
-              <iframe
+              <embed
                 src={objectUrl}
-                title={fileName}
+                type="application/pdf"
                 className="w-full h-full border-0"
               />
             </div>
@@ -54,6 +57,7 @@ export function DocumentViewer({ fileName, fileContent, fileType }: DocumentView
     return (
         <div className="flex flex-col items-center justify-center w-full h-full bg-muted text-muted-foreground p-8 text-center">
             <h3 className="text-lg font-semibold mb-2">Loading PDF...</h3>
+            <p className="text-sm">If the document doesn't load, please try again.</p>
         </div>
     );
   }
