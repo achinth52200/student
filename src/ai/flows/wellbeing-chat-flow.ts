@@ -9,7 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {generate, Message} from 'genkit';
+import {Message} from 'genkit';
 import {z} from 'zod';
 
 const WellbeingChatInputSchema = z.object({
@@ -58,7 +58,7 @@ const wellbeingChatFlow = ai.defineFlow(
       content: [{text: msg.content}],
     }));
 
-    const {output} = await generate({
+    const {output} = await ai.generate({
       model: ai.model,
       prompt: input.message,
       history,
