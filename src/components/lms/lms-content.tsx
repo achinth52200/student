@@ -141,27 +141,6 @@ export function LMSContent() {
     });
   };
 
-  const handleSummaryUpdate = (subjectId: string, moduleId: string, summary: string, audioDataUri: string) => {
-     setSubjects(prev => {
-      const updated = prev.map(s => {
-        if (s.id === subjectId) {
-          return {
-            ...s,
-            modules: s.modules.map(m => {
-              if (m.id === moduleId) {
-                return { ...m, summary, audioDataUri };
-              }
-              return m;
-            })
-          };
-        }
-        return s;
-      });
-      updateStoredSubjects(updated);
-      return updated;
-    });
-  };
-
   const handleDeleteSubject = (subjectId: string) => {
     setSubjects(prev => {
       const updated = prev.filter(s => s.id !== subjectId);
@@ -174,7 +153,7 @@ export function LMSContent() {
     <Card>
       <CardHeader>
         <CardTitle>Learning Management System</CardTitle>
-        <CardDescription>Organize your subjects, upload materials, and chat with your documents.</CardDescription>
+        <CardDescription>Organize your subjects and upload course materials.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleAddSubject} className="flex items-center gap-2 mb-6 p-4 border rounded-lg">
@@ -192,7 +171,6 @@ export function LMSContent() {
           onAddModule={handleAddModule}
           onFileAdd={handleFileAdd}
           onFileDelete={handleFileDelete}
-          onSummaryUpdate={handleSummaryUpdate}
           onSubjectDelete={handleDeleteSubject}
         />
       </CardContent>

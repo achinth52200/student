@@ -1,31 +1,24 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Eye, File as FileIcon, Upload, X, Bot, Sparkles, Volume2 } from 'lucide-react';
+import { Eye, File as FileIcon, Upload, X } from 'lucide-react';
 import type { Module, ModuleFile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { DocumentViewer } from './document-viewer';
-import { DocumentChat } from './document-chat';
-import { summarizeModuleAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 
 type ModuleContentProps = {
   module: Module;
   onFileAdd: (file: File) => void;
   onFileDelete: (fileId: string) => void;
-  onSummaryUpdate: (summary: string, audioDataUri: string) => void;
 };
 
-export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate }: ModuleContentProps) {
+export function ModuleContent({ module, onFileAdd, onFileDelete }: ModuleContentProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [isSummarizing, setIsSummarizing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [viewingFile, setViewingFile] = useState<ModuleFile | null>(null);
   const { toast } = useToast();
-  const audioRef = useRef<HTMLAudioElement>(null);
-
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -45,44 +38,6 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
     // Reset file input to allow uploading the same file again
     if (event.target) event.target.value = '';
     setIsUploading(false);
-  };
-
-  const handleGenerateSummary = async () => {
-    if (!module.files[0]?.content) {
-      toast({
-        variant: 'destructive',
-        title: 'File Error',
-        description: 'Could not read the uploaded file. Please re-upload.',
-      });
-      return;
-    }
-
-    setIsSummarizing(true);
-    try {
-      const fileDataUri = module.files[0].content;
-      const result = await summarizeModuleAction(fileDataUri);
-      
-      if (result.summary && result.audioDataUri) {
-        onSummaryUpdate(result.summary, result.audioDataUri);
-        if (audioRef.current) {
-          audioRef.current.src = result.audioDataUri;
-        }
-        toast({
-            title: 'Summary Generated',
-            description: 'AI summary and audio have been created.',
-        })
-      } else {
-        throw new Error(result.error || 'Unknown error during summarization.');
-      }
-    } catch (e: any) {
-      console.error("Summarization failed", e);
-      toast({
-        variant: 'destructive',
-        title: 'Summarization Failed',
-        description: e.message || 'Could not generate AI summary.',
-      });
-    }
-    setIsSummarizing(false);
   };
 
   const handleViewFile = (file: ModuleFile) => {
@@ -131,72 +86,27 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
           )}
         </div>
 
-        {uploadedFile && (
-           <div className="flex items-center justify-between p-2 bg-background rounded-md text-sm">
+        {uploadedFile ? (
+           <div className="flex items-center justify-between p-3 bg-background rounded-md text-sm border">
                 <div className="flex items-center gap-2 overflow-hidden">
-                    <FileIcon className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="truncate" title={uploadedFile.name}>{uploadedFile.name}</span>
+                    <FileIcon className="h-5 w-5 text-primary flex-shrink-0" />
+                    <span className="truncate font-medium" title={uploadedFile.name}>{uploadedFile.name}</span>
                 </div>
                 <div className="flex items-center">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleViewFile(uploadedFile)}>
-                        <Eye className="h-4 w-4" />
+                    <Button variant="outline" size="sm" className="h-8" onClick={() => handleViewFile(uploadedFile)}>
+                        <Eye className="mr-2 h-4 w-4" /> View
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => onFileDelete(uploadedFile.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onFileDelete(uploadedFile.id)}>
                         <X className="h-4 w-4" />
                     </Button>
                 </div>
             </div>
-        )}
-        
-        {uploadedFile ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[500px]">
-              <div className="h-full">
-                <DocumentChat file={uploadedFile} />
-              </div>
-              <div className="h-full">
-                 <Card className="flex flex-col h-full">
-                   <CardHeader>
-                        <CardTitle className="text-base flex items-center gap-2">
-                           <Bot /> AI Summary & Audio
-                        </CardTitle>
-                        <CardDescription className="text-xs">
-                           Generate a summary and audio version of your document.
-                        </CardDescription>
-                   </CardHeader>
-                    <CardContent className="flex-grow flex flex-col items-center justify-center text-center space-y-4">
-                        {isSummarizing ? (
-                           <>
-                             <Sparkles className="h-8 w-8 animate-spin text-primary" />
-                             <p className="text-sm text-muted-foreground">Generating, please wait...</p>
-                           </>
-                        ) : module.summary ? (
-                             <div className="w-full h-full text-left space-y-4 overflow-y-auto">
-                                <p className="text-sm whitespace-pre-wrap">{module.summary}</p>
-                                {module.audioDataUri && (
-                                     <div className="flex items-center gap-2">
-                                        <Volume2 className="h-5 w-5 text-muted-foreground" />
-                                        <audio ref={audioRef} src={module.audioDataUri} controls className="w-full h-10" />
-                                    </div>
-                                )}
-                             </div>
-                        ) : (
-                             <>
-                                <p className="text-sm text-muted-foreground">Click below to generate an AI summary of the document.</p>
-                                <Button onClick={handleGenerateSummary} disabled={isSummarizing}>
-                                  <Sparkles className="mr-2 h-4 w-4"/> Generate
-                                </Button>
-                             </>
-                        )}
-                    </CardContent>
-                </Card>
-              </div>
-            </div>
         ) : (
-            <div className="text-center text-sm text-muted-foreground py-10">
-                <p>Upload a document to start.</p>
+            <div className="text-center text-sm text-muted-foreground py-10 border-2 border-dashed rounded-lg">
+                <p>Upload a document to get started.</p>
+                <p>(PDF, DOCX, PPTX supported)</p>
             </div>
         )}
-
       </div>
       
       <Dialog open={!!viewingFile} onOpenChange={(isOpen) => !isOpen && handleCloseViewer()}>

@@ -29,7 +29,6 @@ type SubjectAccordionProps = {
   onAddModule: (subjectId: string, moduleName: string) => void;
   onFileAdd: (subjectId: string, moduleId: string, file: File) => void;
   onFileDelete: (subjectId: string, moduleId: string, fileId: string) => void;
-  onSummaryUpdate: (subjectId: string, moduleId: string, summary: string, audioDataUri: string) => void;
   onSubjectDelete: (subjectId: string) => void;
 };
 
@@ -38,7 +37,6 @@ export function SubjectAccordion({
     onAddModule,
     onFileAdd,
     onFileDelete,
-    onSummaryUpdate,
     onSubjectDelete 
 }: SubjectAccordionProps) {
   const [newModuleName, setNewModuleName] = useState<Record<string, string>>({});
@@ -98,7 +96,6 @@ export function SubjectAccordion({
                         module={module}
                         onFileAdd={(file) => onFileAdd(subject.id, module.id, file)}
                         onFileDelete={(fileId) => onFileDelete(subject.id, module.id, fileId)}
-                        onSummaryUpdate={(summary, audio) => onSummaryUpdate(subject.id, module.id, summary, audio)}
                     />
                 ))}
             </div>
