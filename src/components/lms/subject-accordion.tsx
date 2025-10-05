@@ -1,8 +1,7 @@
-
 "use client";
 
 import React, { useState } from 'react';
-import type { Subject, Module, ModuleFile } from '@/lib/types';
+import type { Subject } from '@/lib/types';
 import {
   Accordion,
   AccordionContent,
@@ -24,76 +23,33 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { fileToDataUri } from '@/lib/file-utils';
 
 type SubjectAccordionProps = {
   subjects: Subject[];
-  onSubjectUpdate: (subject: Subject) => void;
+  onAddModule: (subjectId: string, moduleName: string) => void;
+  onFileAdd: (subjectId: string, moduleId: string, file: File) => void;
+  onFileDelete: (subjectId: string, moduleId: string, fileId: string) => void;
+  onSummaryUpdate: (subjectId: string, moduleId: string, summary: string, audioDataUri: string) => void;
   onSubjectDelete: (subjectId: string) => void;
 };
 
-export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete }: SubjectAccordionProps) {
+export function SubjectAccordion({ 
+    subjects, 
+    onAddModule,
+    onFileAdd,
+    onFileDelete,
+    onSummaryUpdate,
+    onSubjectDelete 
+}: SubjectAccordionProps) {
   const [newModuleName, setNewModuleName] = useState<Record<string, string>>({});
 
   const handleAddModule = (e: React.FormEvent, subjectId: string) => {
     e.preventDefault();
     const moduleName = newModuleName[subjectId]?.trim();
     if (!moduleName) return;
-
-    const subject = subjects.find(s => s.id === subjectId);
-    if (!subject) return;
-
-    const newModule: Module = {
-      id: `mod-${subjectId}-${Date.now()}`,
-      name: moduleName,
-      files: [],
-    };
-
-    const updatedSubject = {
-      ...subject,
-      modules: [...subject.modules, newModule],
-    };
-    onSubjectUpdate(updatedSubject);
-
+    onAddModule(subjectId, moduleName);
     setNewModuleName(prev => ({ ...prev, [subjectId]: '' }));
   };
-
-  const handleUpdateModule = (subjectId: string, updatedModule: Module) => {
-    const subject = subjects.find(s => s.id === subjectId);
-    if (!subject) return;
-
-    const updatedSubject = {
-        ...subject,
-        modules: subject.modules.map(m => m.id === updatedModule.id ? updatedModule : m),
-    };
-    onSubjectUpdate(updatedSubject);
-  }
-
-  const handleFileAdd = async (subjectId: string, moduleId: string, file: File) => {
-    const module = subjects.find(s => s.id === subjectId)?.modules.find(m => m.id === moduleId);
-    if (!module) return;
-    
-    const content = await fileToDataUri(file);
-
-    const newFile: ModuleFile = { 
-        id: `file-${Date.now()}`,
-        name: file.name,
-        type: file.type,
-        content: content,
-    };
-
-    // Replace existing file, as we only allow one per module
-    const updatedModule = { ...module, files: [newFile] };
-    handleUpdateModule(subjectId, updatedModule);
-  }
-
-  const handleFileDelete = (subjectId: string, moduleId: string, fileId: string) => {
-     const module = subjects.find(s => s.id === subjectId)?.modules.find(m => m.id === moduleId);
-     if (!module) return;
-
-     const updatedModule = { ...module, files: module.files.filter(f => f.id !== fileId) };
-     handleUpdateModule(subjectId, updatedModule);
-  }
 
   return (
     <Accordion type="multiple" className="w-full space-y-2">
@@ -140,8 +96,9 @@ export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete }:
                     <ModuleContent
                         key={module.id}
                         module={module}
-                        onFileAdd={(file) => handleFileAdd(subject.id, module.id, file)}
-                        onFileDelete={(fileId) => handleFileDelete(subject.id, module.id, fileId)}
+                        onFileAdd={(file) => onFileAdd(subject.id, module.id, file)}
+                        onFileDelete={(fileId) => onFileDelete(subject.id, module.id, fileId)}
+                        onSummaryUpdate={(summary, audio) => onSummaryUpdate(subject.id, module.id, summary, audio)}
                     />
                 ))}
             </div>

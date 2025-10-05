@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import type { Subject } from '@/lib/types';
+import type { Subject, Module } from '@/lib/types';
 import { SubjectAccordion } from './subject-accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -83,10 +82,81 @@ export function LMSContent() {
 
     setNewSubjectName('');
   };
+  
+  const handleAddModule = (subjectId: string, moduleName: string) => {
+     setSubjects(prev => {
+        const updated = prev.map(s => {
+            if (s.id === subjectId) {
+                const newModule: Module = { id: `mod-${Date.now()}`, name: moduleName, files: [] };
+                return { ...s, modules: [...s.modules, newModule] };
+            }
+            return s;
+        });
+        updateStoredSubjects(updated);
+        return updated;
+    });
+  }
 
-  const updateSubject = (updatedSubject: Subject) => {
+  const handleFileAdd = async (subjectId: string, moduleId: string, file: File) => {
+    const content = await fileToDataUri(file);
     setSubjects(prev => {
-      const updated = prev.map(s => s.id === updatedSubject.id ? updatedSubject : s);
+      const updated = prev.map(s => {
+        if (s.id === subjectId) {
+          return {
+            ...s,
+            modules: s.modules.map(m => {
+              if (m.id === moduleId) {
+                const newFile = { id: `file-${Date.now()}`, name: file.name, type: file.type, content };
+                return { ...m, files: [newFile] }; // Replace files array with new file
+              }
+              return m;
+            })
+          };
+        }
+        return s;
+      });
+      updateStoredSubjects(updated);
+      return updated;
+    });
+  };
+
+  const handleFileDelete = (subjectId: string, moduleId: string, fileId: string) => {
+    setSubjects(prev => {
+      const updated = prev.map(s => {
+        if (s.id === subjectId) {
+          return {
+            ...s,
+            modules: s.modules.map(m => {
+              if (m.id === moduleId) {
+                return { ...m, files: m.files.filter(f => f.id !== fileId) };
+              }
+              return m;
+            })
+          };
+        }
+        return s;
+      });
+      updateStoredSubjects(updated);
+      return updated;
+    });
+  };
+
+  const handleSummaryUpdate = (subjectId: string, moduleId: string, summary: string, audioDataUri: string) => {
+     setSubjects(prev => {
+      const updated = prev.map(s => {
+        if (s.id === subjectId) {
+          return {
+            ...s,
+            modules: s.modules.map(m => {
+              if (m.id === moduleId) {
+                return { ...m, summary, audioDataUri };
+              }
+              return m;
+            })
+          };
+        }
+        return s;
+      });
       updateStoredSubjects(updated);
       return updated;
     });
@@ -119,7 +189,10 @@ export function LMSContent() {
         </form>
         <SubjectAccordion 
           subjects={subjects} 
-          onSubjectUpdate={updateSubject} 
+          onAddModule={handleAddModule}
+          onFileAdd={handleFileAdd}
+          onFileDelete={handleFileDelete}
+          onSummaryUpdate={handleSummaryUpdate}
           onSubjectDelete={handleDeleteSubject}
         />
       </CardContent>

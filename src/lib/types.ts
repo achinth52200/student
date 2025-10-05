@@ -1,4 +1,3 @@
-
 export type Transaction = {
   id: string;
   description: string;
@@ -36,6 +35,8 @@ export type Module = {
   id: string;
   name: string;
   files: ModuleFile[];
+  summary?: string;
+  audioDataUri?: string;
 };
 
 export type Subject = {
