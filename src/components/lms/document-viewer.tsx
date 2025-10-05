@@ -23,28 +23,11 @@ export function DocumentViewer({ fileName, fileContent, fileType }: DocumentView
     );
   }
 
-  // For Office documents, use the Microsoft Office Online viewer.
-  // This requires the data URI to be properly encoded.
-  const isOfficeDoc = fileType.includes('officedocument');
-  if (isOfficeDoc) {
-    const viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileContent)}`;
-    return (
-       <div className="w-full h-full">
-        <iframe
-          src={viewerUrl}
-          title={fileName}
-          className="w-full h-full border-0"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-        />
-      </div>
-    )
-  }
-
-  // Fallback for unsupported types - show a message
+  // Fallback for other types - offer a download link
   return (
     <div className="flex flex-col items-center justify-center w-full h-full bg-muted text-muted-foreground p-8 text-center">
         <h3 className="text-lg font-semibold mb-2">In-app preview is not available for this file type.</h3>
-        <p className="text-sm">You can still download the file to view it on your device.</p>
+        <p className="text-sm">You can download the file to view it on your device.</p>
         <a 
             href={fileContent} 
             download={fileName}
