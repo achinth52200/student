@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { summarizeModuleAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { DocumentViewer } from './document-viewer';
 
 type ModuleContentProps = {
   module: Module;
@@ -22,6 +23,7 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
+  const [viewingFile, setViewingFile] = useState<ModuleFile | null>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -70,7 +72,9 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
   };
 
   const handleViewFile = (file: ModuleFile) => {
-    if (file.content) {
+    if (file.type === 'application/pdf') {
+      setViewingFile(file);
+    } else if (file.content) {
         const newWindow = window.open();
         if (newWindow) {
             newWindow.document.write(`<iframe src="${file.content}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
@@ -86,82 +90,92 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
   };
 
   return (
-    <div className="p-4 bg-muted/50 rounded-lg space-y-4">
-      <div className="flex justify-between items-center">
-        <h4 className="font-semibold text-lg">{module.name}</h4>
-        <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            onChange={handleFileChange}
-            accept=".pdf,.doc,.docx,.ppt,.pptx"
-        />
-        <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading || module.files.length > 0}>
-            <Upload className="mr-2 h-4 w-4" /> {isUploading ? 'Uploading...' : 'Upload File'}
-        </Button>
-      </div>
+    <>
+      <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+        <div className="flex justify-between items-center">
+          <h4 className="font-semibold text-lg">{module.name}</h4>
+          <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileChange}
+              accept=".pdf,.doc,.docx,.ppt,.pptx"
+          />
+          <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading || module.files.length > 0}>
+              <Upload className="mr-2 h-4 w-4" /> {isUploading ? 'Uploading...' : 'Upload File'}
+          </Button>
+        </div>
 
-      <div className="space-y-2">
-          {module.files.map(file => (
-              <div key={file.id} className="flex items-center justify-between p-2 bg-background rounded-md text-sm">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <FileIcon className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="truncate" title={file.name}>{file.name}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleViewFile(file)}>
-                        <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => onFileDelete(file.id)}>
-                        <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-              </div>
-          ))}
-      </div>
-
-      <Card>
-        <CardHeader>
-            <div className="flex justify-between items-center">
-                <CardTitle className="text-base flex items-center gap-2">
-                    <Bot className="h-5 w-5" /> AI Summary & Audio
-                </CardTitle>
-                 <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    onClick={handleGenerateSummary}
-                    disabled={isSummarizing || module.files.length === 0}
-                >
-                    {isSummarizing ? (
-                        <>
-                            <Sparkles className="mr-2 h-4 w-4 animate-spin"/> Generating...
-                        </>
-                    ) : 'Generate'}
-                </Button>
-            </div>
-        </CardHeader>
-        <CardContent>
-            {isSummarizing && !module.summary && <p className="text-sm text-muted-foreground">Generating summary...</p>}
-            {module.summary ? (
-                <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{module.summary}</p>
-                    {module.audioDataUri && (
-                         <div className="mt-4 flex items-center gap-2">
-                            <Volume2 className="h-5 w-5 text-muted-foreground" />
-                            <audio ref={audioRef} controls src={module.audioDataUri} className="w-full h-10">
-                                Your browser does not support the audio element.
-                            </audio>
-                        </div>
-                    )}
+        <div className="space-y-2">
+            {module.files.map(file => (
+                <div key={file.id} className="flex items-center justify-between p-2 bg-background rounded-md text-sm">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <FileIcon className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="truncate" title={file.name}>{file.name}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleViewFile(file)}>
+                          <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => onFileDelete(file.id)}>
+                          <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                 </div>
-            ) : (
-                <p className="text-sm text-muted-foreground">
-                    {module.files.length > 0 ? 'Click "Generate" to create a summary and audio from your uploaded materials.' : 'Upload a file to generate a summary.'}
-                </p>
-            )}
-        </CardContent>
-      </Card>
+            ))}
+        </div>
 
-    </div>
+        <Card>
+          <CardHeader>
+              <div className="flex justify-between items-center">
+                  <CardTitle className="text-base flex items-center gap-2">
+                      <Bot className="h-5 w-5" /> AI Summary & Audio
+                  </CardTitle>
+                  <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={handleGenerateSummary}
+                      disabled={isSummarizing || module.files.length === 0}
+                  >
+                      {isSummarizing ? (
+                          <>
+                              <Sparkles className="mr-2 h-4 w-4 animate-spin"/> Generating...
+                          </>
+                      ) : 'Generate'}
+                  </Button>
+              </div>
+          </CardHeader>
+          <CardContent>
+              {isSummarizing && !module.summary && <p className="text-sm text-muted-foreground">Generating summary...</p>}
+              {module.summary ? (
+                  <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{module.summary}</p>
+                      {module.audioDataUri && (
+                          <div className="mt-4 flex items-center gap-2">
+                              <Volume2 className="h-5 w-5 text-muted-foreground" />
+                              <audio ref={audioRef} controls src={module.audioDataUri} className="w-full h-10">
+                                  Your browser does not support the audio element.
+                              </audio>
+                          </div>
+                      )}
+                  </div>
+              ) : (
+                  <p className="text-sm text-muted-foreground">
+                      {module.files.length > 0 ? 'Click "Generate" to create a summary and audio from your uploaded materials.' : 'Upload a file to generate a summary.'}
+                  </p>
+              )}
+          </CardContent>
+        </Card>
+
+      </div>
+      {viewingFile && (
+        <DocumentViewer
+          isOpen={!!viewingFile}
+          onClose={() => setViewingFile(null)}
+          fileName={viewingFile.name}
+          fileContent={viewingFile.content}
+        />
+      )}
+    </>
   );
 }
