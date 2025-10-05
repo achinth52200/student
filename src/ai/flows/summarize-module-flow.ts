@@ -32,11 +32,11 @@ const prompt = ai.definePrompt({
   name: 'summarizeModulePrompt',
   input: { schema: z.object({ fileDataUri: z.string() }) },
   output: { schema: z.object({ summary: z.string() }) },
-  prompt: `You are an expert academic assistant. Your task is to create a concise, easy-to-understand summary of the following educational material from the provided file.
+  prompt: `You are an expert academic assistant. Your task is to create a comprehensive and detailed summary of the following educational material from the provided file.
 
-Focus on the key concepts, main arguments, and important definitions. The summary should be clear and well-structured, ideally using bullet points to highlight the most critical information.
+Focus on the key concepts, main arguments, and important definitions. The summary should be clear and well-structured, using bullet points to highlight the most critical information.
 
-Analyze the document below and generate a summary.
+Analyze the document below and generate a detailed summary.
 
 Document: {{media url=fileDataUri}}
 `,
