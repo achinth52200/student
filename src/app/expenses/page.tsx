@@ -5,10 +5,8 @@ import * as React from "react";
 import dynamic from 'next/dynamic';
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
-import { BudgetChart } from "@/components/dashboard/budget-chart";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { Transaction } from "@/lib/types";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ReceiptUploader } from "@/components/dashboard/receipt-uploader";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
 import { useAuth } from "@/hooks/use-auth";
@@ -96,26 +94,11 @@ export default function ExpensesPage() {
                <div className="flex justify-end mb-4">
                   <ReceiptUploader onTransactionsExtracted={addTransactions} />
               </div>
-              <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-                <div className="grid grid-cols-1 gap-6 lg:col-span-2">
-                  <ExpenseTracker 
-                      transactions={transactions} 
-                      onAddTransaction={addTransaction} 
-                      onDeleteTransaction={deleteTransaction}
-                  />
-                </div>
-                <div className="grid grid-cols-1 gap-6">
-                  <Card className="flex flex-col">
-                      <CardHeader>
-                          <CardTitle>Budget Overview</CardTitle>
-                          <CardDescription>A visual breakdown of your finances.</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                         <BudgetChart transactions={transactions} />
-                      </CardContent>
-                  </Card>
-                </div>
-              </div>
+              <ExpenseTracker 
+                  transactions={transactions} 
+                  onAddTransaction={addTransaction} 
+                  onDeleteTransaction={deleteTransaction}
+              />
             </main>
           </SidebarInset>
         </div>
