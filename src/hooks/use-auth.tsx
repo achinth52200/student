@@ -66,15 +66,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login(email, name);
   }, [login]);
 
-  const logout = useCallback(() => {
+  const logout = () => {
     setIsLoading(true);
     localStorage.removeItem(GUEST_USER_KEY);
     setUser(null);
+    // Directly push to the login page
+    router.push('/login');
+    // A small delay to allow state to update before turning loader off
     setTimeout(() => {
         setIsLoading(false);
-        router.push('/login');
-    }, 500);
-  }, [setIsLoading, router]);
+    }, 300);
+  };
 
   return (
     <AuthContext.Provider value={{ user: user ?? null, login, logout, signup }}>
