@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import type { Subject } from '@/lib/types';
+import type { Subject, Module } from '@/lib/types';
 import { SubjectAccordion } from './subject-accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+// In-memory cache for file objects. This is not persisted.
+const fileCache = new Map<string, File>();
 
 const initialSubjects: Subject[] = [
   {
@@ -48,14 +51,30 @@ export function LMSContent() {
       localStorage.setItem(storageKey, JSON.stringify(initialSubjects));
       setSubjects(initialSubjects);
     }
+    // Note: We don't load file objects from localStorage here as they can't be stored.
+    // The user will need to re-upload files if they refresh the page.
+    // This is a limitation of client-side storage without a proper backend.
   }, [storageKey]);
 
   const updateStoredSubjects = (newSubjects: Subject[]) => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(newSubjects));
+      // Store only the metadata, not the file content itself.
+      const subjectsForStorage = newSubjects.map(subject => ({
+        ...subject,
+        modules: subject.modules.map(module => ({
+          ...module,
+          files: module.files.map(file => ({
+            id: file.id,
+            name: file.name,
+            type: file.type,
+            // Remove content before storing
+            content: undefined 
+          }))
+        }))
+      }));
+      localStorage.setItem(storageKey, JSON.stringify(subjectsForStorage));
     } catch (error) {
-      console.error("Could not save subjects to localStorage. Data might be too large.", error);
-      // Maybe show a toast to the user
+      console.error("Could not save subjects to localStorage.", error);
     }
   };
 
@@ -88,6 +107,14 @@ export function LMSContent() {
 
   const handleDeleteSubject = (subjectId: string) => {
     setSubjects(prev => {
+      const subjectToDelete = prev.find(s => s.id === subjectId);
+      if (subjectToDelete) {
+        subjectToDelete.modules.forEach(module => {
+          module.files.forEach(file => {
+            fileCache.delete(file.id);
+          });
+        });
+      }
       const updated = prev.filter(s => s.id !== subjectId);
       updateStoredSubjects(updated);
       return updated;
@@ -115,6 +142,7 @@ export function LMSContent() {
           subjects={subjects} 
           onSubjectUpdate={updateSubject} 
           onSubjectDelete={handleDeleteSubject}
+          fileCache={fileCache}
         />
       </CardContent>
     </Card>

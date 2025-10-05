@@ -28,8 +28,8 @@ export type ScheduleItem = {
 export type ModuleFile = {
   id: string;
   name: string;
-  type: string; // e.g., 'pdf', 'docx'
-  content: string; // Base64 encoded data URI
+  type: string; // e.g., 'application/pdf'
+  content: string; // This will be a data URI for AI processing, but not for storage/viewing.
 };
 
 export type Module = {

@@ -16,15 +16,18 @@ type ModuleContentProps = {
   onFileAdd: (file: File) => void;
   onFileDelete: (fileId: string) => void;
   onSummaryUpdate: (summary: string, audioDataUri: string) => void;
+  fileCache: Map<string, File>;
+  fileToDataUri: (file: File) => Promise<string>;
 };
 
-export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate }: ModuleContentProps) {
+export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate, fileCache, fileToDataUri }: ModuleContentProps) {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
   const [viewingFile, setViewingFile] = useState<ModuleFile | null>(null);
+  const [viewingFileUrl, setViewingFileUrl] = useState<string | null>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -38,55 +41,70 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
   };
 
   const handleGenerateSummary = async () => {
-    if (module.files.length === 0 || !module.files[0].content) {
+    const fileId = module.files[0]?.id;
+    const file = fileId ? fileCache.get(fileId) : undefined;
+    
+    if (!file) {
         toast({
             variant: "destructive",
-            title: "No File Content",
-            description: "Please upload a file first or the file content is missing.",
+            title: "No File Available",
+            description: "Please upload a file first.",
         });
         return;
     }
     
     setIsSummarizing(true);
     
-    const fileDataUri = module.files[0].content;
-    
-    const result = await summarizeModuleAction(fileDataUri);
-    
-    if (result && result.summary && result.audioDataUri) {
-      onSummaryUpdate(result.summary, result.audioDataUri);
-      if (audioRef.current) {
-        audioRef.current.src = result.audioDataUri;
-      }
-      toast({
-          title: "Success!",
-          description: "Summary and audio have been generated."
-      })
-    } else {
+    try {
+        const fileDataUri = await fileToDataUri(file);
+        const result = await summarizeModuleAction(fileDataUri);
+        
+        if (result && result.summary && result.audioDataUri) {
+          onSummaryUpdate(result.summary, result.audioDataUri);
+          if (audioRef.current) {
+            audioRef.current.src = result.audioDataUri;
+          }
+          toast({
+              title: "Success!",
+              description: "Summary and audio have been generated."
+          })
+        } else {
+            throw new Error(result?.error || "Could not generate summary.");
+        }
+    } catch (error: any) {
         toast({
             variant: "destructive",
             title: "Summarization Failed",
-            description: result?.error || "Could not generate summary. Please try again."
+            description: error.message || "Please try again."
         })
+    } finally {
+        setIsSummarizing(false);
     }
-    setIsSummarizing(false);
   };
 
-  const handleViewFile = (file: ModuleFile) => {
-    if (file.type === 'application/pdf') {
-      setViewingFile(file);
-    } else if (file.content) {
-        // Open data URI directly in a new tab for non-PDF files
-        const newWindow = window.open(file.content);
-        if (!newWindow) {
-            toast({
-                variant: "destructive",
-                title: "Popup Blocked",
-                description: "Please allow popups for this site to view the document.",
-            });
-        }
+  const handleViewFile = (fileInfo: ModuleFile) => {
+    const fileObject = fileCache.get(fileInfo.id);
+    if (!fileObject) {
+      toast({
+        variant: "destructive",
+        title: "File not found",
+        description: "Please upload the file again to view it.",
+      });
+      return;
     }
+
+    const objectUrl = URL.createObjectURL(fileObject);
+    setViewingFileUrl(objectUrl);
+    setViewingFile(fileInfo);
   };
+
+  const handleCloseViewer = () => {
+    if (viewingFileUrl) {
+        URL.revokeObjectURL(viewingFileUrl);
+    }
+    setViewingFile(null);
+    setViewingFileUrl(null);
+  }
 
   return (
     <>
@@ -165,26 +183,29 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
               )}
           </CardContent>
         </Card>
-
       </div>
       
-      <Dialog open={!!viewingFile} onOpenChange={(isOpen) => !isOpen && setViewingFile(null)}>
+      <Dialog open={!!viewingFile} onOpenChange={(isOpen) => !isOpen && handleCloseViewer()}>
         <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
           <DialogHeader className="p-4 border-b flex-row items-center justify-between">
             <DialogTitle>{viewingFile?.name}</DialogTitle>
             <DialogClose asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" onClick={handleCloseViewer}>
                   <X className="h-4 w-4" />
                 </Button>
             </DialogClose>
           </DialogHeader>
-          {viewingFile && (
+          {viewingFileUrl && viewingFile?.type === 'application/pdf' ? (
             <div className="flex-1 p-0">
                <DocumentViewer
                 fileName={viewingFile.name}
-                fileContent={viewingFile.content}
+                fileContent={viewingFileUrl}
               />
             </div>
+          ) : (
+             <div className="flex-1 p-4 text-center text-muted-foreground">
+                <p>This file type cannot be previewed in the app. It will be opened in a new tab.</p>
+             </div>
           )}
         </DialogContent>
       </Dialog>
