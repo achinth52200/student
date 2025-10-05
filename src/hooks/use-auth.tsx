@@ -1,34 +1,79 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { useLoader } from './use-loader';
+import { useRouter } from 'next/navigation';
+
+// Simplified user type for simulation
+type User = {
+  uid: string;
+  displayName: string | null;
+  email: string | null;
+};
 
 type AuthContextType = {
   user: User | null;
+  login: (email: string, name?: string) => void;
+  logout: () => void;
+  signup: (email: string, name: string) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const GUEST_USER_KEY = 'guest_user';
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const { setIsLoading } = useLoader();
+  const router = useRouter();
 
   useEffect(() => {
     setIsLoading(true);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setIsLoading(false);
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
+    try {
+      const storedUser = localStorage.getItem(GUEST_USER_KEY);
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Failed to parse user from localStorage", error);
+      localStorage.removeItem(GUEST_USER_KEY);
+    }
+    setIsLoading(false);
   }, [setIsLoading]);
+
+  const login = useCallback((email: string, name?: string) => {
+    setIsLoading(true);
+    const mockUser: User = {
+      uid: 'mock-user-uid',
+      email: email,
+      displayName: name || email.split('@')[0],
+    };
+    localStorage.setItem(GUEST_USER_KEY, JSON.stringify(mockUser));
+    setUser(mockUser);
+    setTimeout(() => {
+        setIsLoading(false);
+        router.push('/dashboard');
+    }, 500);
+  }, [setIsLoading, router]);
   
+  const signup = useCallback((email: string, name: string) => {
+    // In simulation, signup is the same as login
+    login(email, name);
+  }, [login]);
+
+  const logout = useCallback(() => {
+    setIsLoading(true);
+    localStorage.removeItem(GUEST_USER_KEY);
+    setUser(null);
+    setTimeout(() => {
+        setIsLoading(false);
+        router.push('/login');
+    }, 500);
+  }, [setIsLoading, router]);
+
   return (
-    <AuthContext.Provider value={{ user }}>
+    <AuthContext.Provider value={{ user, login, logout, signup }}>
       {children}
     </AuthContext.Provider>
   );

@@ -18,8 +18,6 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "../icons";
 import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
-import { auth } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useAuth } from "@/hooks/use-auth";
 
 export function SignupForm() {
@@ -29,46 +27,33 @@ export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, signup } = useAuth();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: name });
-      
-      toast({
-        title: "Signup Successful!",
-        description: "Your account has been created. Redirecting to dashboard...",
-      });
-      router.push("/dashboard");
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Signup Failed",
-        description: error.message,
-      });
-    }
-    setIsLoading(false);
+    toast({
+      title: "Signup Successful!",
+      description: "Your account has been created. Redirecting to dashboard...",
+    });
+    // Simulate network delay
+    setTimeout(() => {
+        signup(email, name);
+        setIsLoading(false);
+    }, 1000);
   };
   
   const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-       toast({
-        title: "Sign-up Successful!",
-        description: "Your account has been created. Redirecting to dashboard...",
-      });
-      router.push("/dashboard");
-    } catch (error: any) {
-       toast({
-        variant: "destructive",
-        title: "Google Sign-Up Failed",
-        description: error.message,
-      });
-    }
+    setIsLoading(true);
+    toast({
+      title: "Sign-up Successful!",
+      description: "Your account has been created. Redirecting to dashboard...",
+    });
+    // Simulate network delay
+    setTimeout(() => {
+        signup("guest@example.com", "Google User");
+        setIsLoading(false);
+    }, 1000);
   };
   
   if (user) {
@@ -154,7 +139,7 @@ export function SignupForm() {
               </span>
             </div>
           </div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
             <GoogleIcon className="mr-2 h-4 w-4" />
             Sign up with Google
           </Button>

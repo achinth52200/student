@@ -19,8 +19,6 @@ import { Logo } from "../icons";
 import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -28,44 +26,33 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({
-        title: "Login Successful",
-        description: "Redirecting to your dashboard...",
-      });
-      router.push("/dashboard");
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: error.message,
-      });
-    }
-    setIsLoading(false);
+    toast({
+      title: "Login Successful",
+      description: "Redirecting to your dashboard...",
+    });
+    // Simulate network delay
+    setTimeout(() => {
+      login(email);
+      setIsLoading(false);
+    }, 1000);
   };
 
   const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      toast({
-        title: "Login Successful",
-        description: "Redirecting to your dashboard...",
-      });
-      router.push("/dashboard");
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Google Sign-In Failed",
-        description: error.message,
-      });
-    }
+    setIsLoading(true);
+    toast({
+      title: "Login Successful",
+      description: "Redirecting to your dashboard...",
+    });
+    // Simulate network delay
+    setTimeout(() => {
+        login("guest@example.com", "Google User");
+        setIsLoading(false);
+    }, 1000);
   };
   
   if (user) {
@@ -146,7 +133,7 @@ export function LoginForm() {
               </span>
             </div>
           </div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
             <GoogleIcon className="mr-2 h-4 w-4" />
             Sign in with Google
           </Button>

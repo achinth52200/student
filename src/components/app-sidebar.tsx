@@ -78,7 +78,7 @@ export function AppSidebar() {
       <SidebarFooter>
         <div className={cn("flex items-center gap-3", sidebarState === 'collapsed' && 'justify-center')}>
              <Avatar className="h-9 w-9">
-              <AvatarFallback>{user?.displayName?.charAt(0) || 'A'}</AvatarFallback>
+              <AvatarFallback>{user?.displayName?.charAt(0).toUpperCase() || 'A'}</AvatarFallback>
             </Avatar>
             <div className={cn("flex flex-col", sidebarState === 'collapsed' && 'hidden')}>
                 <span className="font-semibold text-sm">{user?.displayName}</span>
