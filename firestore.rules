@@ -1,0 +1,13 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /notifications/{notificationId} {
+      // Allow users to read, update, and delete their own notifications
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      // Allow any authenticated user to create a notification
+      allow create: if request.auth != null;
+    }
+  }
+}
