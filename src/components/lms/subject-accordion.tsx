@@ -73,24 +73,29 @@ export function SubjectAccordion({ subjects, onSubjectUpdate }: SubjectAccordion
     const module = subjects.find(s => s.id === subjectId)?.modules.find(m => m.id === moduleId);
     if (!module) return;
 
-    const fileContent = await fileToDataUri(file);
+    try {
+        const fileContent = await fileToDataUri(file);
 
-    const newFile: ModuleFile = { 
-        id: `file-${Date.now()}`,
-        name: file.name,
-        type: file.type,
-        content: fileContent
-    };
-    // Replace existing file, as we only allow one per module for now
-    const updatedModule = { ...module, files: [newFile] };
-    handleUpdateModule(subjectId, updatedModule);
+        const newFile: ModuleFile = { 
+            id: `file-${Date.now()}`,
+            name: file.name,
+            type: file.type,
+            content: fileContent
+        };
+        // Replace existing file, as we only allow one per module for now
+        const updatedModule = { ...module, files: [newFile] };
+        handleUpdateModule(subjectId, updatedModule);
+    } catch (error) {
+        console.error("Failed to read file:", error);
+    }
   }
 
   const handleFileDelete = (subjectId: string, moduleId: string, fileId: string) => {
      const module = subjects.find(s => s.id === subjectId)?.modules.find(m => m.id === moduleId);
      if (!module) return;
 
-     const updatedModule = { ...module, files: module.files.filter(f => f.id !== fileId) };
+     // Also clear summary when deleting the file
+     const updatedModule = { ...module, files: module.files.filter(f => f.id !== fileId), summary: null, audioDataUri: null };
      handleUpdateModule(subjectId, updatedModule);
   }
   

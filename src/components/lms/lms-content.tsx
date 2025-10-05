@@ -51,7 +51,12 @@ export function LMSContent() {
   }, [storageKey]);
 
   const updateStoredSubjects = (newSubjects: Subject[]) => {
-    localStorage.setItem(storageKey, JSON.stringify(newSubjects));
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(newSubjects));
+    } catch (error) {
+      console.error("Could not save subjects to localStorage. Data might be too large.", error);
+      // Maybe show a toast to the user
+    }
   };
 
   const handleAddSubject = (e: React.FormEvent) => {

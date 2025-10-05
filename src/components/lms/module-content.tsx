@@ -7,6 +7,7 @@ import type { Module, ModuleFile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { summarizeModuleAction } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 type ModuleContentProps = {
   module: Module;
@@ -15,21 +16,12 @@ type ModuleContentProps = {
   onSummaryUpdate: (summary: string, audioDataUri: string) => void;
 };
 
-// Helper to read a file as a data URI
-const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
 export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate }: ModuleContentProps) {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const { toast } = useToast();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -37,15 +29,23 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
 
     setIsUploading(true);
     onFileAdd(file);
+    // Reset file input to allow uploading the same file again
+    event.target.value = '';
     setIsUploading(false);
   };
 
   const handleGenerateSummary = async () => {
-    if (module.files.length === 0 || !module.files[0].content) return;
+    if (module.files.length === 0 || !module.files[0].content) {
+        toast({
+            variant: "destructive",
+            title: "No File Content",
+            description: "Please upload a file first or the file content is missing.",
+        });
+        return;
+    }
     
     setIsSummarizing(true);
     
-    // The file content (as a data URI) is already stored in the module state
     const fileDataUri = module.files[0].content;
     
     const result = await summarizeModuleAction(fileDataUri);
@@ -55,6 +55,16 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
       if (audioRef.current) {
         audioRef.current.src = result.audioDataUri;
       }
+      toast({
+          title: "Success!",
+          description: "Summary and audio have been generated."
+      })
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Summarization Failed",
+            description: result.error || "Could not generate summary. Please try again."
+        })
     }
     setIsSummarizing(false);
   };
@@ -70,7 +80,7 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
             onChange={handleFileChange}
             accept=".pdf,.doc,.docx,.ppt,.pptx"
         />
-        <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+        <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading || module.files.length > 0}>
             <Upload className="mr-2 h-4 w-4" /> {isUploading ? 'Uploading...' : 'Upload File'}
         </Button>
       </div>
@@ -78,11 +88,11 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
       <div className="space-y-2">
           {module.files.map(file => (
               <div key={file.id} className="flex items-center justify-between p-2 bg-background rounded-md text-sm">
-                  <div className="flex items-center gap-2">
-                    <FileIcon className="h-4 w-4 text-primary" />
-                    <span>{file.name}</span>
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <FileIcon className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="truncate" title={file.name}>{file.name}</span>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onFileDelete(file.id)}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => onFileDelete(file.id)}>
                       <X className="h-4 w-4" />
                   </Button>
               </div>
