@@ -7,6 +7,7 @@ import { wellbeingChat } from '@/ai/flows/wellbeing-chat-flow'
 import { extractTransactionsFromImage } from '@/ai/flows/extract-transaction-from-image-flow';
 import { generatePersonalizedTips } from '@/ai/flows/generate-personalized-tips-flow';
 import { textToSpeech } from '@/ai/flows/text-to-speech-flow';
+import { summarizeModule } from '@/ai/flows/summarize-module-flow';
 import type { Transaction, Reminder, ScheduleItem } from '@/lib/types';
 
 const optimizeScheduleSchema = z.object({
@@ -263,6 +264,41 @@ export async function generatePersonalizedTipsAction(
     console.error("Error generating tips:", error);
     return {
       error: 'Failed to generate personalized tips. Please try again later.',
+    };
+  }
+}
+
+const summarizeModuleSchema = z.object({
+  textContent: z.string().min(1, 'Text content cannot be empty.'),
+});
+
+type SummarizeModuleState = {
+  summary?: string;
+  audioDataUri?: string;
+  error?: string;
+};
+
+export async function summarizeModuleAction(
+  textContent: string
+): Promise<SummarizeModuleState> {
+  const validatedFields = summarizeModuleSchema.safeParse({ textContent });
+
+  if (!validatedFields.success) {
+    return {
+      error: 'Invalid input for summarization.',
+    };
+  }
+
+  try {
+    const result = await summarizeModule({ textContent: validatedFields.data.textContent });
+    return {
+      summary: result.summary,
+      audioDataUri: result.audioDataUri,
+    };
+  } catch (error) {
+    console.error("Error summarizing module:", error);
+    return {
+      error: 'Failed to summarize the module content. Please try again later.',
     };
   }
 }
