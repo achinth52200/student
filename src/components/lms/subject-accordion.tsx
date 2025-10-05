@@ -32,16 +32,6 @@ type SubjectAccordionProps = {
   fileCache: Map<string, File>;
 };
 
-// Helper to read a file as a data URI for AI processing
-const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
 export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete, fileCache }: SubjectAccordionProps) {
   const [newModuleName, setNewModuleName] = useState<Record<string, string>>({});
 
@@ -56,8 +46,6 @@ export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete, f
     const newModule: Module = {
       id: `mod-${subjectId}-${Date.now()}`,
       name: moduleName,
-      summary: null,
-      audioDataUri: null,
       files: [],
     };
 
@@ -89,14 +77,13 @@ export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete, f
         id: `file-${Date.now()}`,
         name: file.name,
         type: file.type,
-        content: '' // content is not stored directly anymore
     };
 
     // Store the actual file object in the cache
     fileCache.set(newFile.id, file);
     
     // Replace existing file, as we only allow one per module
-    const updatedModule = { ...module, files: [newFile], summary: null, audioDataUri: null };
+    const updatedModule = { ...module, files: [newFile] };
     handleUpdateModule(subjectId, updatedModule);
   }
 
@@ -107,16 +94,8 @@ export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete, f
      // Remove from cache
      fileCache.delete(fileId);
 
-     const updatedModule = { ...module, files: module.files.filter(f => f.id !== fileId), summary: null, audioDataUri: null };
+     const updatedModule = { ...module, files: module.files.filter(f => f.id !== fileId) };
      handleUpdateModule(subjectId, updatedModule);
-  }
-  
-  const handleSummaryUpdate = (subjectId: string, moduleId: string, summary: string, audioDataUri: string) => {
-    const module = subjects.find(s => s.id === subjectId)?.modules.find(m => m.id === moduleId);
-    if (!module) return;
-    
-    const updatedModule = { ...module, summary, audioDataUri };
-    handleUpdateModule(subjectId, updatedModule);
   }
 
   return (
@@ -166,9 +145,7 @@ export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete, f
                         module={module}
                         onFileAdd={(file) => handleFileAdd(subject.id, module.id, file)}
                         onFileDelete={(fileId) => handleFileDelete(subject.id, module.id, fileId)}
-                        onSummaryUpdate={(summary, audio) => handleSummaryUpdate(subject.id, module.id, summary, audio)}
                         fileCache={fileCache}
-                        fileToDataUri={fileToDataUri}
                     />
                 ))}
             </div>

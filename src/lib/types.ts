@@ -29,14 +29,11 @@ export type ModuleFile = {
   id: string;
   name: string;
   type: string; // e.g., 'application/pdf'
-  content: string; // This will be a data URI for AI processing, but not for storage/viewing.
 };
 
 export type Module = {
   id: string;
   name: string;
-  summary: string | null;
-  audioDataUri: string | null;
   files: ModuleFile[];
 };
 

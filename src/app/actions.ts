@@ -9,6 +9,7 @@ import { extractTransactionsFromImage } from '@/ai/flows/extract-transaction-fro
 import { generatePersonalizedTips } from '@/ai/flows/generate-personalized-tips-flow';
 import { textToSpeech } from '@/ai/flows/text-to-speech-flow';
 import { summarizeModule } from '@/ai/flows/summarize-module-flow';
+import { chatWithDocument } from '@/ai/flows/chat-with-document-flow';
 import type { Transaction, Reminder, ScheduleItem } from '@/lib/types';
 
 const optimizeScheduleSchema = z.object({
@@ -292,14 +293,62 @@ export async function summarizeModuleAction(
 
   try {
     const result = await summarizeModule({ fileDataUri: validatedFields.data.fileDataUri });
+    if (!result) {
+        return { error: 'Failed to get a result from the summarization service.' };
+    }
     return {
       summary: result.summary,
       audioDataUri: result.audioDataUri,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error summarizing module:", error);
     return {
-      error: 'Failed to summarize the module content. Please try again later.',
+      error: error.message || 'Failed to summarize the module content. Please try again later.',
+    };
+  }
+}
+
+
+const chatWithDocumentSchema = z.object({
+  history: z.string(), // JSON string of message history
+  message: z.string().min(1, 'Please enter a message.'),
+  documentDataUri: z.string().min(1, 'Document content is missing.'),
+});
+
+type ChatWithDocumentState = {
+  response?: string;
+  error?: string;
+};
+
+export async function chatWithDocumentAction(
+  formData: FormData
+): Promise<ChatWithDocumentState> {
+  const validatedFields = chatWithDocumentSchema.safeParse({
+    history: formData.get('history'),
+    message: formData.get('message'),
+    documentDataUri: formData.get('documentDataUri'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      error: 'Validation failed. Please check your input.',
+    };
+  }
+
+  try {
+    const history = JSON.parse(validatedFields.data.history);
+    const result = await chatWithDocument({
+      history,
+      message: validatedFields.data.message,
+      documentDataUri: validatedFields.data.documentDataUri,
+    });
+    return {
+      response: result.response,
+    };
+  } catch (error: any) {
+    console.error("Error in chat with document action:", error);
+    return {
+      error: error.message || 'An error occurred while getting a response. Please try again.',
     };
   }
 }

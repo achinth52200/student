@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import type { Subject, Module } from '@/lib/types';
+import type { Subject } from '@/lib/types';
 import { SubjectAccordion } from './subject-accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// In-memory cache for file objects. This is not persisted.
+// In-memory cache for file objects. This is not persisted across page reloads.
 const fileCache = new Map<string, File>();
 
 const initialSubjects: Subject[] = [
@@ -24,15 +24,15 @@ const initialSubjects: Subject[] = [
     id: 'subj-1',
     name: 'Computer Science',
     modules: [
-      { id: 'mod-1-1', name: 'Introduction to Algorithms', summary: null, audioDataUri: null, files: [] },
-      { id: 'mod-1-2', name: 'Data Structures', summary: null, audioDataUri: null, files: [] },
+      { id: 'mod-1-1', name: 'Introduction to Algorithms', files: [] },
+      { id: 'mod-1-2', name: 'Data Structures', files: [] },
     ],
   },
   {
     id: 'subj-2',
     name: 'History',
     modules: [
-      { id: 'mod-2-1', name: 'The Renaissance', summary: 'A period of European history, covering the 15th and 16th centuries.', audioDataUri: null, files: [] },
+      { id: 'mod-2-1', name: 'The Renaissance', files: [] },
     ],
   },
 ];
@@ -51,28 +51,12 @@ export function LMSContent() {
       localStorage.setItem(storageKey, JSON.stringify(initialSubjects));
       setSubjects(initialSubjects);
     }
-    // Note: We don't load file objects from localStorage here as they can't be stored.
-    // The user will need to re-upload files if they refresh the page.
-    // This is a limitation of client-side storage without a proper backend.
+    // File cache is intentionally not persisted.
   }, [storageKey]);
 
   const updateStoredSubjects = (newSubjects: Subject[]) => {
     try {
-      // Store only the metadata, not the file content itself.
-      const subjectsForStorage = newSubjects.map(subject => ({
-        ...subject,
-        modules: subject.modules.map(module => ({
-          ...module,
-          files: module.files.map(file => ({
-            id: file.id,
-            name: file.name,
-            type: file.type,
-            // Remove content before storing
-            content: undefined 
-          }))
-        }))
-      }));
-      localStorage.setItem(storageKey, JSON.stringify(subjectsForStorage));
+      localStorage.setItem(storageKey, JSON.stringify(newSubjects));
     } catch (error) {
       console.error("Could not save subjects to localStorage.", error);
     }
@@ -125,7 +109,7 @@ export function LMSContent() {
     <Card>
       <CardHeader>
         <CardTitle>Learning Management System</CardTitle>
-        <CardDescription>Organize your subjects, upload materials, and let AI help you study.</CardDescription>
+        <CardDescription>Organize your subjects, upload materials, and chat with your documents.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleAddSubject} className="flex items-center gap-2 mb-6 p-4 border rounded-lg">
