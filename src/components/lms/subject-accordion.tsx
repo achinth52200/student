@@ -11,12 +11,24 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { ModuleContent } from './module-content';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type SubjectAccordionProps = {
   subjects: Subject[];
   onSubjectUpdate: (subject: Subject) => void;
+  onSubjectDelete: (subjectId: string) => void;
 };
 
 // Helper to read a file as a data URI
@@ -30,7 +42,7 @@ const fileToDataUri = (file: File): Promise<string> => {
 }
 
 
-export function SubjectAccordion({ subjects, onSubjectUpdate }: SubjectAccordionProps) {
+export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete }: SubjectAccordionProps) {
   const [newModuleName, setNewModuleName] = useState<Record<string, string>>({});
 
   const handleAddModule = (e: React.FormEvent, subjectId: string) => {
@@ -110,10 +122,31 @@ export function SubjectAccordion({ subjects, onSubjectUpdate }: SubjectAccordion
   return (
     <Accordion type="multiple" className="w-full space-y-2">
       {subjects.map(subject => (
-        <AccordionItem key={subject.id} value={subject.id} className="border rounded-lg bg-card-foreground/5">
-          <AccordionTrigger className="px-4 text-lg font-medium">
-            {subject.name}
-          </AccordionTrigger>
+        <AccordionItem key={subject.id} value={subject.id} className="border rounded-lg bg-card-foreground/5 group">
+          <div className="flex items-center pr-4">
+            <AccordionTrigger className="px-4 text-lg font-medium flex-1">
+              {subject.name}
+            </AccordionTrigger>
+             <AlertDialog>
+              <AlertDialogTrigger asChild>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the subject "{subject.name}" and all of its modules.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onSubjectDelete(subject.id)}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
           <AccordionContent className="p-4 space-y-4">
              <form onSubmit={(e) => handleAddModule(e, subject.id)} className="flex items-center gap-2 px-2">
                 <Input

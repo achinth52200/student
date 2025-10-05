@@ -86,6 +86,14 @@ export function LMSContent() {
     });
   };
 
+  const handleDeleteSubject = (subjectId: string) => {
+    setSubjects(prev => {
+      const updated = prev.filter(s => s.id !== subjectId);
+      updateStoredSubjects(updated);
+      return updated;
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -103,7 +111,11 @@ export function LMSContent() {
             <PlusCircle className="h-4 w-4" />
           </Button>
         </form>
-        <SubjectAccordion subjects={subjects} onSubjectUpdate={updateSubject} />
+        <SubjectAccordion 
+          subjects={subjects} 
+          onSubjectUpdate={updateSubject} 
+          onSubjectDelete={handleDeleteSubject}
+        />
       </CardContent>
     </Card>
   );
