@@ -1,7 +1,20 @@
 
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+// Configure the worker to load PDF files.
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
+
 
 type DocumentViewerProps = {
   fileName: string;
@@ -10,55 +23,70 @@ type DocumentViewerProps = {
 };
 
 export function DocumentViewer({ fileName, fileContent, fileType }: DocumentViewerProps) {
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    if (fileType === 'application/pdf' && fileContent) {
-      try {
-        const base64String = fileContent.split(',')[1];
-        if (!base64String) {
-            throw new Error("Invalid Data URI: no base64 content found.");
-        }
-        const byteCharacters = atob(base64String);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'application/pdf' });
-        
-        const url = URL.createObjectURL(blob);
-        setObjectUrl(url);
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages);
+    setPageNumber(1);
+  }
 
-        // Clean up the object URL when the component unmounts
-        return () => {
-          URL.revokeObjectURL(url);
-        };
-      } catch (error) {
-        console.error("Error creating object URL for PDF:", error);
-        setObjectUrl(null);
-      }
-    }
-  }, [fileContent, fileType]);
+  function onDocumentLoadError(error: Error) {
+    console.error("Error loading PDF:", error);
+    toast({
+      variant: 'destructive',
+      title: 'PDF Error',
+      description: 'Failed to load the PDF file. It might be corrupted or in an unsupported format.'
+    });
+  }
 
-  // Use <embed> for PDFs as it is often more reliable than iframes for blob URLs
+  function goToPrevPage() {
+    setPageNumber(prev => Math.max(prev - 1, 1));
+  }
+
+  function goToNextPage() {
+    setPageNumber(prev => Math.min(prev + 1, numPages || 1));
+  }
+  
   if (fileType === 'application/pdf') {
-    if (objectUrl) {
-        return (
-            <div className="w-full h-full">
-              <embed
-                src={objectUrl}
-                type="application/pdf"
-                className="w-full h-full border-0"
-              />
-            </div>
-        );
-    }
-    return (
-        <div className="flex flex-col items-center justify-center w-full h-full bg-muted text-muted-foreground p-8 text-center">
-            <h3 className="text-lg font-semibold mb-2">Loading PDF...</h3>
-            <p className="text-sm">If the document doesn't load, please try again.</p>
+     return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-muted">
+        <div className="flex-grow w-full overflow-y-auto flex justify-center">
+            <Document
+                file={fileContent}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                loading={
+                    <div className="flex items-center justify-center h-full">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <p className="ml-2 text-muted-foreground">Loading PDF...</p>
+                    </div>
+                }
+                error={
+                    <div className="flex items-center justify-center h-full text-destructive p-4 text-center">
+                        <p>Failed to load PDF. The file may be invalid or unsupported.</p>
+                    </div>
+                }
+            >
+                <Page pageNumber={pageNumber} renderTextLayer={false} />
+            </Document>
         </div>
+
+        {numPages && numPages > 1 && (
+          <div className="flex-shrink-0 flex items-center justify-center gap-4 p-2 bg-background border-t w-full">
+            <Button variant="outline" size="icon" onClick={goToPrevPage} disabled={pageNumber <= 1}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              Page {pageNumber} of {numPages}
+            </p>
+            <Button variant="outline" size="icon" onClick={goToNextPage} disabled={pageNumber >= numPages}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
     );
   }
 
