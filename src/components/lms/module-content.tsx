@@ -76,11 +76,9 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
     if (file.type === 'application/pdf') {
       setViewingFile(file);
     } else if (file.content) {
-        const newWindow = window.open();
-        if (newWindow) {
-            newWindow.document.write(`<iframe src="${file.content}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
-            newWindow.document.title = file.name;
-        } else {
+        // Open data URI directly in a new tab for non-PDF files
+        const newWindow = window.open(file.content);
+        if (!newWindow) {
             toast({
                 variant: "destructive",
                 title: "Popup Blocked",
