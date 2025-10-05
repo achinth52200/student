@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const GUEST_USER_KEY = 'guest_user';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | undefined>(undefined);
   const { setIsLoading } = useLoader();
   const router = useRouter();
 
@@ -34,18 +34,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const storedUser = localStorage.getItem(GUEST_USER_KEY);
       if (storedUser) {
         setUser(JSON.parse(storedUser));
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error("Failed to parse user from localStorage", error);
       localStorage.removeItem(GUEST_USER_KEY);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, [setIsLoading]);
 
   const login = useCallback((email: string, name?: string) => {
     setIsLoading(true);
     const mockUser: User = {
-      uid: 'mock-user-uid',
+      uid: 'mock-user-uid-' + Math.random().toString(36).substring(2),
       email: email,
       displayName: name || email.split('@')[0],
     };
@@ -73,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [setIsLoading, router]);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, signup }}>
+    <AuthContext.Provider value={{ user: user ?? null, login, logout, signup }}>
       {children}
     </AuthContext.Provider>
   );

@@ -35,7 +35,7 @@ export function ForgotPasswordForm() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background relative overflow-hidden">
-      <div className="absolute inset-0 bg-[length:400%_400%] bg-gradient-to-br from-blue-500/30 via-purple-500/30 to-teal-500/30 animate-gradient" />
+      <div className="absolute inset-0 bg-background" />
       <Card className="mx-auto max-w-sm z-10 bg-card/60 backdrop-blur-lg border-white/20 shadow-xl">
         <CardHeader className="text-center">
           <div className="flex justify-center items-center gap-2 mb-4">

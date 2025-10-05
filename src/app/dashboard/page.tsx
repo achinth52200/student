@@ -12,8 +12,6 @@ import { BudgetChart } from "@/components/dashboard/budget-chart";
 import type { Transaction } from "@/lib/types";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
 import { getRecentTransactions } from "@/ai/flows/get-transactions-flow";
-import { db } from "@/lib/firebase";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "@/hooks/use-auth";
 
 const initialTransactions: Transaction[] = [
@@ -38,8 +36,6 @@ export default function DashboardPage() {
   }, [storageKey]);
   
   React.useEffect(() => {
-    if (!user) return;
-
     const interval = setInterval(async () => {
       try {
         const { transactions: newTransactions } = await getRecentTransactions();
@@ -49,16 +45,6 @@ export default function DashboardPage() {
           localStorage.setItem(storageKey, JSON.stringify(updatedTransactions));
           return updatedTransactions;
         });
-        
-        // Create notifications for new transactions
-        for (const transaction of newTransactions) {
-          await addDoc(collection(db, "notifications"), {
-            userId: user.uid,
-            title: `New ${transaction.type}: RS ${transaction.amount.toFixed(2)} for ${transaction.description}`,
-            createdAt: serverTimestamp(),
-            isRead: false,
-          });
-        }
 
       } catch (error) {
         console.error("Failed to fetch new transactions", error);
@@ -66,7 +52,7 @@ export default function DashboardPage() {
     }, 15000); // Fetch every 15 seconds
 
     return () => clearInterval(interval);
-  }, [storageKey, user]);
+  }, [storageKey]);
 
 
   return (
@@ -78,8 +64,8 @@ export default function DashboardPage() {
           <SidebarInset className="flex-1">
             <AppHeader />
             <main className="p-4 sm:p-6 lg:p-8">
-              <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div className="grid grid-cols-1 gap-6 lg:col-span-2">
+              <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 md:col-span-2">
                    <Card className="transform-gpu transition-transform duration-300 ease-in-out md:hover:scale-105 md:hover:shadow-2xl">
                       <CardHeader>
                           <CardTitle>Budget Overview</CardTitle>
