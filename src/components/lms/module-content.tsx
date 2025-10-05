@@ -10,17 +10,19 @@ import { summarizeModuleAction } from '@/app/actions';
 
 type ModuleContentProps = {
   module: Module;
-  onFileAdd: (file: Omit<ModuleFile, 'id'>) => void;
+  onFileAdd: (file: File) => void;
   onFileDelete: (fileId: string) => void;
   onSummaryUpdate: (summary: string, audioDataUri: string) => void;
 };
 
-// A mock function to simulate text extraction.
-// In a real app, this would be a complex backend process.
-const mockExtractText = async (file: File): Promise<string> => {
-    console.log(`"Extracting" text from ${file.name}`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return `This is the simulated text content from the document "${file.name}". It would normally contain the full text extracted from the PDF, DOCX, or PPT file. The AI will use this text to generate a summary. For now, this is just placeholder content to demonstrate the flow.`;
+// Helper to read a file as a data URI
+const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate }: ModuleContentProps) {
@@ -34,22 +36,19 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
     if (!file) return;
 
     setIsUploading(true);
-    // In a real app, you'd upload the file to a cloud storage.
-    // For this simulation, we just add it to the state.
-    onFileAdd({ name: file.name, type: file.name.split('.').pop() || 'file' });
+    onFileAdd(file);
     setIsUploading(false);
   };
 
   const handleGenerateSummary = async () => {
-    if (module.files.length === 0) return;
+    if (module.files.length === 0 || !module.files[0].content) return;
     
     setIsSummarizing(true);
-    // This is a simulation. In a real app, you would download the file,
-    // extract text on a server, and then call the AI.
-    const fakeFile = new File([], module.files[0].name);
-    const textContent = await mockExtractText(fakeFile);
     
-    const result = await summarizeModuleAction(textContent);
+    // The file content (as a data URI) is already stored in the module state
+    const fileDataUri = module.files[0].content;
+    
+    const result = await summarizeModuleAction(fileDataUri);
     
     if (result.summary && result.audioDataUri) {
       onSummaryUpdate(result.summary, result.audioDataUri);

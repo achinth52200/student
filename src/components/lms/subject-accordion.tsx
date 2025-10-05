@@ -19,6 +19,17 @@ type SubjectAccordionProps = {
   onSubjectUpdate: (subject: Subject) => void;
 };
 
+// Helper to read a file as a data URI
+const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+
 export function SubjectAccordion({ subjects, onSubjectUpdate }: SubjectAccordionProps) {
   const [newModuleName, setNewModuleName] = useState<Record<string, string>>({});
 
@@ -58,12 +69,20 @@ export function SubjectAccordion({ subjects, onSubjectUpdate }: SubjectAccordion
     onSubjectUpdate(updatedSubject);
   }
 
-  const handleFileAdd = (subjectId: string, moduleId: string, file: Omit<ModuleFile, 'id'>) => {
+  const handleFileAdd = async (subjectId: string, moduleId: string, file: File) => {
     const module = subjects.find(s => s.id === subjectId)?.modules.find(m => m.id === moduleId);
     if (!module) return;
 
-    const newFile: ModuleFile = { ...file, id: `file-${Date.now()}` };
-    const updatedModule = { ...module, files: [...module.files, newFile] };
+    const fileContent = await fileToDataUri(file);
+
+    const newFile: ModuleFile = { 
+        id: `file-${Date.now()}`,
+        name: file.name,
+        type: file.type,
+        content: fileContent
+    };
+    // Replace existing file, as we only allow one per module for now
+    const updatedModule = { ...module, files: [newFile] };
     handleUpdateModule(subjectId, updatedModule);
   }
 

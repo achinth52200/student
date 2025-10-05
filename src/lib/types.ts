@@ -1,3 +1,4 @@
+
 export type Transaction = {
   id: string;
   description: string;
@@ -28,6 +29,7 @@ export type ModuleFile = {
   id: string;
   name: string;
   type: string; // e.g., 'pdf', 'docx'
+  content: string; // Base64 encoded data URI
 };
 
 export type Module = {

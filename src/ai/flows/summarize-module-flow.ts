@@ -1,8 +1,9 @@
+
 'use server';
 /**
  * @fileOverview An AI-driven flow to summarize educational content from various file types.
  *
- * - summarizeModule - A function that takes text content and provides a concise summary and generates audio.
+ * - summarizeModule - A function that takes a file's data URI and provides a concise summary and generates audio.
  * - SummarizeModuleInput - The input type for the summarizeModule function.
  * - SummarizeModuleOutput - The return type for the summarizeModule function.
  */
@@ -12,7 +13,7 @@ import {z} from 'zod';
 import { textToSpeech } from './text-to-speech-flow';
 
 const SummarizeModuleInputSchema = z.object({
-  textContent: z.string().describe("The full text content extracted from a document (PDF, DOCX, etc.)."),
+  fileDataUri: z.string().describe("A data URI of the document (PDF, DOCX, etc.) to be summarized. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type SummarizeModuleInput = z.infer<typeof SummarizeModuleInputSchema>;
 
@@ -29,16 +30,15 @@ export async function summarizeModule(input: SummarizeModuleInput): Promise<Summ
 
 const prompt = ai.definePrompt({
   name: 'summarizeModulePrompt',
-  input: { schema: z.object({ textContent: z.string() }) },
+  input: { schema: z.object({ fileDataUri: z.string() }) },
   output: { schema: z.object({ summary: z.string() }) },
-  prompt: `You are an expert academic assistant. Your task is to create a concise, easy-to-understand summary of the following educational material.
+  prompt: `You are an expert academic assistant. Your task is to create a concise, easy-to-understand summary of the following educational material from the provided file.
 
 Focus on the key concepts, main arguments, and important definitions. The summary should be clear and well-structured, ideally using bullet points to highlight the most critical information.
 
-Analyze the text below and generate a summary.
+Analyze the document below and generate a summary.
 
-Content:
-{{{textContent}}}
+Document: {{media url=fileDataUri}}
 `,
 });
 
@@ -48,9 +48,9 @@ const summarizeModuleFlow = ai.defineFlow(
     inputSchema: SummarizeModuleInputSchema,
     outputSchema: SummarizeModuleOutputSchema,
   },
-  async ({ textContent }) => {
-    // Step 1: Generate the summary
-    const { output: summaryOutput } = await prompt({ textContent });
+  async ({ fileDataUri }) => {
+    // Step 1: Generate the summary from the document
+    const { output: summaryOutput } = await prompt({ fileDataUri });
     if (!summaryOutput?.summary) {
         throw new Error("Failed to generate a summary for the content.");
     }

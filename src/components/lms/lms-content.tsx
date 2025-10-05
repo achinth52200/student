@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import type { Subject } from '@/lib/types';
+import type { Subject, Module, ModuleFile } from '@/lib/types';
 import { SubjectAccordion } from './subject-accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,15 +21,15 @@ const initialSubjects: Subject[] = [
     id: 'subj-1',
     name: 'Computer Science',
     modules: [
-      { id: 'mod-1-1', name: 'Introduction to Algorithms', summary: null, audioDataUri: null, files: [{ id: 'file-1', name: 'Chapter 1 Slides.pptx', type: 'pptx' }] },
-      { id: 'mod-1-2', name: 'Data Structures', summary: null, audioDataUri: null, files: [{ id: 'file-2', name: 'Lecture Notes.pdf', type: 'pdf' }] },
+      { id: 'mod-1-1', name: 'Introduction to Algorithms', summary: null, audioDataUri: null, files: [] },
+      { id: 'mod-1-2', name: 'Data Structures', summary: null, audioDataUri: null, files: [] },
     ],
   },
   {
     id: 'subj-2',
     name: 'History',
     modules: [
-      { id: 'mod-2-1', name: 'The Renaissance', summary: 'A period of European history, covering the 15th and 16th centuries.', audioDataUri: null, files: [{ id: 'file-3', name: 'Reading Material.docx', type: 'docx' }] },
+      { id: 'mod-2-1', name: 'The Renaissance', summary: 'A period of European history, covering the 15th and 16th centuries.', audioDataUri: null, files: [] },
     ],
   },
 ];

@@ -1,3 +1,4 @@
+
 'use server'
 
 import { z } from 'zod'
@@ -269,7 +270,7 @@ export async function generatePersonalizedTipsAction(
 }
 
 const summarizeModuleSchema = z.object({
-  textContent: z.string().min(1, 'Text content cannot be empty.'),
+  fileDataUri: z.string().min(1, 'File data URI cannot be empty.'),
 });
 
 type SummarizeModuleState = {
@@ -279,9 +280,9 @@ type SummarizeModuleState = {
 };
 
 export async function summarizeModuleAction(
-  textContent: string
+  fileDataUri: string
 ): Promise<SummarizeModuleState> {
-  const validatedFields = summarizeModuleSchema.safeParse({ textContent });
+  const validatedFields = summarizeModuleSchema.safeParse({ fileDataUri });
 
   if (!validatedFields.success) {
     return {
@@ -290,7 +291,7 @@ export async function summarizeModuleAction(
   }
 
   try {
-    const result = await summarizeModule({ textContent: validatedFields.data.textContent });
+    const result = await summarizeModule({ fileDataUri: validatedFields.data.fileDataUri });
     return {
       summary: result.summary,
       audioDataUri: result.audioDataUri,
