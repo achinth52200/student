@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -12,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { fileToDataUri } from '@/lib/file-utils';
+import type { ModuleFile } from '@/lib/types';
 
 type Message = {
   role: 'user' | 'model';
@@ -25,7 +26,7 @@ type DocumentChatState = {
 };
 
 type DocumentChatProps = {
-    file: File;
+    file: ModuleFile;
 }
 
 function SubmitButton() {
@@ -48,39 +49,22 @@ export function DocumentChat({ file }: DocumentChatProps) {
   const [messages, setMessages] = useState<Message[]>([
       { role: 'model', content: `Hello! I've read "${file.name}". Ask me anything about it.` }
   ]);
-  const [documentDataUri, setDocumentDataUri] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const convertFile = async () => {
-        try {
-            const uri = await fileToDataUri(file);
-            setDocumentDataUri(uri);
-        } catch (error) {
-            toast({
-                variant: 'destructive',
-                title: 'File Error',
-                description: 'Could not read the uploaded file.',
-            });
-        }
-    };
-    convertFile();
-  }, [file, toast]);
   
   const handleAction = async (formData: FormData) => {
       const message = formData.get('message') as string;
       if (!message.trim()) return;
-      if (!documentDataUri) {
+      if (!file.content) {
           toast({
               variant: 'destructive',
               title: 'Document Error',
-              description: 'The document has not been loaded yet. Please wait a moment and try again.'
+              description: 'The document content is missing. Please try re-uploading the file.'
           });
           return;
       }
-      formData.append('documentDataUri', documentDataUri);
+      formData.append('documentDataUri', file.content);
 
       setMessages((prev) => [...prev, { role: 'user', content: message }]);
       
@@ -111,12 +95,11 @@ export function DocumentChat({ file }: DocumentChatProps) {
     }
   }, [messages])
 
-  if (!documentDataUri && !pending) {
+  if (!file.content && !pending) {
       return (
           <Card>
               <CardContent className="p-4 text-center text-muted-foreground">
-                  <Sparkles className="mx-auto h-6 w-6 animate-spin" />
-                  <p>Preparing your document for chat...</p>
+                  <p>Error: Document content is not available.</p>
               </CardContent>
           </Card>
       )
@@ -202,7 +185,7 @@ export function DocumentChat({ file }: DocumentChatProps) {
             placeholder="Ask a question..."
             autoComplete="off"
             required
-            disabled={pending || !documentDataUri}
+            disabled={pending || !file.content}
           />
           <SubmitButton />
         </form>

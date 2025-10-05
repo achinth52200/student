@@ -29,6 +29,7 @@ export type ModuleFile = {
   id: string;
   name: string;
   type: string; // e.g., 'application/pdf'
+  content: string; // data URI
 };
 
 export type Module = {

@@ -24,15 +24,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { fileToDataUri } from '@/lib/file-utils';
 
 type SubjectAccordionProps = {
   subjects: Subject[];
   onSubjectUpdate: (subject: Subject) => void;
   onSubjectDelete: (subjectId: string) => void;
-  fileCache: Map<string, File>;
 };
 
-export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete, fileCache }: SubjectAccordionProps) {
+export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete }: SubjectAccordionProps) {
   const [newModuleName, setNewModuleName] = useState<Record<string, string>>({});
 
   const handleAddModule = (e: React.FormEvent, subjectId: string) => {
@@ -72,16 +72,16 @@ export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete, f
   const handleFileAdd = async (subjectId: string, moduleId: string, file: File) => {
     const module = subjects.find(s => s.id === subjectId)?.modules.find(m => m.id === moduleId);
     if (!module) return;
+    
+    const content = await fileToDataUri(file);
 
     const newFile: ModuleFile = { 
         id: `file-${Date.now()}`,
         name: file.name,
         type: file.type,
+        content: content,
     };
 
-    // Store the actual file object in the cache
-    fileCache.set(newFile.id, file);
-    
     // Replace existing file, as we only allow one per module
     const updatedModule = { ...module, files: [newFile] };
     handleUpdateModule(subjectId, updatedModule);
@@ -90,9 +90,6 @@ export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete, f
   const handleFileDelete = (subjectId: string, moduleId: string, fileId: string) => {
      const module = subjects.find(s => s.id === subjectId)?.modules.find(m => m.id === moduleId);
      if (!module) return;
-     
-     // Remove from cache
-     fileCache.delete(fileId);
 
      const updatedModule = { ...module, files: module.files.filter(f => f.id !== fileId) };
      handleUpdateModule(subjectId, updatedModule);
@@ -145,7 +142,6 @@ export function SubjectAccordion({ subjects, onSubjectUpdate, onSubjectDelete, f
                         module={module}
                         onFileAdd={(file) => handleFileAdd(subject.id, module.id, file)}
                         onFileDelete={(fileId) => handleFileDelete(subject.id, module.id, fileId)}
-                        fileCache={fileCache}
                     />
                 ))}
             </div>

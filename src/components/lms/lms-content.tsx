@@ -15,9 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-// In-memory cache for file objects. This is not persisted across page reloads.
-const fileCache = new Map<string, File>();
+import { fileToDataUri } from '@/lib/file-utils';
 
 const initialSubjects: Subject[] = [
   {
@@ -44,21 +42,26 @@ export function LMSContent() {
   const storageKey = user ? `lms_subjects_${user.uid}` : 'lms_subjects_guest';
 
   useEffect(() => {
-    const storedSubjects = localStorage.getItem(storageKey);
-    if (storedSubjects) {
-      setSubjects(JSON.parse(storedSubjects));
-    } else {
-      localStorage.setItem(storageKey, JSON.stringify(initialSubjects));
-      setSubjects(initialSubjects);
+    try {
+        const storedSubjects = localStorage.getItem(storageKey);
+        if (storedSubjects) {
+          setSubjects(JSON.parse(storedSubjects));
+        } else {
+          localStorage.setItem(storageKey, JSON.stringify(initialSubjects));
+          setSubjects(initialSubjects);
+        }
+    } catch (error) {
+        console.error("Failed to parse subjects from localStorage", error);
+        localStorage.setItem(storageKey, JSON.stringify(initialSubjects));
+        setSubjects(initialSubjects);
     }
-    // File cache is intentionally not persisted.
   }, [storageKey]);
 
   const updateStoredSubjects = (newSubjects: Subject[]) => {
     try {
       localStorage.setItem(storageKey, JSON.stringify(newSubjects));
     } catch (error) {
-      console.error("Could not save subjects to localStorage.", error);
+      console.error("Could not save subjects to localStorage. Data might be too large.", error);
     }
   };
 
@@ -91,14 +94,6 @@ export function LMSContent() {
 
   const handleDeleteSubject = (subjectId: string) => {
     setSubjects(prev => {
-      const subjectToDelete = prev.find(s => s.id === subjectId);
-      if (subjectToDelete) {
-        subjectToDelete.modules.forEach(module => {
-          module.files.forEach(file => {
-            fileCache.delete(file.id);
-          });
-        });
-      }
       const updated = prev.filter(s => s.id !== subjectId);
       updateStoredSubjects(updated);
       return updated;
@@ -126,7 +121,6 @@ export function LMSContent() {
           subjects={subjects} 
           onSubjectUpdate={updateSubject} 
           onSubjectDelete={handleDeleteSubject}
-          fileCache={fileCache}
         />
       </CardContent>
     </Card>

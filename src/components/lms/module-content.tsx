@@ -5,7 +5,6 @@ import React, { useState, useRef } from 'react';
 import { Eye, File as FileIcon, Upload, X } from 'lucide-react';
 import type { Module, ModuleFile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { DocumentViewer } from './document-viewer';
 import { DocumentChat } from './document-chat';
@@ -14,61 +13,43 @@ type ModuleContentProps = {
   module: Module;
   onFileAdd: (file: File) => void;
   onFileDelete: (fileId: string) => void;
-  fileCache: Map<string, File>;
 };
 
-export function ModuleContent({ module, onFileAdd, onFileDelete, fileCache }: ModuleContentProps) {
+export function ModuleContent({ module, onFileAdd, onFileDelete }: ModuleContentProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
   const [viewingFile, setViewingFile] = useState<ModuleFile | null>(null);
-  const [viewingFileUrl, setViewingFileUrl] = useState<string | null>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
-    onFileAdd(file);
+    try {
+        await onFileAdd(file);
+    } catch(e) {
+        console.error("Failed to add file", e);
+    }
     // Reset file input to allow uploading the same file again
     event.target.value = '';
     setIsUploading(false);
   };
 
   const handleViewFile = (fileInfo: ModuleFile) => {
-    const fileObject = fileCache.get(fileInfo.id);
-    if (!fileObject) {
-      toast({
-        variant: "destructive",
-        title: "File not found",
-        description: "Please upload the file again to view it.",
-      });
-      return;
-    }
-
     // For non-PDF files, open in a new tab
-    if (fileObject.type !== 'application/pdf') {
-        const objectUrl = URL.createObjectURL(fileObject);
-        window.open(objectUrl, '_blank');
-        URL.revokeObjectURL(objectUrl); // Clean up after opening
+    if (fileInfo.type !== 'application/pdf') {
+        window.open(fileInfo.content, '_blank');
         return;
     }
-
     // For PDFs, use the in-app viewer
-    const objectUrl = URL.createObjectURL(fileObject);
-    setViewingFileUrl(objectUrl);
     setViewingFile(fileInfo);
   };
 
   const handleCloseViewer = () => {
-    if (viewingFileUrl) {
-        URL.revokeObjectURL(viewingFileUrl);
-    }
     setViewingFile(null);
-    setViewingFileUrl(null);
   }
 
-  const uploadedFile = module.files.length > 0 ? fileCache.get(module.files[0].id) : null;
+  const uploadedFile = module.files.length > 0 ? module.files[0] : null;
 
   return (
     <>
@@ -128,11 +109,11 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, fileCache }: Mo
                 </Button>
             </DialogClose>
           </DialogHeader>
-          {viewingFileUrl && viewingFile?.type === 'application/pdf' ? (
+          {viewingFile?.content && viewingFile?.type === 'application/pdf' ? (
             <div className="flex-1 p-0">
                <DocumentViewer
                 fileName={viewingFile.name}
-                fileContent={viewingFileUrl}
+                fileContent={viewingFile.content}
               />
             </div>
           ) : (
