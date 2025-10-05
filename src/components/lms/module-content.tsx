@@ -50,19 +50,7 @@ export function ModuleContent({ module, onFileAdd, onFileDelete }: ModuleContent
       });
       return;
     }
-    
-    // PDFs can be viewed inline. Other types should be downloaded.
-    if (file.type === 'application/pdf') {
-        setViewingFile(file);
-    } else {
-        // For non-PDF files, create a link and trigger a download.
-        const link = document.createElement('a');
-        link.href = file.content;
-        link.download = file.name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+    setViewingFile(file);
   };
 
   const handleCloseViewer = () => {
@@ -130,6 +118,7 @@ export function ModuleContent({ module, onFileAdd, onFileDelete }: ModuleContent
                <DocumentViewer
                 fileName={viewingFile.name}
                 fileContent={viewingFile.content}
+                fileType={viewingFile.type}
               />
             </div>
           ) : (
