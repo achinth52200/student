@@ -2,15 +2,6 @@
 "use client";
 
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { X } from 'lucide-react';
-import { Button } from '../ui/button';
 
 type DocumentViewerProps = {
   fileName: string;

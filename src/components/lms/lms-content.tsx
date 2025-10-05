@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import type { Subject, Module, ModuleFile } from '@/lib/types';
+import type { Subject } from '@/lib/types';
 import { SubjectAccordion } from './subject-accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

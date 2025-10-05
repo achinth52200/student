@@ -2,14 +2,14 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Paperclip, File as FileIcon, Upload, Bot, Sparkles, Volume2, X, Eye } from 'lucide-react';
+import { Eye, File as FileIcon, Bot, Sparkles, Upload, Volume2, X } from 'lucide-react';
 import type { Module, ModuleFile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { summarizeModuleAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { DocumentViewer } from './document-viewer';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '../ui/dialog';
 
 type ModuleContentProps = {
   module: Module;
