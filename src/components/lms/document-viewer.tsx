@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 type DocumentViewerProps = {
   fileName: string;
@@ -10,16 +10,51 @@ type DocumentViewerProps = {
 };
 
 export function DocumentViewer({ fileName, fileContent, fileType }: DocumentViewerProps) {
-  // PDFs can be rendered directly in an iframe
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (fileType === 'application/pdf' && fileContent) {
+      try {
+        const base64String = fileContent.split(',')[1];
+        const byteCharacters = atob(base64String);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        
+        const url = URL.createObjectURL(blob);
+        setObjectUrl(url);
+
+        // Clean up the object URL when the component unmounts
+        return () => {
+          URL.revokeObjectURL(url);
+        };
+      } catch (error) {
+        console.error("Error creating object URL for PDF:", error);
+        setObjectUrl(null);
+      }
+    }
+  }, [fileContent, fileType]);
+
+  // PDFs can be rendered directly in an iframe using a Blob URL
   if (fileType === 'application/pdf') {
+    if (objectUrl) {
+        return (
+            <div className="w-full h-full">
+              <iframe
+                src={objectUrl}
+                title={fileName}
+                className="w-full h-full border-0"
+              />
+            </div>
+        );
+    }
     return (
-      <div className="w-full h-full">
-        <iframe
-          src={fileContent}
-          title={fileName}
-          className="w-full h-full border-0"
-        />
-      </div>
+        <div className="flex flex-col items-center justify-center w-full h-full bg-muted text-muted-foreground p-8 text-center">
+            <h3 className="text-lg font-semibold mb-2">Loading PDF...</h3>
+        </div>
     );
   }
 
