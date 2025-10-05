@@ -3,7 +3,7 @@
 /**
  * @fileOverview An AI-driven flow to summarize educational content from various file types.
  *
- * - summarizeModule - A function that takes a file's data URI and provides a concise summary and generates audio.
+ * - summarizeModule - A function that takes a file's data URI and provides a detailed summary and generates audio.
  * - SummarizeModuleInput - The input type for the summarizeModule function.
  * - SummarizeModuleOutput - The return type for the summarizeModule function.
  */
@@ -18,7 +18,7 @@ const SummarizeModuleInputSchema = z.object({
 export type SummarizeModuleInput = z.infer<typeof SummarizeModuleInputSchema>;
 
 const SummarizeModuleOutputSchema = z.object({
-  summary: z.string().describe('A concise summary of the provided text content.'),
+  summary: z.string().describe('A detailed summary of the provided text content.'),
   audioDataUri: z.string().describe('The generated audio of the summary as a base64-encoded data URI.'),
 });
 export type SummarizeModuleOutput = z.infer<typeof SummarizeModuleOutputSchema>;
