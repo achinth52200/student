@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { summarizeModuleAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { DocumentViewer } from './document-viewer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '../ui/dialog';
 
 type ModuleContentProps = {
   module: Module;
@@ -168,14 +169,27 @@ export function ModuleContent({ module, onFileAdd, onFileDelete, onSummaryUpdate
         </Card>
 
       </div>
-      {viewingFile && (
-        <DocumentViewer
-          isOpen={!!viewingFile}
-          onClose={() => setViewingFile(null)}
-          fileName={viewingFile.name}
-          fileContent={viewingFile.content}
-        />
-      )}
+      
+      <Dialog open={!!viewingFile} onOpenChange={(isOpen) => !isOpen && setViewingFile(null)}>
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-4 border-b flex-row items-center justify-between">
+            <DialogTitle>{viewingFile?.name}</DialogTitle>
+            <DialogClose asChild>
+                <Button variant="ghost" size="icon">
+                  <X className="h-4 w-4" />
+                </Button>
+            </DialogClose>
+          </DialogHeader>
+          {viewingFile && (
+            <div className="flex-1 p-0">
+               <DocumentViewer
+                fileName={viewingFile.name}
+                fileContent={viewingFile.content}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
