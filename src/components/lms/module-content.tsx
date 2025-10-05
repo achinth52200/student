@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef } from 'react';
@@ -49,14 +50,7 @@ export function ModuleContent({ module, onFileAdd, onFileDelete }: ModuleContent
       });
       return;
     }
-    
-    // For PDFs, use the in-app viewer
-    if (file.type === 'application/pdf') {
-      setViewingFile(file);
-    } else {
-      // For other types, open in a new tab
-      window.open(file.content);
-    }
+    setViewingFile(file);
   };
 
   const handleCloseViewer = () => {
@@ -119,7 +113,7 @@ export function ModuleContent({ module, onFileAdd, onFileDelete }: ModuleContent
                 </Button>
             </DialogClose>
           </DialogHeader>
-          {viewingFile?.content && viewingFile?.type === 'application/pdf' ? (
+          {viewingFile?.content ? (
             <div className="flex-1 p-0">
                <DocumentViewer
                 fileName={viewingFile.name}
@@ -128,7 +122,7 @@ export function ModuleContent({ module, onFileAdd, onFileDelete }: ModuleContent
             </div>
           ) : (
              <div className="flex-1 p-4 text-center text-muted-foreground flex items-center justify-center">
-                <p>This file type cannot be previewed directly in the app. It should open in a new tab.</p>
+                <p>Could not load file content.</p>
              </div>
           )}
         </DialogContent>
