@@ -15,7 +15,7 @@ export function PageTransitionLoader() {
         setIsLoading(true);
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 500); // Reduced timeout for quicker transitions
+        }, 300); // Further reduced timeout for even quicker transitions
 
         return () => clearTimeout(timer);
     // We only want this to run on route changes.
