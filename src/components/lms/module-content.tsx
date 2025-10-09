@@ -2,12 +2,21 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Eye, File as FileIcon, Upload, X } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Eye, File as FileIcon, Upload, X, Loader2 } from 'lucide-react';
 import type { Module, ModuleFile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { DocumentViewer } from './document-viewer';
 import { useToast } from '@/hooks/use-toast';
+
+const DocumentViewer = dynamic(() => import('./document-viewer').then(mod => mod.DocumentViewer), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  )
+});
 
 type ModuleContentProps = {
   module: Module;
