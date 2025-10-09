@@ -23,21 +23,3 @@ export type ScheduleItem = {
     duration: string;
     suggestedTime: string;
 }
-
-export type ModuleFile = {
-    name: string;
-    type: "pdf" | "video" | "document" | "other";
-    path: string;
-};
-
-export type Module = {
-    id: string;
-    title: string;
-    files: ModuleFile[];
-};
-
-export type Subject = {
-    id: string;
-    title: string;
-    modules: Module[];
-};

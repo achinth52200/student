@@ -13,9 +13,13 @@ export function PageTransitionLoader() {
 
     useEffect(() => {
         setIsLoading(true);
+        // Setting a timeout of 0 allows the state to update and the browser to render
+        // before we turn it off. This ensures the loader appears for a micro-task,
+        // giving the perception of an instant transition while still allowing
+        // the loader to handle slower page loads if needed.
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 300); // Further reduced timeout for even quicker transitions
+        }, 0); 
 
         return () => clearTimeout(timer);
     // We only want this to run on route changes.

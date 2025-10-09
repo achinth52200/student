@@ -26,12 +26,6 @@ const nextConfig = {
   serverActions: {
     bodySizeLimit: '10mb',
   },
-   webpack: (config) => {
-    config.externals.push({
-      canvas: "commonjs canvas",
-    });
-    return config;
-  },
 };
 
 module.exports = nextConfig;
