@@ -9,6 +9,7 @@ import { extractTransactionsFromImage } from '@/ai/flows/extract-transaction-fro
 import { generatePersonalizedTips } from '@/ai/flows/generate-personalized-tips-flow';
 import { textToSpeech } from '@/ai/flows/text-to-speech-flow';
 import type { Transaction, Reminder, ScheduleItem } from '@/lib/types';
+import { getFileAsDataURL } from '@/lib/file-utils';
 
 const optimizeScheduleSchema = z.object({
   courseDeadlines: z.string().min(1, 'Please provide course deadlines.'),
@@ -266,4 +267,35 @@ export async function generatePersonalizedTipsAction(
       error: 'Failed to generate personalized tips. Please try again later.',
     };
   }
+}
+
+const getDocumentUrlSchema = z.object({
+  filePath: z.string(),
+});
+
+type GetDocumentUrlState = {
+  dataUrl?: string;
+  error?: string;
+};
+
+export async function getDocumentUrlAction(formData: FormData): Promise<GetDocumentUrlState> {
+    const validatedFields = getDocumentUrlSchema.safeParse({
+        filePath: formData.get('filePath'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            error: 'Validation failed. Please provide a valid file path.',
+        };
+    }
+
+    try {
+        const dataUrl = await getFileAsDataURL(validatedFields.data.filePath);
+        return { dataUrl };
+    } catch (error) {
+        console.error(error);
+        return {
+            error: 'Failed to read document. Please check the file path and try again.',
+        };
+    }
 }
