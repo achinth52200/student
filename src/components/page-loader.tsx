@@ -4,12 +4,12 @@
 import { useLoader } from "@/hooks/use-loader";
 import { CustomLoader } from "./custom-loader";
 
-export function PageLoader() {
+export function PageLoader({ loaderComponent }: { loaderComponent?: React.ReactNode }) {
   const { isLoading } = useLoader();
 
   if (!isLoading) {
     return null;
   }
 
-  return <CustomLoader />;
+  return loaderComponent || <CustomLoader />;
 }
