@@ -2,6 +2,7 @@
 "use client";
 
 import { useLoader } from "@/hooks/use-loader";
+import { CustomLoader } from "./custom-loader";
 
 export function PageLoader() {
   const { isLoading } = useLoader();
@@ -10,13 +11,5 @@ export function PageLoader() {
     return null;
   }
 
-  return (
-    <div className="page-loader-overlay">
-       <div className="bouncing-loader">
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-    </div>
-  );
+  return <CustomLoader />;
 }
