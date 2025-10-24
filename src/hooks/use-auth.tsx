@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setTimeout(() => {
         setIsLoading(false);
         router.push('/dashboard');
-    }, 500);
+    }, 6000);
   }, [setIsLoading, router]);
   
   const signup = useCallback((email: string, name: string) => {
