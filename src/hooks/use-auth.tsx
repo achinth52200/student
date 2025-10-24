@@ -57,9 +57,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(mockUser);
     setTimeout(() => {
         setIsLoading(false);
-        router.push('/dashboard');
-    }, 6000);
-  }, [setIsLoading, router]);
+    }, 7000);
+  }, [setIsLoading]);
   
   const signup = useCallback((email: string, name: string) => {
     // In simulation, signup is the same as login

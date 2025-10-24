@@ -35,11 +35,12 @@ export function LoginForm() {
       title: "Login Successful",
       description: "Redirecting to your dashboard...",
     });
-    // Simulate network delay
+    login(email);
+    // Simulate network delay and loader display
     setTimeout(() => {
-      login(email);
       setIsLoading(false);
-    }, 1000);
+      router.push('/dashboard');
+    }, 7000);
   };
 
   const handleGoogleSignIn = async () => {
@@ -48,11 +49,12 @@ export function LoginForm() {
       title: "Login Successful",
       description: "Redirecting to your dashboard...",
     });
-    // Simulate network delay
+    login("guest@example.com", "Google User");
+    // Simulate network delay and loader display
     setTimeout(() => {
-        login("guest@example.com", "Google User");
         setIsLoading(false);
-    }, 1000);
+        router.push('/dashboard');
+    }, 7000);
   };
   
   if (user) {
