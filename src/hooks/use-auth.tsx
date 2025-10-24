@@ -53,9 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email: email,
       displayName: name || email.split('@')[0],
     };
-    localStorage.setItem(GUEST_USER_KEY, JSON.stringify(mockUser));
-    setUser(mockUser);
+
     setTimeout(() => {
+        localStorage.setItem(GUEST_USER_KEY, JSON.stringify(mockUser));
+        setUser(mockUser);
         setIsLoading(false);
     }, 7000);
   }, [setIsLoading]);

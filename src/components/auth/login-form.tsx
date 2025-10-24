@@ -19,42 +19,31 @@ import { Logo } from "../icons";
 import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { useLoader } from "@/hooks/use-loader";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const { user, login } = useAuth();
+  const { isLoading } = useLoader();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     toast({
       title: "Login Successful",
       description: "Redirecting to your dashboard...",
     });
     login(email);
-    // Simulate network delay and loader display
-    setTimeout(() => {
-      setIsLoading(false);
-      router.push('/dashboard');
-    }, 7000);
   };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true);
     toast({
       title: "Login Successful",
       description: "Redirecting to your dashboard...",
     });
     login("guest@example.com", "Google User");
-    // Simulate network delay and loader display
-    setTimeout(() => {
-        setIsLoading(false);
-        router.push('/dashboard');
-    }, 7000);
   };
   
   if (user) {
