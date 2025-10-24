@@ -2,7 +2,6 @@
 "use client";
 
 import * as React from "react";
-import dynamic from 'next/dynamic';
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -10,12 +9,7 @@ import type { Transaction } from "@/lib/types";
 import { ReceiptUploader } from "@/components/dashboard/receipt-uploader";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
 import { useAuth } from "@/hooks/use-auth";
-
-// Dynamically import ExpenseTracker with SSR turned off
-const ExpenseTracker = dynamic(
-  () => import('@/components/dashboard/expense-tracker').then(mod => mod.ExpenseTracker),
-  { ssr: false }
-);
+import { ExpenseTracker } from "@/components/dashboard/expense-tracker";
 
 const initialTransactions: Transaction[] = [
     { id: '1', description: 'Groceries', amount: 75.50, type: 'expense', category: 'Groceries', date: '2024-07-15T10:00:00Z', status: 'Completed' },
