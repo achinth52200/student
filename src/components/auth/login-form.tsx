@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AtSign, Lock, Sparkles } from "lucide-react";
@@ -46,10 +46,11 @@ export function LoginForm() {
     login("guest@example.com", "Google User");
   };
   
-  if (user) {
-    router.push('/dashboard');
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background animate-gradient">
