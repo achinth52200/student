@@ -1,4 +1,4 @@
-// Implemented by Gemini.
+
 'use server';
 /**
  * @fileOverview An AI-driven well-being support agent that monitors stress levels and emotional regulation based on user inputs.
@@ -78,7 +78,14 @@ const aiDrivenWellbeingSupportFlow = ai.defineFlow(
     outputSchema: AiDrivenWellbeingSupportOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await ai.generate({
+      prompt: prompt.prompt,
+      input,
+      model: ai.model,
+      output: {
+        schema: prompt.config.output?.schema,
+      },
+    });
     return output!;
   }
 );
