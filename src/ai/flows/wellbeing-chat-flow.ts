@@ -59,7 +59,7 @@ const wellbeingChatFlow = ai.defineFlow(
     }));
 
     const {output} = await ai.generate({
-      model: ai.model,
+      model: 'googleai/gemini-2.5-flash',
       prompt: input.message,
       history,
       system: prompt.config?.system,
