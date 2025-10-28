@@ -8,3 +8,4 @@ import '@/ai/flows/extract-transaction-from-image-flow.ts';
 import '@/ai/flows/generate-personalized-tips-flow.ts';
 import '@/ai/flows/text-to-speech-flow.ts';
 import '@/ai/flows/get-transactions-flow.ts';
+import '@/ai/flows/story-generator-flow.ts';

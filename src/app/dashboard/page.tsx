@@ -11,7 +11,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { BudgetChart } from "@/components/dashboard/budget-chart";
 import type { Transaction } from "@/lib/types";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
-import { getRecentTransactions } from "@/ai/flows/get-transactions-flow";
 import { useAuth } from "@/hooks/use-auth";
 
 const initialTransactions: Transaction[] = [
@@ -34,26 +33,6 @@ export default function DashboardPage() {
       setTransactions(initialTransactions);
     }
   }, [storageKey]);
-  
-  React.useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const { transactions: newTransactions } = await getRecentTransactions();
-
-        setTransactions(prev => {
-          const updatedTransactions = [...newTransactions, ...prev];
-          localStorage.setItem(storageKey, JSON.stringify(updatedTransactions));
-          return updatedTransactions;
-        });
-
-      } catch (error) {
-        console.error("Failed to fetch new transactions", error);
-      }
-    }, 15000); // Fetch every 15 seconds
-
-    return () => clearInterval(interval);
-  }, [storageKey]);
-
 
   return (
     <>
