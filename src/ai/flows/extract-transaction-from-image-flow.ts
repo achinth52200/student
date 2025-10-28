@@ -38,11 +38,18 @@ export async function extractTransactionsFromImage(input: ExtractTransactionsInp
   return extractTransactionsFromImageFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'extractTransactionsPrompt',
-  input: {schema: ExtractTransactionsInputSchema},
-  output: {schema: ExtractTransactionsOutputSchema},
-  prompt: `You are an expert at extracting structured data from images of receipts or transaction histories.
+const extractTransactionsFromImageFlow = ai.defineFlow(
+  {
+    name: 'extractTransactionsFromImageFlow',
+    inputSchema: ExtractTransactionsInputSchema,
+    outputSchema: ExtractTransactionsOutputSchema,
+  },
+  async ({ photoDataUri }) => {
+    const { output } = await ai.generate({
+        model: 'googleai/gemini-2.5-flash',
+        prompt: [
+            {
+                text: `You are an expert at extracting structured data from images of receipts or transaction histories.
 
 Analyze the following image and extract all key transaction details for every transaction you find.
 
@@ -53,19 +60,15 @@ Analyze the following image and extract all key transaction details for every tr
 - For 'category', make a reasonable guess based on the merchant (e.g., 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Salary', 'Other').
 - For personal payments (like UPI), use the recipient's name as the 'category'. This is important for tracking payments to individuals.
 
-If you cannot find any transactions in the image, return an empty array for the transactions.
+If you cannot find any transactions in the image, return an empty array for the transactions.`,
+            },
+            { media: { url: photoDataUri } },
+        ],
+        output: {
+            schema: ExtractTransactionsOutputSchema,
+        },
+    });
 
-Image: {{media url=photoDataUri}}`,
-});
-
-const extractTransactionsFromImageFlow = ai.defineFlow(
-  {
-    name: 'extractTransactionsFromImageFlow',
-    inputSchema: ExtractTransactionsInputSchema,
-    outputSchema: ExtractTransactionsOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
     return output!;
   }
 );
