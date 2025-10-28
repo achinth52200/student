@@ -78,14 +78,7 @@ const aiDrivenWellbeingSupportFlow = ai.defineFlow(
     outputSchema: AiDrivenWellbeingSupportOutputSchema,
   },
   async input => {
-    const {output} = await ai.generate({
-      prompt: prompt.prompt,
-      input,
-      model: ai.model,
-      output: {
-        schema: prompt.config.output?.schema,
-      },
-    });
+    const {output} = await prompt(input);
     return output!;
   }
 );
