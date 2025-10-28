@@ -34,17 +34,14 @@ export async function wellbeingChat(
   return wellbeingChatFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'wellbeingChatPrompt',
-  system: `You are a personal health manager and mentor for students. Your role is to be a responsive, empathetic, and encouraging student motivator and health advisor. Your goal is to provide supportive guidance to help them maintain their mental and physical well-being.
+const systemPrompt = `You are a personal health manager and mentor for students. Your role is to be a responsive, empathetic, and encouraging student motivator and health advisor. Your goal is to provide supportive guidance to help them maintain their mental and physical well-being.
 - Act as a mentor, offering concise, actionable advice.
 - When they talk about their studies, motivate them.
 - When they talk about their health, give them sound advice.
 - When appropriate, use bullet points for clarity.
 - Ask clarifying questions to better understand their needs.
 - Remember the conversation history to provide contextual support and track their progress.
-- Keep your responses encouraging and positive.`,
-});
+- Keep your responses encouraging and positive.`;
 
 const wellbeingChatFlow = ai.defineFlow(
   {
@@ -62,7 +59,7 @@ const wellbeingChatFlow = ai.defineFlow(
       model: 'googleai/gemini-2.5-flash',
       prompt: input.message,
       history,
-      system: prompt.config?.system,
+      system: systemPrompt,
     });
     
     if (!output) {

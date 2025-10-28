@@ -51,11 +51,7 @@ export async function generatePersonalizedTips(input: GeneratePersonalizedTipsIn
   return generatePersonalizedTipsFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'generatePersonalizedTipsPrompt',
-  input: {schema: GeneratePersonalizedTipsInputSchema},
-  output: {schema: GeneratePersonalizedTipsOutputSchema},
-  prompt: `You are a student success coach. Your goal is to provide supportive, actionable, and personalized tips to a student based on their recent activity.
+const promptText = `You are a student success coach. Your goal is to provide supportive, actionable, and personalized tips to a student based on their recent activity.
 
 Analyze the following data:
 - Financial transactions
@@ -89,8 +85,7 @@ Here are some examples of good tips:
 - If there are no recent well-being checks: "Remember to check in with your well-being. A few minutes of mindfulness can make a big difference." (Icon: HeartPulse)
 
 Generate a list of tips that are directly relevant to the user's provided data.
-`,
-});
+`;
 
 const generatePersonalizedTipsFlow = ai.defineFlow(
   {
@@ -99,7 +94,13 @@ const generatePersonalizedTipsFlow = ai.defineFlow(
     outputSchema: GeneratePersonalizedTipsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await ai.generate({
+      prompt: promptText,
+      input,
+      output: {
+        schema: GeneratePersonalizedTipsOutputSchema,
+      },
+    });
     return output!;
   }
 );
