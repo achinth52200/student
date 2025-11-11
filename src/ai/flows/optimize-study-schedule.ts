@@ -50,7 +50,11 @@ export async function optimizeStudySchedule(input: OptimizeStudyScheduleInput): 
   return optimizeStudyScheduleFlow(input);
 }
 
-const promptText = `You are an AI assistant designed to optimize study schedules for students into a structured timetable format.
+const prompt = ai.definePrompt({
+  name: 'optimizeStudySchedulePrompt',
+  input: { schema: OptimizeStudyScheduleInputSchema },
+  output: { schema: OptimizeStudyScheduleOutputSchema },
+  prompt: `You are an AI assistant designed to optimize study schedules for students into a structured timetable format.
 
   Based on the provided course deadlines, priorities, topics, and desired duration, generate an optimized study schedule.
 
@@ -74,7 +78,8 @@ const promptText = `You are an AI assistant designed to optimize study schedules
   
   Break down the total duration into logical study blocks, allocating time based on priorities.
   Be concise, clear and easy to follow. The output must be an array of schedule items.
-  `;
+  `,
+});
 
 const optimizeStudyScheduleFlow = ai.defineFlow(
   {
@@ -83,13 +88,7 @@ const optimizeStudyScheduleFlow = ai.defineFlow(
     outputSchema: OptimizeStudyScheduleOutputSchema,
   },
   async input => {
-    const {output} = await ai.generate({
-      prompt: promptText,
-      input,
-      output: {
-        schema: OptimizeStudyScheduleOutputSchema,
-      },
-    });
+    const {output} = await prompt(input);
     return output!;
   }
 );

@@ -49,7 +49,11 @@ export async function provideAiDrivenWellbeingSupport(
   return aiDrivenWellbeingSupportFlow(input);
 }
 
-const promptText = `You are an AI assistant designed to provide personalized feedback and support to students for maintaining their mental and physical well-being.
+const prompt = ai.definePrompt({
+  name: 'aiDrivenWellbeingSupportPrompt',
+  input: { schema: AiDrivenWellbeingSupportInputSchema },
+  output: { schema: AiDrivenWellbeingSupportOutputSchema },
+  prompt: `You are an AI assistant designed to provide personalized feedback and support to students for maintaining their mental and physical well-being.
 
   Based on the following information provided by the student, offer specific and actionable suggestions to help them manage stress, improve emotional regulation, and promote overall well-being.
 
@@ -64,7 +68,8 @@ const promptText = `You are an AI assistant designed to provide personalized fee
   Consider their study hours and suggest appropriate breaks and relaxation techniques.
   Suggest improvements for sleep quality, physical activity, and emotional regulation, providing concrete steps they can take.
   Offer support and encouragement to help them stay balanced during their studies.
-  `;
+  `,
+});
 
 const aiDrivenWellbeingSupportFlow = ai.defineFlow(
   {
@@ -73,13 +78,7 @@ const aiDrivenWellbeingSupportFlow = ai.defineFlow(
     outputSchema: AiDrivenWellbeingSupportOutputSchema,
   },
   async input => {
-    const {output} = await ai.generate({
-      prompt: promptText,
-      input,
-      output: {
-        schema: AiDrivenWellbeingSupportOutputSchema,
-      },
-    });
+    const {output} = await prompt(input);
     return output!;
   }
 );
