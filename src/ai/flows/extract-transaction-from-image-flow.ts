@@ -61,7 +61,7 @@ Analyze the following image and extract all key transaction details for every tr
 
 If you cannot find any transactions in the image, return an empty array for the transactions.`,
             },
-            { media: { url: photoDataUri } },
+            { media: { url: photoDataUri} },
         ],
         output: {
             schema: ExtractTransactionsOutputSchema,
