@@ -46,7 +46,6 @@ const extractTransactionsFromImageFlow = ai.defineFlow(
   },
   async ({ photoDataUri }) => {
     const { output } = await ai.generate({
-        model: 'googleai/gemini-2.5-flash',
         prompt: [
             {
                 text: `You are an expert at extracting structured data from images of receipts or transaction histories.

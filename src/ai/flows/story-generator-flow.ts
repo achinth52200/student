@@ -36,10 +36,9 @@ const storyGeneratorFlow = ai.defineFlow(
   async ({ prompt }) => {
     
     // Generate Story and Title
-    const storyPrompt = ai.definePrompt({
-        name: 'storyGenerationPrompt',
+    const storyResult = await ai.generate({
         prompt: `Based on the following prompt, write a short, engaging story. Also, give it a suitable title.
-        Prompt: {{{prompt}}}
+        Prompt: ${prompt}
         `,
         output: {
             schema: z.object({
@@ -49,7 +48,6 @@ const storyGeneratorFlow = ai.defineFlow(
         },
     });
 
-    const storyResult = await storyPrompt({ prompt });
     const { title, story } = storyResult.output!;
 
     // Generate Cover Image

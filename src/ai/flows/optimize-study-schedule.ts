@@ -50,37 +50,6 @@ export async function optimizeStudySchedule(input: OptimizeStudyScheduleInput): 
   return optimizeStudyScheduleFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'optimizeStudySchedulePrompt',
-  input: { schema: OptimizeStudyScheduleInputSchema },
-  output: { schema: OptimizeStudyScheduleOutputSchema },
-  prompt: `You are an AI assistant designed to optimize study schedules for students into a structured timetable format.
-
-  Based on the provided course deadlines, priorities, topics, and desired duration, generate an optimized study schedule.
-
-  Course Deadlines:
-  {{courseDeadlines}}
-
-  Priorities:
-  {{priorities}}
-  
-  Main Topic: {{mainTopic}}
-  Core Topics: {{coreTopics}}
-  Total Duration: {{duration}}
-
-  Generate a structured timetable. Each entry in the timetable should be an object with the following fields:
-  - course: The course name.
-  - task: The specific assignment or study goal.
-  - mainTopic: The main topic for that specific study block.
-  - coreTopics: The specific sub-topics to cover.
-  - duration: How long to spend on this block.
-  - suggestedTime: A specific day and time slot for the study block.
-  
-  Break down the total duration into logical study blocks, allocating time based on priorities.
-  Be concise, clear and easy to follow. The output must be an array of schedule items.
-  `,
-});
-
 const optimizeStudyScheduleFlow = ai.defineFlow(
   {
     name: 'optimizeStudyScheduleFlow',
@@ -88,7 +57,36 @@ const optimizeStudyScheduleFlow = ai.defineFlow(
     outputSchema: OptimizeStudyScheduleOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await ai.generate({
+        prompt: `You are an AI assistant designed to optimize study schedules for students into a structured timetable format.
+
+        Based on the provided course deadlines, priorities, topics, and desired duration, generate an optimized study schedule.
+
+        Course Deadlines:
+        ${input.courseDeadlines}
+
+        Priorities:
+        ${input.priorities}
+        
+        Main Topic: ${input.mainTopic}
+        Core Topics: ${input.coreTopics}
+        Total Duration: ${input.duration}
+
+        Generate a structured timetable. Each entry in the timetable should be an object with the following fields:
+        - course: The course name.
+        - task: The specific assignment or study goal.
+        - mainTopic: The main topic for that specific study block.
+        - coreTopics: The specific sub-topics to cover.
+        - duration: How long to spend on this block.
+        - suggestedTime: A specific day and time slot for the study block.
+        
+        Break down the total duration into logical study blocks, allocating time based on priorities.
+        Be concise, clear and easy to follow. The output must be an array of schedule items.
+        `,
+        output: {
+            schema: OptimizeStudyScheduleOutputSchema
+        }
+    });
     return output!;
   }
 );
