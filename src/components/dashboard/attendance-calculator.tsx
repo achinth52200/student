@@ -87,9 +87,10 @@ export function AttendanceCalculator() {
 
       const to75 = Math.max(0, Math.ceil((0.75 * conducted - present) / 0.25));
       const to85 = Math.max(0, Math.ceil((0.85 * conducted - present) / 0.15));
+      const to95 = Math.max(0, Math.ceil((0.95 * conducted - present) / 0.05));
       const canBunk = Math.floor((present - 0.75 * conducted) / 0.75);
 
-      return { ...subject, absent, percentage, to75, to85, canBunk };
+      return { ...subject, absent, percentage, to75, to85, to95, canBunk };
     });
   }, [subjects]);
 
@@ -127,6 +128,7 @@ export function AttendanceCalculator() {
                 <TableHead>%</TableHead>
                 <TableHead>To 75%</TableHead>
                 <TableHead>To 85%</TableHead>
+                <TableHead>To 95%</TableHead>
                 <TableHead>Can Bunk</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
@@ -161,6 +163,9 @@ export function AttendanceCalculator() {
                     {s.percentage >= 85 ? <Check className="text-green-500"/> : <span className="text-red-500 font-bold">{s.to85}</span>}
                   </TableCell>
                   <TableCell>
+                    {s.percentage >= 95 ? <Check className="text-green-500"/> : <span className="text-red-500 font-bold">{s.to95}</span>}
+                  </TableCell>
+                  <TableCell>
                      {s.canBunk > 0 ? <span className="text-green-500 font-bold">{s.canBunk}</span> : 0}
                   </TableCell>
                   <TableCell>
@@ -181,7 +186,7 @@ export function AttendanceCalculator() {
                     <TableCell>
                         {totals.totalPercentage >= 75 ? <Check className="text-green-500"/> : <span className="text-red-500 font-bold">{totals.totalTo75}</span>}
                     </TableCell>
-                    <TableCell colSpan={2}>-</TableCell>
+                    <TableCell colSpan={3}>-</TableCell>
                     <TableCell>
                          {totals.totalCanBunk > 0 ? <span className="text-green-500 font-bold">{totals.totalCanBunk}</span> : 0}
                     </TableCell>
