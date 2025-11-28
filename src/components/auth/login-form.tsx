@@ -20,7 +20,48 @@ import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useLoader } from "@/hooks/use-loader";
-import { ChristLogo } from "../icons/christ-logo";
+
+const ChristSeal = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        viewBox="0 0 200 200"
+        {...props}
+    >
+        <defs>
+            <path id="circlePath" d="M 40,100 A 60,60 0 1,1 160,100 A 60,60 0 1,1 40,100" />
+        </defs>
+        <g fill="none" stroke="hsl(var(--primary))" strokeWidth="2">
+            <circle cx="100" cy="100" r="90" />
+            <circle cx="100" cy="100" r="80" />
+
+            {/* Star and inner circle */}
+            <path d="M 100,20 L 120,80 L 180,80 L 130,120 L 150,180 L 100,140 L 50,180 L 70,120 L 20,80 L 80,80 Z" />
+
+            {/* Rays */}
+            <g strokeWidth="1" stroke="hsl(var(--primary))">
+                {Array.from({ length: 36 }).map((_, i) => (
+                    <path key={i} d={`M 100 100 L ${100 + 45 * Math.cos(i * 10 * Math.PI / 180)} ${100 + 45 * Math.sin(i * 10 * Math.PI / 180)}`} />
+                ))}
+            </g>
+
+            <circle cx="100" cy="100" r="40" fill="hsl(var(--background))" />
+            
+            {/* Candle and Book */}
+            <path d="M95 125 h10 v-20 h-10z" strokeWidth="1.5" fill="hsl(var(--background))" />
+            <path d="M90 130 h20 l-2 5 h-16 l-2 -5z" strokeWidth="1.5" fill="hsl(var(--background))"/>
+            <path d="M98 105 q2 -5 4 0" fill="hsl(var(--primary))" stroke="none"/>
+            <path d="M100 105 l0 -10" strokeWidth="1"/>
+
+            {/* Text */}
+            <text fill="hsl(var(--primary))" fontSize="14" fontWeight="bold" letterSpacing="1">
+                <textPath href="#circlePath" startOffset="8%" textAnchor="middle">EXCELLENCE</textPath>
+                <textPath href="#circlePath" startOffset="42%" textAnchor="middle">SERVICE</textPath>
+                <textPath href="#circlePath" startOffset="75%" textAnchor="middle">CHRIST</textPath>
+            </text>
+        </g>
+    </svg>
+);
+
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -61,7 +102,9 @@ export function LoginForm() {
             <Logo className="w-8 h-8 text-primary" />
             <CardTitle className="text-3xl">StudentSync</CardTitle>
           </div>
-          <ChristLogo className="w-full h-auto px-4 pt-4" />
+          <div className="flex justify-center py-4">
+             <ChristSeal className="w-32 h-32" />
+          </div>
           <CardDescription>
             Enter your email below to login to your account
           </CardDescription>
