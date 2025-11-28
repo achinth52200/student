@@ -21,6 +21,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'christuniversity.in',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   serverActions: {
