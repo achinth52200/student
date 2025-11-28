@@ -88,6 +88,9 @@ export function AppSidebar() {
               <LogOut className="w-4 h-4"/>
             </Button>
         </div>
+         <div className={cn("text-xs text-muted-foreground text-center mt-4", sidebarState === 'collapsed' && 'hidden')}>
+            <p>developed by Gowtham C N & Achinth.M</p>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
