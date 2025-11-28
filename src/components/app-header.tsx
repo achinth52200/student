@@ -7,7 +7,7 @@ import Image from "next/image";
 
 export function AppHeader() {
   const title = "StudentSync";
-  const description = "Comprehensive Student Life Management system";
+  const description = "Comprehensive student life management system for Christite";
 
   return (
     <header className={cn("flex h-16 items-center gap-4 border-b px-6", "glass-effect")}>
