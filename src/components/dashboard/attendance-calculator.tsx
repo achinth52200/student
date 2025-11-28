@@ -61,7 +61,12 @@ export function AttendanceCalculator() {
     setSubjects(prev => {
         const updated = prev.map(s => {
           if (s.id === id) {
-            const parsedValue = (field === 'conducted' || field === 'present') ? Math.max(0, Number(value)) : value;
+            let parsedValue: string | number = value;
+            if (field === 'conducted' || field === 'present') {
+              // Ensure we are working with numbers for calculation fields
+              const numValue = Number(value);
+              parsedValue = isNaN(numValue) ? 0 : Math.max(0, numValue);
+            }
             return { ...s, [field]: parsedValue };
           }
           return s;
@@ -81,27 +86,28 @@ export function AttendanceCalculator() {
   
   const calculations = useMemo(() => {
     return subjects.map(subject => {
-      const { conducted, present } = subject;
+      const conducted = Number(subject.conducted) || 0;
+      const present = Number(subject.present) || 0;
       const absent = conducted - present;
       const percentage = conducted > 0 ? (present / conducted) * 100 : 0;
 
-      const to75 = Math.max(0, Math.ceil((0.75 * conducted - present) / 0.25));
-      const to85 = Math.max(0, Math.ceil((0.85 * conducted - present) / 0.15));
-      const to95 = Math.max(0, Math.ceil((0.95 * conducted - present) / 0.05));
-      const canBunk = Math.floor((present - 0.75 * conducted) / 0.75);
+      const to75 = percentage < 75 ? Math.max(0, Math.ceil((0.75 * conducted - present) / 0.25)) : 0;
+      const to85 = percentage < 85 ? Math.max(0, Math.ceil((0.85 * conducted - present) / 0.15)) : 0;
+      const to95 = percentage < 95 ? Math.max(0, Math.ceil((0.95 * conducted - present) / 0.05)) : 0;
+      const canBunk = percentage >= 75 ? Math.floor((present - 0.75 * conducted) / 0.75) : 0;
 
       return { ...subject, absent, percentage, to75, to85, to95, canBunk };
     });
   }, [subjects]);
 
   const totals = useMemo(() => {
-    const totalConducted = subjects.reduce((sum, s) => sum + s.conducted, 0);
-    const totalPresent = subjects.reduce((sum, s) => sum + s.present, 0);
+    const totalConducted = subjects.reduce((sum, s) => sum + Number(s.conducted || 0), 0);
+    const totalPresent = subjects.reduce((sum, s) => sum + Number(s.present || 0), 0);
     const totalAbsent = totalConducted - totalPresent;
     const totalPercentage = totalConducted > 0 ? (totalPresent / totalConducted) * 100 : 0;
     
-    const totalTo75 = calculations.reduce((sum, s) => sum + (s.to75 > 0 ? s.to75 : 0), 0);
-    const totalCanBunk = calculations.reduce((sum, s) => sum + (s.canBunk > 0 ? s.canBunk : 0), 0);
+    const totalTo75 = calculations.reduce((sum, s) => sum + s.to75, 0);
+    const totalCanBunk = calculations.reduce((sum, s) => sum + s.canBunk, 0);
 
     return { totalConducted, totalPresent, totalAbsent, totalPercentage, totalTo75, totalCanBunk };
   }, [subjects, calculations]);
@@ -166,7 +172,7 @@ export function AttendanceCalculator() {
                     {s.percentage >= 95 ? <Check className="text-green-500"/> : <span className="text-red-500 font-bold">{s.to95}</span>}
                   </TableCell>
                   <TableCell>
-                     {s.canBunk > 0 ? <span className="text-green-500 font-bold">{s.canBunk}</span> : 0}
+                     {s.canBunk > 0 ? <span className="text-green-500 font-bold">{s.canBunk}</span> : <X className="text-red-500"/>}
                   </TableCell>
                   <TableCell>
                     <Button variant="ghost" size="icon" onClick={() => handleDeleteSubject(s.id)}>
