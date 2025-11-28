@@ -22,43 +22,63 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLoader } from "@/hooks/use-loader";
 
 const ChristSeal = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 200 200"
-        {...props}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 200 200"
+      {...props}
     >
+      <g>
+        {/* Outer Circles */}
+        <circle cx="100" cy="100" r="95" fill="#FFFFFF" stroke="#003366" strokeWidth="2" />
+        <circle cx="100" cy="100" r="85" fill="none" stroke="#D4AF37" strokeWidth="2" />
+
+        {/* Text on Path */}
         <defs>
             <path id="circlePath" d="M 40,100 A 60,60 0 1,1 160,100 A 60,60 0 1,1 40,100" />
         </defs>
-        <g fill="none" stroke="hsl(var(--primary))" strokeWidth="2">
-            <circle cx="100" cy="100" r="90" />
-            <circle cx="100" cy="100" r="80" />
+        <text fill="#003366" fontSize="11" fontWeight="bold" letterSpacing="1.5">
+            <textPath href="#circlePath" startOffset="50%" textAnchor="middle">CHRIST (DEEMED TO BE UNIVERSITY)</textPath>
+        </text>
 
-            {/* Star and inner circle */}
-            <path d="M 100,20 L 120,80 L 180,80 L 130,120 L 150,180 L 100,140 L 50,180 L 70,120 L 20,80 L 80,80 Z" />
+         {/* Inner Star */}
+        <path
+            d="M 100,25
+               L 119.5,78.5
+               L 175,78.5
+               L 127.75,111.5
+               L 147.25,165
+               L 100,132
+               L 52.75,165
+               L 72.25,111.5
+               L 25,78.5
+               L 80.5,78.5 Z"
+            fill="#D4AF37"
+            stroke="#003366"
+            strokeWidth="1.5"
+        />
 
-            {/* Rays */}
-            <g strokeWidth="1" stroke="hsl(var(--primary))">
-                {Array.from({ length: 36 }).map((_, i) => (
-                    <path key={i} d={`M 100 100 L ${100 + 45 * Math.cos(i * 10 * Math.PI / 180)} ${100 + 45 * Math.sin(i * 10 * Math.PI / 180)}`} />
-                ))}
-            </g>
+        {/* Central Circle */}
+        <circle cx="100" cy="100" r="40" fill="#FFFFFF" stroke="#003366" strokeWidth="2" />
 
-            <circle cx="100" cy="100" r="40" fill="hsl(var(--background))" />
-            
-            {/* Candle and Book */}
-            <path d="M95 125 h10 v-20 h-10z" strokeWidth="1.5" fill="hsl(var(--background))" />
-            <path d="M90 130 h20 l-2 5 h-16 l-2 -5z" strokeWidth="1.5" fill="hsl(var(--background))"/>
-            <path d="M98 105 q2 -5 4 0" fill="hsl(var(--primary))" stroke="none"/>
-            <path d="M100 105 l0 -10" strokeWidth="1"/>
-
-            {/* Text */}
-            <text fill="hsl(var(--primary))" fontSize="14" fontWeight="bold" letterSpacing="1">
-                <textPath href="#circlePath" startOffset="8%" textAnchor="middle">EXCELLENCE</textPath>
-                <textPath href="#circlePath" startOffset="42%" textAnchor="middle">SERVICE</textPath>
-                <textPath href="#circlePath" startOffset="75%" textAnchor="middle">CHRIST</textPath>
-            </text>
+        {/* Book */}
+        <path d="M 85,110 L 115,110 L 115,115 L 85,115 Z" fill="#F4F4F4" stroke="#003366" strokeWidth="0.5"/>
+        <path d="M 87,112 L 97,95 L 103,95 L 113,112" fill="none" stroke="#003366" strokeWidth="1" />
+        <path d="M100,95 L 100,112" fill="none" stroke="#003366" strokeWidth="1" />
+        
+        {/* Light rays */}
+        <g stroke="#D4AF37" strokeWidth="1">
+            <path d="M100 92 L100 82" />
+            <path d="M100 92 L 90 85" />
+            <path d="M100 92 L 110 85" />
+            <path d="M100 92 L 85 92" />
+            <path d="M100 92 L 115 92" />
         </g>
+        
+        {/* Bottom Text */}
+        <text x="100" y="188" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#003366">
+          BANGALORE, INDIA
+        </text>
+      </g>
     </svg>
 );
 
