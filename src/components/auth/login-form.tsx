@@ -65,9 +65,10 @@ export function LoginForm() {
             <Image 
               src="/christ-logo.png" 
               alt="CHRIST University Logo" 
-              width={200} 
-              height={50}
+              width={400} 
+              height={100}
               className="mb-4"
+              priority
             />
           </div>
           <CardDescription>
