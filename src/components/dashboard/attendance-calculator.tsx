@@ -63,10 +63,17 @@ export function AttendanceCalculator() {
           if (s.id === id) {
             let parsedValue: string | number = value;
             if (field === 'conducted' || field === 'present') {
-              // Ensure we are working with numbers for calculation fields
               const numValue = Number(value);
               parsedValue = isNaN(numValue) ? 0 : Math.max(0, numValue);
             }
+            // Ensure 'present' is not more than 'conducted'
+            if (field === 'present' && Number(value) > s.conducted) {
+              parsedValue = s.conducted;
+            }
+            if (field === 'conducted' && s.present > Number(value)) {
+                return { ...s, conducted: parsedValue, present: parsedValue };
+            }
+            
             return { ...s, [field]: parsedValue };
           }
           return s;
@@ -91,9 +98,16 @@ export function AttendanceCalculator() {
       const absent = conducted - present;
       const percentage = conducted > 0 ? (present / conducted) * 100 : 0;
 
-      const to75 = percentage < 75 ? Math.max(0, Math.ceil((0.75 * conducted - present) / 0.25)) : 0;
-      const to85 = percentage < 85 ? Math.max(0, Math.ceil((0.85 * conducted - present) / 0.15)) : 0;
-      const to95 = percentage < 95 ? Math.max(0, Math.ceil((0.95 * conducted - present) / 0.05)) : 0;
+      const calculateClassesToAttend = (targetPercentage: number) => {
+        if (percentage >= targetPercentage) return 0;
+        const requiredPresent = Math.ceil(targetPercentage / 100 * conducted);
+        return requiredPresent - present;
+      };
+
+      const to75 = calculateClassesToAttend(75);
+      const to85 = calculateClassesToAttend(85);
+      const to95 = calculateClassesToAttend(95);
+
       const canBunk = percentage >= 75 ? Math.floor((present - 0.75 * conducted) / 0.75) : 0;
 
       return { ...subject, absent, percentage, to75, to85, to95, canBunk };
@@ -106,7 +120,7 @@ export function AttendanceCalculator() {
     const totalAbsent = totalConducted - totalPresent;
     const totalPercentage = totalConducted > 0 ? (totalPresent / totalConducted) * 100 : 0;
     
-    const totalTo75 = calculations.reduce((sum, s) => sum + s.to75, 0);
+    const totalTo75 = totalPercentage < 75 ? Math.ceil((0.75 * totalConducted - totalPresent) / 0.25) : 0;
     const totalCanBunk = calculations.reduce((sum, s) => sum + s.canBunk, 0);
 
     return { totalConducted, totalPresent, totalAbsent, totalPercentage, totalTo75, totalCanBunk };
