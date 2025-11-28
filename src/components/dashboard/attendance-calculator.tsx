@@ -98,10 +98,11 @@ export function AttendanceCalculator() {
       const absent = conducted - present;
       const percentage = conducted > 0 ? (present / conducted) * 100 : 0;
 
-      const calculateClassesToAttend = (targetPercentage: number) => {
-        if (percentage >= targetPercentage) return 0;
-        const requiredPresent = Math.ceil(targetPercentage / 100 * conducted);
-        return requiredPresent - present;
+      const calculateClassesToAttend = (target: number) => {
+          if (percentage >= target) return 0;
+          // Formula: x = (target * conducted - 100 * present) / (100 - target)
+          const required = Math.ceil((target * conducted - 100 * present) / (100 - target));
+          return required > 0 ? required : 0;
       };
 
       const to75 = calculateClassesToAttend(75);
