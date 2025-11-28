@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { AtSign, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,9 +57,18 @@ export function LoginForm() {
     <div className="flex items-center justify-center min-h-screen bg-background animate-gradient">
       <Card className="mx-auto max-w-sm z-10 shadow-xl">
         <CardHeader className="text-center">
-          <div className="flex justify-center items-center gap-2 mb-4">
+          <div className="flex justify-center items-center gap-2 mb-2">
             <Logo className="w-8 h-8 text-primary" />
             <CardTitle className="text-3xl">StudentSync</CardTitle>
+          </div>
+          <div className="flex justify-center">
+            <Image 
+              src="/christ-logo.png" 
+              alt="CHRIST University Logo" 
+              width={200} 
+              height={50}
+              className="mb-4"
+            />
           </div>
           <CardDescription>
             Enter your email below to login to your account
