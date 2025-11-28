@@ -1,3 +1,4 @@
+
 export type Transaction = {
   id: string;
   description: string;
@@ -23,3 +24,11 @@ export type ScheduleItem = {
     duration: string;
     suggestedTime: string;
 }
+
+export type Subject = {
+  id: string;
+  name: string;
+  type: 'Theory' | 'Practical' | 'Extra Curricular';
+  conducted: number;
+  present: number;
+};
