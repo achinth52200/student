@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { AtSign, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +20,7 @@ import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useLoader } from "@/hooks/use-loader";
+import { ChristLogo } from "../icons/christ-logo";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -61,14 +61,8 @@ export function LoginForm() {
             <Logo className="w-8 h-8 text-primary" />
             <CardTitle className="text-3xl">StudentSync</CardTitle>
           </div>
-          <div className="flex justify-center">
-            <Image 
-              src="/christ-logo.png" 
-              alt="CHRIST University Logo" 
-              width={400} 
-              height={100}
-              className="mb-4"
-            />
+          <div className="flex justify-center p-4">
+            <ChristLogo className="w-full h-auto" />
           </div>
           <CardDescription>
             Enter your email below to login to your account
