@@ -101,7 +101,7 @@ export function AttendanceCalculator() {
       const calculateClassesToAttend = (target: number) => {
           if (percentage >= target) return 0;
           // Formula: x = (target * conducted - 100 * present) / (100 - target)
-          const required = Math.ceil((target * conducted - 100 * present) / (100 - target));
+          const required = Math.ceil((target / 100 * conducted - present) / (1 - target / 100));
           return required > 0 ? required : 0;
       };
 
@@ -109,7 +109,7 @@ export function AttendanceCalculator() {
       const to85 = calculateClassesToAttend(85);
       const to95 = calculateClassesToAttend(95);
 
-      const canBunk = percentage >= 75 ? Math.floor((100 * present - 75 * conducted) / 75) : 0;
+      const canBunk = percentage >= 75 ? Math.floor((present - 0.75 * conducted) / 0.75) : 0;
 
       return { ...subject, absent, percentage, to75, to85, to95, canBunk };
     });
@@ -122,11 +122,11 @@ export function AttendanceCalculator() {
     const totalPercentage = totalConducted > 0 ? (totalPresent / totalConducted) * 100 : 0;
     
     const totalTo75 = totalPercentage < 75 ? Math.ceil((0.75 * totalConducted - totalPresent) / 0.25) : 0;
-    const totalCanBunk = totalPercentage >= 75 ? Math.floor((100 * totalPresent - 75 * totalConducted) / 75) : 0;
+    const totalCanBunk = calculations.reduce((sum, s) => sum + s.canBunk, 0);
 
 
     return { totalConducted, totalPresent, totalAbsent, totalPercentage, totalTo75, totalCanBunk };
-  }, [subjects]);
+  }, [subjects, calculations]);
 
   return (
     <Card>
@@ -224,3 +224,5 @@ export function AttendanceCalculator() {
     </Card>
   );
 }
+
+    
