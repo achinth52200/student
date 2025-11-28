@@ -61,9 +61,7 @@ export function LoginForm() {
             <Logo className="w-8 h-8 text-primary" />
             <CardTitle className="text-3xl">StudentSync</CardTitle>
           </div>
-          <div className="flex justify-center p-4">
-            <ChristLogo className="w-full h-auto" />
-          </div>
+          <ChristLogo className="w-full h-auto px-4 pt-4" />
           <CardDescription>
             Enter your email below to login to your account
           </CardDescription>
