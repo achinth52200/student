@@ -68,7 +68,6 @@ export function LoginForm() {
               width={400} 
               height={100}
               className="mb-4"
-              priority
             />
           </div>
           <CardDescription>
