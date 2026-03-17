@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -89,9 +88,6 @@ export function AppSidebar() {
             <Button variant="ghost" size="icon" onClick={logout} className={cn("ml-auto", sidebarState === 'collapsed' && 'hidden')}>
               <LogOut className="w-4 h-4"/>
             </Button>
-        </div>
-         <div className={cn("text-xs text-muted-foreground text-center mt-4", sidebarState === 'collapsed' && 'hidden')}>
-            <p>Developed by Gowtham C N & Achinth.M</p>
         </div>
       </SidebarFooter>
     </Sidebar>
