@@ -20,7 +20,6 @@ import { GoogleIcon } from "../icons/google-icon";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useLoader } from "@/hooks/use-loader";
-import Image from "next/image";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -60,15 +59,6 @@ export function LoginForm() {
           <div className="flex justify-center items-center gap-2 mb-2">
             <Logo className="w-8 h-8 text-primary" />
             <CardTitle className="text-3xl">StudentSync</CardTitle>
-          </div>
-          <div className="flex justify-center py-4">
-             <Image
-                src="https://christuniversity.in/images/logo.png"
-                alt="CHRIST University Logo"
-                width={300}
-                height={100}
-                className="w-auto h-auto"
-            />
           </div>
           <CardDescription>
             Enter your email below to login to your account
