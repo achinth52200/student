@@ -18,7 +18,6 @@ const initialSubjects: Subject[] = [
     { id: '4', name: 'NCC', type: 'Extra Curricular', conducted: 10, present: 10 },
 ];
 
-
 export function AttendanceCalculator() {
   const { user } = useAuth();
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -100,8 +99,10 @@ export function AttendanceCalculator() {
 
       const calculateClassesToAttend = (target: number) => {
           if (percentage >= target) return 0;
-          // Formula: x = (target * conducted - 100 * present) / (100 - target)
-          const required = Math.ceil((target / 100 * conducted - present) / (1 - target / 100));
+          // Formula: (present + x) / (conducted + x) >= target/100
+          // x >= (target/100 * conducted - present) / (1 - target/100)
+          const targetDecimal = target / 100;
+          const required = Math.ceil((targetDecimal * conducted - present) / (1 - targetDecimal));
           return required > 0 ? required : 0;
       };
 
@@ -109,6 +110,8 @@ export function AttendanceCalculator() {
       const to85 = calculateClassesToAttend(85);
       const to95 = calculateClassesToAttend(95);
 
+      // Formula for Can Bunk: present / (conducted + y) >= 0.75
+      // y <= (present - 0.75 * conducted) / 0.75
       const canBunk = percentage >= 75 ? Math.floor((present - 0.75 * conducted) / 0.75) : 0;
 
       return { ...subject, absent, percentage, to75, to85, to95, canBunk };
@@ -121,19 +124,18 @@ export function AttendanceCalculator() {
     const totalAbsent = totalConducted - totalPresent;
     const totalPercentage = totalConducted > 0 ? (totalPresent / totalConducted) * 100 : 0;
     
-    const totalTo75 = totalPercentage < 75 ? Math.ceil((0.75 * totalConducted - totalPresent) / 0.25) : 0;
+    // Overall bunking is calculated as the sum of per-subject bunking capacity
     const totalCanBunk = calculations.reduce((sum, s) => sum + s.canBunk, 0);
 
-
-    return { totalConducted, totalPresent, totalAbsent, totalPercentage, totalTo75, totalCanBunk };
+    return { totalConducted, totalPresent, totalAbsent, totalPercentage, totalCanBunk };
   }, [subjects, calculations]);
 
   return (
-    <Card>
+    <Card className="glass-effect shadow-xl">
       <CardHeader>
         <CardTitle>Attendance Calculator</CardTitle>
         <CardDescription>
-          Track your attendance and calculate what you need to stay on track.
+          Track per-subject attendance. Calculates bunk limits based on a 75% threshold.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -141,8 +143,8 @@ export function AttendanceCalculator() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40px]">Sl.No</TableHead>
-                <TableHead className="min-w-[150px]">Subject Name</TableHead>
+                <TableHead className="w-[40px]">#</TableHead>
+                <TableHead className="min-w-[150px]">Subject</TableHead>
                 <TableHead className="min-w-[130px]">Type</TableHead>
                 <TableHead>Conducted</TableHead>
                 <TableHead>Present</TableHead>
@@ -151,20 +153,20 @@ export function AttendanceCalculator() {
                 <TableHead>To 75%</TableHead>
                 <TableHead>To 85%</TableHead>
                 <TableHead>To 95%</TableHead>
-                <TableHead>Can Bunk</TableHead>
+                <TableHead className="text-primary font-bold">Can Bunk</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {calculations.map((s, index) => (
-                <TableRow key={s.id}>
+                <TableRow key={s.id} className="transition-colors hover:bg-muted/30">
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
-                    <Input value={s.name} onChange={(e) => handleUpdateSubject(s.id, 'name', e.target.value)} className="w-full" />
+                    <Input value={s.name} onChange={(e) => handleUpdateSubject(s.id, 'name', e.target.value)} className="w-full bg-transparent border-none focus-visible:ring-1" />
                   </TableCell>
                   <TableCell>
                     <Select value={s.type} onValueChange={(v) => handleUpdateSubject(s.id, 'type', v)}>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-transparent">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -174,21 +176,23 @@ export function AttendanceCalculator() {
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell><Input type="number" value={s.conducted} onChange={(e) => handleUpdateSubject(s.id, 'conducted', e.target.value)} className="w-[70px]"/></TableCell>
-                  <TableCell><Input type="number" value={s.present} onChange={(e) => handleUpdateSubject(s.id, 'present', e.target.value)} className="w-[70px]"/></TableCell>
+                  <TableCell><Input type="number" value={s.conducted} onChange={(e) => handleUpdateSubject(s.id, 'conducted', e.target.value)} className="w-[70px] bg-transparent"/></TableCell>
+                  <TableCell><Input type="number" value={s.present} onChange={(e) => handleUpdateSubject(s.id, 'present', e.target.value)} className="w-[70px] bg-transparent"/></TableCell>
                   <TableCell>{s.absent}</TableCell>
-                  <TableCell>{s.percentage.toFixed(2)}</TableCell>
-                  <TableCell>
-                    {s.percentage >= 75 ? <Check className="text-green-500"/> : <span className="text-red-500 font-bold">{s.to75}</span>}
+                  <TableCell className={cn("font-medium", s.percentage < 75 ? "text-destructive" : "text-green-600")}>
+                    {s.percentage.toFixed(2)}%
                   </TableCell>
                   <TableCell>
-                    {s.percentage >= 85 ? <Check className="text-green-500"/> : <span className="text-red-500 font-bold">{s.to85}</span>}
+                    {s.percentage >= 75 ? <Check className="text-green-500 h-4 w-4"/> : <span className="text-destructive font-bold">{s.to75}</span>}
                   </TableCell>
                   <TableCell>
-                    {s.percentage >= 95 ? <Check className="text-green-500"/> : <span className="text-red-500 font-bold">{s.to95}</span>}
+                    {s.percentage >= 85 ? <Check className="text-green-500 h-4 w-4"/> : <span className="text-destructive font-bold">{s.to85}</span>}
                   </TableCell>
                   <TableCell>
-                     {s.canBunk > 0 ? <span className="text-green-500 font-bold">{s.canBunk}</span> : <X className="text-red-500"/>}
+                    {s.percentage >= 95 ? <Check className="text-green-500 h-4 w-4"/> : <span className="text-destructive font-bold">{s.to95}</span>}
+                  </TableCell>
+                  <TableCell>
+                     {s.canBunk > 0 ? <span className="text-primary font-bold">{s.canBunk}</span> : <X className="text-muted-foreground h-4 w-4"/>}
                   </TableCell>
                   <TableCell>
                     <Button variant="ghost" size="icon" onClick={() => handleDeleteSubject(s.id)}>
@@ -200,29 +204,26 @@ export function AttendanceCalculator() {
             </TableBody>
             <TableFooter>
                 <TableRow className="font-bold bg-muted/50">
-                    <TableCell colSpan={3}>Total</TableCell>
+                    <TableCell colSpan={3}>Overall Totals</TableCell>
                     <TableCell>{totals.totalConducted}</TableCell>
                     <TableCell>{totals.totalPresent}</TableCell>
                     <TableCell>{totals.totalAbsent}</TableCell>
-                    <TableCell>{totals.totalPercentage.toFixed(2)}</TableCell>
-                    <TableCell>
-                        {totals.totalPercentage >= 75 ? <Check className="text-green-500"/> : <span className="text-red-500 font-bold">{totals.totalTo75}</span>}
+                    <TableCell className={cn(totals.totalPercentage < 75 ? "text-destructive" : "text-green-600")}>
+                        {totals.totalPercentage.toFixed(2)}%
                     </TableCell>
-                    <TableCell colSpan={3}>-</TableCell>
+                    <TableCell colSpan={3} className="text-center text-xs text-muted-foreground">Individual goals above</TableCell>
                     <TableCell>
-                         {totals.totalCanBunk > 0 ? <span className="text-green-500 font-bold">{totals.totalCanBunk}</span> : 0}
+                         {totals.totalCanBunk > 0 ? <span className="text-primary font-bold">{totals.totalCanBunk}</span> : 0}
                     </TableCell>
                     <TableCell></TableCell>
                 </TableRow>
             </TableFooter>
           </Table>
         </div>
-        <Button onClick={handleAddSubject} variant="outline" className="mt-4">
-          <Plus className="mr-2 h-4 w-4" /> Add Subject
+        <Button onClick={handleAddSubject} variant="outline" className="mt-4 w-full md:w-auto">
+          <Plus className="mr-2 h-4 w-4" /> Add New Subject
         </Button>
       </CardContent>
     </Card>
   );
 }
-
-    
