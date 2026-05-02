@@ -11,7 +11,6 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
 import type {Transaction, Reminder} from '@/lib/types';
-import { generate as hbsGenerate } from 'handlebars';
 
 const TransactionSchema = z.object({
   id: z.string(),
@@ -64,6 +63,7 @@ const generatePersonalizedTipsFlow = ai.defineFlow(
     const remindersList = input.reminders.map(r => `- ${r.title} (Due: ${r.dueDate}, Completed: ${r.completed})`).join('\n') || '- No reminders available.';
     
     const {output} = await ai.generate({
+        model: 'googleai/gemini-1.5-flash',
         prompt: `You are a student success coach. Your goal is to provide supportive, actionable, and personalized tips to a student based on their recent activity.
 
         Analyze the following data:

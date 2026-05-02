@@ -57,6 +57,7 @@ const aiDrivenWellbeingSupportFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await ai.generate({
+        model: 'googleai/gemini-1.5-flash',
         prompt: `You are an AI assistant designed to provide personalized feedback and support to students for maintaining their mental and physical well-being.
 
         Based on the following information provided by the student, offer specific and actionable suggestions to help them manage stress, improve emotional regulation, and promote overall well-being.

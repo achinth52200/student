@@ -47,6 +47,7 @@ const wellbeingChatFlow = ai.defineFlow(
     }));
 
     const {output} = await ai.generate({
+        model: 'googleai/gemini-1.5-flash',
         system: `You are a personal health manager and mentor for students. Your role is to be a responsive, empathetic, and encouraging student motivator and health advisor. Your goal is to provide supportive guidance to help them maintain their mental and physical well-being.
         - Act as a mentor, offering concise, actionable advice.
         - When they talk about their studies, motivate them.

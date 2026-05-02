@@ -58,6 +58,7 @@ const optimizeStudyScheduleFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await ai.generate({
+        model: 'googleai/gemini-1.5-flash',
         prompt: `You are an AI assistant designed to optimize study schedules for students into a structured timetable format.
 
         Based on the provided course deadlines, priorities, topics, and desired duration, generate an optimized study schedule.
