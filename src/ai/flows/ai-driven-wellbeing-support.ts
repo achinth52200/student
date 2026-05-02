@@ -79,6 +79,10 @@ const aiDrivenWellbeingSupportFlow = ai.defineFlow(
         }
     });
 
-    return output!;
+    if (!output) {
+      throw new Error("AI failed to generate feedback");
+    }
+
+    return output;
   }
 );
