@@ -55,6 +55,7 @@ export async function optimizeStudyScheduleAction(
       schedule: result.optimizedSchedule,
     }
   } catch (error) {
+    console.error("Optimize Schedule Error:", error);
     return {
       message: 'An error occurred while optimizing the schedule. Please try again.',
     }
@@ -103,19 +104,27 @@ export async function provideWellbeingSupportAction(
   try {
     const feedbackResult = await provideAiDrivenWellbeingSupport(validatedFields.data);
     
-    if (!feedbackResult.feedback) {
+    if (!feedbackResult || !feedbackResult.feedback) {
         return { message: 'Could not generate feedback at this time. Please try again.' }
     }
+
+    let audioDataUri: string | undefined = undefined;
     
-    const audioResult = await textToSpeech({ text: feedbackResult.feedback });
+    // Try TTS but don't fail the whole action if it fails
+    try {
+      const audioResult = await textToSpeech({ text: feedbackResult.feedback });
+      audioDataUri = audioResult.audioDataUri;
+    } catch (ttsError) {
+      console.error("TTS Generation Failed:", ttsError);
+    }
     
     return {
       message: 'Feedback generated successfully!',
       feedback: feedbackResult.feedback,
-      audioDataUri: audioResult.audioDataUri,
+      audioDataUri,
     }
   } catch (error) {
-    console.error(error);
+    console.error("Wellbeing Support Action Error:", error);
     return {
       message: 'An error occurred while generating feedback. Please try again.',
     }
@@ -156,6 +165,7 @@ export async function wellbeingChatAction(
       response: result.response,
     };
   } catch (error) {
+    console.error("Wellbeing Chat Error:", error);
     return {
       error: 'An error occurred while getting a response. Please try again.',
     };
@@ -198,7 +208,7 @@ export async function extractTransactionAction(
 
         const result = await extractTransactionsFromImage({ photoDataUri });
         
-        if (result.transactions && result.transactions.length > 0) {
+        if (result && result.transactions && result.transactions.length > 0) {
             return {
                 transactions: result.transactions,
             };
@@ -208,7 +218,7 @@ export async function extractTransactionAction(
             }
         }
     } catch (error) {
-        console.error(error);
+        console.error("Extract Transaction Error:", error);
         return {
             error: 'An unexpected error occurred while analyzing the receipt. Please try again.',
         };
@@ -233,12 +243,6 @@ const ReminderSchema = z.object({
     completed: z.boolean(),
 });
 
-const generateTipsSchema = z.object({
-  transactions: z.array(TransactionSchema),
-  reminders: z.array(ReminderSchema),
-});
-
-
 type Tip = {
     icon: "PiggyBank" | "GraduationCap" | "HeartPulse" | "Lightbulb";
     text: string;
@@ -253,11 +257,10 @@ export async function generatePersonalizedTipsAction(
   transactions: Transaction[],
   reminders: Reminder[]
 ): Promise<GenerateTipsState> {
-  // Convert dates to string representations
-  const safeTransactions = transactions.map(t => ({...t, date: new Date(t.date).toISOString()}));
-  const safeReminders = reminders.map(r => ({...r, dueDate: new Date(r.dueDate).toISOString()}));
-
   try {
+    const safeTransactions = transactions.map(t => ({...t, date: new Date(t.date).toISOString()}));
+    const safeReminders = reminders.map(r => ({...r, dueDate: new Date(r.dueDate).toISOString()}));
+
     const result = await generatePersonalizedTips({ transactions: safeTransactions, reminders: safeReminders });
     return { tips: result.tips };
   } catch (error) {

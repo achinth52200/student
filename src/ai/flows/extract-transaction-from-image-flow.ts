@@ -2,14 +2,10 @@
 'use server';
 /**
  * @fileOverview An AI-powered flow to extract multiple transaction details from an image.
- *
- * - extractTransactionsFromImage - A function that analyzes an image of a receipt or statement and returns structured transaction data.
- * - ExtractTransactionsInput - The input type for the extractTransactionsFromImage function.
- * - ExtractTransactionsOutput - The return type for the extractTransactionsFromImage function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'zod';
+import {z} from 'genkit';
 
 const ExtractTransactionsInputSchema = z.object({
   photoDataUri: z
@@ -22,14 +18,14 @@ export type ExtractTransactionsInput = z.infer<typeof ExtractTransactionsInputSc
 
 
 const TransactionSchema = z.object({
-  description: z.string().describe("The description or merchant of the transaction. For personal transfers (like UPI), this should be the recipient's name."),
+  description: z.string().describe("The description or merchant of the transaction."),
   amount: z.number().describe("The total amount of the transaction."),
   type: z.enum(['income', 'expense']).describe("The type of transaction (income or expense)."),
-  category: z.string().describe("The most likely category. For personal transfers (like UPI), use the recipient's name as the category."),
+  category: z.string().describe("The most likely category."),
 });
 
 const ExtractTransactionsOutputSchema = z.object({
-    transactions: z.array(TransactionSchema).describe("The list of extracted transactions. If no transactions can be found, this should be an empty array.")
+    transactions: z.array(TransactionSchema).describe("The list of extracted transactions."),
 });
 
 export type ExtractTransactionsOutput = z.infer<typeof ExtractTransactionsOutputSchema>;
@@ -58,7 +54,6 @@ Analyze the following image and extract all key transaction details for every tr
 - The 'amount' should be the final total of the transaction.
 - The 'type' should be 'expense' for payments made, and 'income' for money received.
 - For 'category', make a reasonable guess based on the merchant (e.g., 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Salary', 'Other').
-- For personal payments (like UPI), use the recipient's name as the 'category'. This is important for tracking payments to individuals.
 
 If you cannot find any transactions in the image, return an empty array for the transactions.`,
             },
@@ -69,6 +64,10 @@ If you cannot find any transactions in the image, return an empty array for the 
         },
     });
 
-    return output!;
+    if (!output) {
+      return { transactions: [] };
+    }
+
+    return output;
   }
 );
