@@ -22,7 +22,7 @@ export type ExtractTransactionsOutput = {
 export async function extractTransactionsFromImage(input: ExtractTransactionsInput): Promise<ExtractTransactionsOutput> {
   const response = await client.chat.completions.create({
     model: 'llama-3.2-11b-vision-preview',
-    max_tokens: 2048,
+    max_tokens: 1024,
     messages: [
       {
         role: 'user',

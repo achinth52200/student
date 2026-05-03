@@ -26,8 +26,8 @@ export async function generatePersonalizedTips(input: GeneratePersonalizedTipsIn
   const remindersList = input.reminders.map(r => `- ${r.title} (Due: ${r.dueDate}, Completed: ${r.completed})`).join('\n') || '- No reminders available.';
 
   const response = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    max_tokens: 1024,
+    model: 'llama-3.1-8b-instant',
+    max_tokens: 512,
     response_format: { type: 'json_object' },
     messages: [
       {

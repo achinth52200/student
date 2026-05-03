@@ -15,6 +15,7 @@ import type { Reminder, Transaction } from "@/lib/types";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
+import { getCachedResponse, setCachedResponse } from "@/lib/ai-cache";
 
 type Tip = {
   icon: "PiggyBank" | "GraduationCap" | "HeartPulse" | "Lightbulb";
@@ -43,17 +44,31 @@ const staticTips: Tip[] = [
   },
 ];
 
+// Cache duration: 2 hours (saves tons of API calls)
+const TIPS_CACHE_TTL = 120;
 
 export function PersonalizedTips() {
   const { user } = useAuth();
   const [tips, setTips] = useState<Tip[]>(staticTips);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchTips = React.useCallback(async () => {
+  const fetchTips = React.useCallback(async (forceRefresh = false) => {
     setIsLoading(true);
 
     try {
       const storageKeySuffix = user ? user.uid : 'guest';
+      const cacheKey = `tips_${storageKeySuffix}`;
+
+      // Check cache first (unless force refresh)
+      if (!forceRefresh) {
+        const cached = getCachedResponse<Tip[]>(cacheKey);
+        if (cached && cached.length > 0) {
+          setTips(cached);
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const transactionsStr = localStorage.getItem(`transactions_${storageKeySuffix}`);
       const remindersStr = localStorage.getItem(`reminders_${storageKeySuffix}`);
 
@@ -64,6 +79,8 @@ export function PersonalizedTips() {
 
       if (result.tips && result.tips.length > 0) {
         setTips(result.tips);
+        // Cache for 2 hours
+        setCachedResponse(cacheKey, result.tips, TIPS_CACHE_TTL);
       } else {
         setTips(staticTips);
       }
@@ -76,48 +93,54 @@ export function PersonalizedTips() {
   }, [user]);
 
   useEffect(() => {
-    fetchTips();
+    fetchTips(false); // Try cache first on mount
   }, [fetchTips]);
 
   return (
-    <Card>
+    <Card className="premium-card rounded-2xl">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb /> Personalized Tips
-          </CardTitle>
-           <Button variant="ghost" size="icon" onClick={fetchTips} disabled={isLoading}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md shadow-amber-500/15">
+              <Lightbulb className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-base font-bold">AI Tips</CardTitle>
+              <CardDescription className="text-xs">Personalized suggestions</CardDescription>
+            </div>
+          </div>
+           <Button variant="ghost" size="icon" onClick={() => fetchTips(true)} disabled={isLoading}
+             className="h-8 w-8 rounded-lg hover:bg-amber-50 hover:text-amber-600">
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
            </Button>
         </div>
-        <CardDescription>AI-generated suggestions based on your activity.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {isLoading ? (
             <>
                 <div className="flex items-start gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-8 w-8 rounded-lg" />
+                    <Skeleton className="h-10 w-full rounded-lg" />
                 </div>
                  <div className="flex items-start gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-8 w-8 rounded-lg" />
+                    <Skeleton className="h-10 w-full rounded-lg" />
                 </div>
                  <div className="flex items-start gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-8 w-8 rounded-lg" />
+                    <Skeleton className="h-10 w-full rounded-lg" />
                 </div>
             </>
         ) : (
             tips.map((tip, index) => {
                 const TipIcon = iconMap[tip.icon] || Lightbulb;
                 return (
-                <div key={index} className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/50 text-accent-foreground">
-                    <TipIcon className="h-5 w-5" />
+                <div key={index} className="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50/80 transition-colors">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-100">
+                      <TipIcon className="h-4 w-4" />
                     </div>
-                    <p className="text-sm text-muted-foreground flex-1 pt-1">
-                    {tip.text}
+                    <p className="text-sm text-muted-foreground flex-1 pt-0.5 leading-relaxed">
+                      {tip.text}
                     </p>
                 </div>
                 );

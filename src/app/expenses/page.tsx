@@ -10,6 +10,7 @@ import { ReceiptUploader } from "@/components/dashboard/receipt-uploader";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { ExpenseTracker } from "@/components/dashboard/expense-tracker";
+import { ExportToPDF } from "@/components/export-to-pdf";
 
 const initialTransactions: Transaction[] = [
     { id: '1', description: 'Groceries', amount: 75.50, type: 'expense', category: 'Groceries', date: '2024-07-15T10:00:00Z', status: 'Completed' },
@@ -85,14 +86,17 @@ export default function ExpensesPage() {
           <SidebarInset className="flex-1">
             <AppHeader />
             <main className="p-4 sm:p-6 lg:p-8">
-               <div className="flex justify-end mb-4">
+               <div className="flex justify-end gap-2 mb-4">
+                  <ExportToPDF targetId="expense-export" filename="Expense Report" title="Expense Report" />
                   <ReceiptUploader onTransactionsExtracted={addTransactions} />
               </div>
-              <ExpenseTracker 
-                  transactions={transactions} 
-                  onAddTransaction={addTransaction} 
-                  onDeleteTransaction={deleteTransaction}
-              />
+              <div id="expense-export">
+                <ExpenseTracker 
+                    transactions={transactions} 
+                    onAddTransaction={addTransaction} 
+                    onDeleteTransaction={deleteTransaction}
+                />
+              </div>
             </main>
           </SidebarInset>
         </div>

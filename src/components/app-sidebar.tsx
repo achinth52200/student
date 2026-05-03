@@ -3,7 +3,7 @@
 import Link from "next/link";
 import {
   BookOpen, HeartPulse, LayoutDashboard,
-  Wallet, Bell, LogOut, Zap, Sparkles,
+  Wallet, Bell, LogOut, Zap, Sparkles, GraduationCap,
 } from "lucide-react";
 import {
   Sidebar, SidebarHeader, SidebarContent,
@@ -24,6 +24,7 @@ export const menuItems = [
   { href: "/study-planner", icon: BookOpen, label: "Study Planner", color: "text-emerald-500" },
   { href: "/well-being", icon: HeartPulse, label: "Well-being", color: "text-rose-500" },
   { href: "/reminders", icon: Bell, label: "Reminders", color: "text-amber-500" },
+  { href: "/gpa-calculator", icon: GraduationCap, label: "GPA Calculator", color: "text-purple-500" },
 ];
 
 export function AppSidebar() {

@@ -3,7 +3,7 @@
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Wallet, BookOpen, HeartPulse, Bell } from "lucide-react";
+import { LayoutDashboard, Wallet, BookOpen, HeartPulse, Bell, GraduationCap } from "lucide-react";
 
 const pageMeta: Record<string, { title: string; desc: string; icon: any; gradient: string }> = {
   "/dashboard": { title: "Dashboard", desc: "Overview of your student life", icon: LayoutDashboard, gradient: "from-indigo-500 to-purple-500" },
@@ -11,6 +11,7 @@ const pageMeta: Record<string, { title: string; desc: string; icon: any; gradien
   "/study-planner": { title: "Study Planner", desc: "AI-optimized study schedules", icon: BookOpen, gradient: "from-emerald-500 to-teal-500" },
   "/well-being": { title: "Well-being Hub", desc: "Your personal AI wellness mentor", icon: HeartPulse, gradient: "from-rose-500 to-pink-500" },
   "/reminders": { title: "Reminders", desc: "Stay on top of deadlines", icon: Bell, gradient: "from-amber-500 to-orange-500" },
+  "/gpa-calculator": { title: "GPA Calculator", desc: "Track your academic performance", icon: GraduationCap, gradient: "from-purple-500 to-violet-500" },
 };
 
 export function AppHeader() {

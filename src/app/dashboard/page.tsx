@@ -11,6 +11,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { BudgetChart } from "@/components/dashboard/budget-chart";
 import type { Transaction } from "@/lib/types";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
+import { ExportToPDF } from "@/components/export-to-pdf";
 import { useAuth } from "@/hooks/use-auth";
 import {
   TrendingUp, TrendingDown, Wallet, ArrowUpRight,
@@ -168,7 +169,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 <div className="lg:col-span-3">
                   <Card className="premium-card rounded-2xl">
-                    <CardHeader className="pb-2">
+                    <CardHeader className="pb-2 flex flex-row items-center justify-between">
                       <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-500/15">
                           <Wallet className="w-4 h-4 text-white" />
@@ -178,8 +179,9 @@ export default function DashboardPage() {
                           <CardDescription className="text-xs">Financial breakdown by category</CardDescription>
                         </div>
                       </div>
+                      <ExportToPDF targetId="budget-export" filename="Budget Overview" title="Budget Overview" />
                     </CardHeader>
-                    <CardContent>
+                    <CardContent id="budget-export">
                       <BudgetChart transactions={transactions} />
                     </CardContent>
                   </Card>
