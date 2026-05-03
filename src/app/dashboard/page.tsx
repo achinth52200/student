@@ -145,18 +145,18 @@ export default function DashboardPage() {
                 <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-3 flex items-center gap-2">
                   <Zap className="w-3.5 h-3.5 text-indigo-400" /> Quick Actions
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 mt-3 sm:mt-4">
                   {quickActions.map((action, i) => (
                     <Link key={i} href={action.href}
-                      className={`group relative rounded-2xl p-4 border border-transparent ${action.bg} hover:border-slate-200 hover:shadow-lg ${action.shadow} transition-all duration-300 hover:-translate-y-1`}
+                      className={`group relative rounded-2xl p-3 sm:p-4 border border-transparent ${action.bg} hover:border-slate-200 hover:shadow-lg ${action.shadow} transition-all duration-300 hover:-translate-y-1`}
                     >
                       <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center mb-3 shadow-md group-hover:scale-110 transition-transform duration-300`}>
                         <action.icon className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-sm font-bold block">{action.label}</span>
-                          <span className={`text-[11px] ${action.text} font-medium`}>{action.desc}</span>
+                          <span className="text-xs sm:text-sm font-bold block">{action.label}</span>
+                          <span className={`text-[10px] sm:text-[11px] ${action.text} font-medium`}>{action.desc}</span>
                         </div>
                         <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                       </div>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Main Content Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6 mt-2">
                 <div className="lg:col-span-3">
                   <Card className="premium-card rounded-2xl">
                     <CardHeader className="pb-2 flex flex-row items-center justify-between">

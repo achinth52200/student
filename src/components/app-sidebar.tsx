@@ -75,8 +75,8 @@ export function AppSidebar() {
                 }}
               >
                 <Link href={item.href} className="py-1.5 sm:py-2">
-                  <item.icon className={cn("!w-[18px] !h-[18px]", isActive(item.href) && item.color)} />
-                  <span className="text-[13px]">{item.label}</span>
+                  <item.icon className={cn("!w-[20px] !h-[20px]", isActive(item.href) && item.color)} />
+                  <span className="text-[15px] font-medium">{item.label}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
