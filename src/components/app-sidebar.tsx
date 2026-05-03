@@ -29,7 +29,7 @@ export const menuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { state: sidebarState } = useSidebar();
+  const { state: sidebarState, setOpenMobile, isMobile } = useSidebar();
   const { user, logout } = useAuth();
   const isActive = (href: string) => pathname === href;
   
@@ -54,22 +54,27 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="mt-3 px-2">
+      <SidebarContent className="mt-2 sm:mt-3 px-2">
         <p className={cn(
           "text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 px-4 mb-2",
           sidebarState === 'collapsed' && 'hidden'
         )}>
           Navigation
         </p>
-        <SidebarMenu>
+        <SidebarMenu className="gap-0.5 sm:gap-1">
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
                 isActive={isActive(item.href)}
                 tooltip={{ children: item.label, side: "right" }}
+                onClick={() => {
+                  if (isMobile) {
+                    setOpenMobile(false);
+                  }
+                }}
               >
-                <Link href={item.href}>
+                <Link href={item.href} className="py-1.5 sm:py-2">
                   <item.icon className={cn("!w-[18px] !h-[18px]", isActive(item.href) && item.color)} />
                   <span className="text-[13px]">{item.label}</span>
                 </Link>
