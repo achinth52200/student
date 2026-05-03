@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem(GUEST_USER_KEY, JSON.stringify(mockUser));
         setUser(mockUser);
         setIsLoading(false);
-    }, 7000);
+    }, 500);
   }, [setIsLoading]);
   
   const signup = useCallback((email: string, name: string) => {

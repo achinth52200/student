@@ -14,10 +14,10 @@ export function PageTransitionLoader() {
 
     useEffect(() => {
         setIsLoading(true);
-        // Setting a timeout to show the loader for 5 seconds.
+        // Setting a brief timeout for the page transition animation.
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 5000); 
+        }, 500); 
 
         return () => clearTimeout(timer);
     // We only want this to run on route changes.

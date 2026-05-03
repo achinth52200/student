@@ -1,71 +1,57 @@
 
 'use server';
 /**
- * @fileOverview A personalized well-being chatbot.
- *
- * - wellbeingChat - A function that handles the chatbot conversation.
- * - WellbeingChatInput - The input type for the wellbeingChat function.
- * - WellbeingChatOutput - The return type for the wellbeingChat function.
+ * @fileOverview A personalized well-being chatbot using Groq.
  */
 
-import {ai} from '@/ai/genkit';
-import {Message} from 'genkit';
-import {z} from 'zod';
+import { client } from '@/ai/claude';
 
-const WellbeingChatInputSchema = z.object({
-  history: z.array(
-    z.object({
-      role: z.enum(['user', 'model']),
-      content: z.string(),
-    })
-  ),
-  message: z.string().describe('The user’s current message.'),
-});
-export type WellbeingChatInput = z.infer<typeof WellbeingChatInputSchema>;
+export type WellbeingChatInput = {
+  history: { role: 'user' | 'model'; content: string }[];
+  message: string;
+};
 
-const WellbeingChatOutputSchema = z.object({
-  response: z.string().describe('The AI’s response to the user’s message.'),
-});
-export type WellbeingChatOutput = z.infer<typeof WellbeingChatOutputSchema>;
+export type WellbeingChatOutput = {
+  response: string;
+};
 
-export async function wellbeingChat(
-  input: WellbeingChatInput
-): Promise<WellbeingChatOutput> {
-  return wellbeingChatFlow(input);
-}
+export async function wellbeingChat(input: WellbeingChatInput): Promise<WellbeingChatOutput> {
+  // Convert history to OpenAI format (model -> assistant)
+  const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+    {
+      role: 'system',
+      content: `You are a personal health manager and mentor for students. Your role is to be a responsive, empathetic, and encouraging student motivator and health advisor. Your goal is to provide supportive guidance to help them maintain their mental and physical well-being.
+- Act as a mentor, offering concise, actionable advice.
+- When they talk about their studies, motivate them.
+- When they talk about their health, give them sound advice.
+- When appropriate, use bullet points for clarity.
+- Ask clarifying questions to better understand their needs.
+- Remember the conversation history to provide contextual support and track their progress.
+- Keep your responses encouraging and positive.`,
+    },
+  ];
 
-const wellbeingChatFlow = ai.defineFlow(
-  {
-    name: 'wellbeingChatFlow',
-    inputSchema: WellbeingChatInputSchema,
-    outputSchema: WellbeingChatOutputSchema,
-  },
-  async input => {
-    const history: Message[] = input.history.map(msg => ({
-      role: msg.role,
-      content: [{text: msg.content}],
-    }));
-
-    const {output} = await ai.generate({
-        model: 'googleai/gemini-1.5-flash',
-        system: `You are a personal health manager and mentor for students. Your role is to be a responsive, empathetic, and encouraging student motivator and health advisor. Your goal is to provide supportive guidance to help them maintain their mental and physical well-being.
-        - Act as a mentor, offering concise, actionable advice.
-        - When they talk about their studies, motivate them.
-        - When they talk about their health, give them sound advice.
-        - When appropriate, use bullet points for clarity.
-        - Ask clarifying questions to better understand their needs.
-        - Remember the conversation history to provide contextual support and track their progress.
-        - Keep your responses encouraging and positive.`,
-        prompt: input.message,
-        history,
+  // Add history
+  for (const msg of input.history) {
+    messages.push({
+      role: msg.role === 'model' ? 'assistant' : 'user',
+      content: msg.content,
     });
-    
-    if (!output) {
-      return { response: "I'm sorry, I couldn't generate a response." };
-    }
-
-    return {
-      response: output.text,
-    };
   }
-);
+
+  // Add current message
+  messages.push({ role: 'user', content: input.message });
+
+  const response = await client.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    max_tokens: 1024,
+    messages,
+  });
+
+  const text = response.choices[0]?.message?.content;
+  if (!text) {
+    return { response: "I'm sorry, I couldn't generate a response." };
+  }
+
+  return { response: text };
+}

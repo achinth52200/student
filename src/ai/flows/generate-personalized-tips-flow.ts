@@ -1,100 +1,62 @@
 
 'use server';
 /**
- * @fileOverview An AI-driven flow to generate personalized tips for students based on their dashboard data.
- *
- * - generatePersonalizedTips - A function that provides tips based on financial status, reminders, and well-being.
- * - GeneratePersonalizedTipsInput - The input type for the generatePersonalizedTips function.
- * - GeneratePersonalizedTipsOutput - The return type for the generatePersonalizedTips function.
+ * @fileOverview AI-driven personalized tips generator using Groq.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'zod';
-import type {Transaction, Reminder} from '@/lib/types';
+import { client } from '@/ai/claude';
+import type { Transaction, Reminder } from '@/lib/types';
 
-const TransactionSchema = z.object({
-  id: z.string(),
-  description: z.string(),
-  amount: z.number(),
-  type: z.enum(['income', 'expense']),
-  category: z.string(),
-  date: z.string(),
-  status: z.enum(['Completed', 'Pending', 'Failed']),
-});
+export type GeneratePersonalizedTipsInput = {
+  transactions: Transaction[];
+  reminders: Reminder[];
+};
 
-const ReminderSchema = z.object({
-    id: z.string(),
-    title: z.string(),
-    dueDate: z.string(),
-    completed: z.boolean(),
-});
+type Tip = {
+  icon: 'PiggyBank' | 'GraduationCap' | 'HeartPulse' | 'Lightbulb';
+  text: string;
+};
 
-const GeneratePersonalizedTipsInputSchema = z.object({
-  transactions: z.array(TransactionSchema).describe("The user's recent financial transactions."),
-  reminders: z.array(ReminderSchema).describe("The user's current reminders."),
-});
-
-export type GeneratePersonalizedTipsInput = z.infer<typeof GeneratePersonalizedTipsInputSchema>;
-
-const TipSchema = z.object({
-  icon: z.enum(["PiggyBank", "GraduationCap", "HeartPulse", "Lightbulb"]),
-  text: z.string(),
-});
-
-const GeneratePersonalizedTipsOutputSchema = z.object({
-  tips: z.array(TipSchema).describe('A list of 3-4 personalized, actionable tips for the student.'),
-});
-
-export type GeneratePersonalizedTipsOutput = z.infer<typeof GeneratePersonalizedTipsOutputSchema>;
+export type GeneratePersonalizedTipsOutput = {
+  tips: Tip[];
+};
 
 export async function generatePersonalizedTips(input: GeneratePersonalizedTipsInput): Promise<GeneratePersonalizedTipsOutput> {
-  return generatePersonalizedTipsFlow(input);
-}
+  const transactionsList = input.transactions.map(t => `- ${t.description}: ${t.type} of RS ${t.amount} on ${t.date} (Category: ${t.category})`).join('\n') || '- No transactions available.';
+  const remindersList = input.reminders.map(r => `- ${r.title} (Due: ${r.dueDate}, Completed: ${r.completed})`).join('\n') || '- No reminders available.';
 
-const generatePersonalizedTipsFlow = ai.defineFlow(
-  {
-    name: 'generatePersonalizedTipsFlow',
-    inputSchema: GeneratePersonalizedTipsInputSchema,
-    outputSchema: GeneratePersonalizedTipsOutputSchema,
-  },
-  async input => {
+  const response = await client.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    max_tokens: 1024,
+    response_format: { type: 'json_object' },
+    messages: [
+      {
+        role: 'system',
+        content: `You are a student success coach. Respond with valid JSON: {"tips": [{"icon": "PiggyBank"|"GraduationCap"|"HeartPulse"|"Lightbulb", "text": "..."}]}
+Icons: PiggyBank=financial, GraduationCap=academic, HeartPulse=wellbeing, Lightbulb=productivity.`,
+      },
+      {
+        role: 'user',
+        content: `Generate 3-4 personalized, encouraging tips based on this student data:
 
-    const transactionsList = input.transactions.map(t => `- ${t.description}: ${t.type} of RS ${t.amount} on ${t.date} (Category: ${t.category})`).join('\n') || '- No transactions available.';
-    const remindersList = input.reminders.map(r => `- ${r.title} (Due: ${r.dueDate}, Completed: ${r.completed})`).join('\n') || '- No reminders available.';
-    
-    const {output} = await ai.generate({
-        model: 'googleai/gemini-1.5-flash',
-        prompt: `You are a student success coach. Your goal is to provide supportive, actionable, and personalized tips to a student based on their recent activity.
+Transactions:
+${transactionsList}
 
-        Analyze the following data:
-        - Financial transactions
-        - Pending reminders
+Reminders:
+${remindersList}`,
+      },
+    ],
+  });
 
-        Based on this data, generate 3-4 concise, helpful, and encouraging tips. Each tip must be assigned an appropriate icon.
-
-        Here are the available icons and their meanings:
-        - PiggyBank: For financial advice (budgeting, saving, etc.).
-        - GraduationCap: For academic or study-related advice.
-        - HeartPulse: For well-being, stress management, or health.
-        - Lightbulb: For general productivity or other helpful ideas.
-
-        User's Transactions:
-        ${transactionsList}
-
-        User's Reminders:
-        ${remindersList}
-
-        Here are some examples of good tips:
-        - If expenses are high: "Your expenses seem a bit high. Try creating a weekly budget to track spending and find areas to save." (Icon: PiggyBank)
-        - If many tasks are pending: "You have a few tasks coming up. Try the Pomodoro Technique: study for 25 mins, then take a 5-min break to stay focused." (Icon: GraduationCap)
-        - If there are no recent well-being checks: "Remember to check in with your well-being. A few minutes of mindfulness can make a big difference." (Icon: HeartPulse)
-
-        Generate a list of tips that are directly relevant to the user's provided data.
-        `,
-        output: {
-            schema: GeneratePersonalizedTipsOutputSchema
-        }
-    });
-    return output!;
+  const text = response.choices[0]?.message?.content;
+  if (!text) {
+    throw new Error('AI failed to generate tips');
   }
-);
+
+  try {
+    const parsed = JSON.parse(text);
+    return { tips: parsed.tips || [] };
+  } catch {
+    throw new Error('Failed to parse AI tips response');
+  }
+}

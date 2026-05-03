@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Bot, Send, Sparkles, User } from 'lucide-react';
 
@@ -16,11 +16,6 @@ import { ScrollArea } from '../ui/scroll-area';
 type Message = {
   role: 'user' | 'model';
   content: string;
-};
-
-type WellbeingChatState = {
-  response?: string;
-  error?: string;
 };
 
 function SubmitButton() {
@@ -38,9 +33,9 @@ function SubmitButton() {
 }
 
 export function WellbeingChat() {
-  const [state, setState] = useState<WellbeingChatState>({});
-  const { pending } = useFormStatus();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | undefined>();
   const formRef = useRef<HTMLFormElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   
@@ -48,17 +43,29 @@ export function WellbeingChat() {
       const message = formData.get('message') as string;
       if (!message.trim()) return;
 
-      setMessages((prev) => [...prev, { role: 'user', content: message }]);
+      const userMessage = message;
       
-      const result = await wellbeingChatAction(formData);
-      setState(result);
+      // Reset form immediately so the input clears
+      formRef.current?.reset();
+      
+      setMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
+      setIsPending(true);
+      setError(undefined);
+      
+      try {
+        const result = await wellbeingChatAction(formData);
+        if (result.response) {
+          setMessages(prev => [...prev, { role: 'model', content: result.response! }]);
+        }
+        if (result.error) {
+          setError(result.error);
+        }
+      } catch (e) {
+        setError('An unexpected error occurred. Please try again.');
+      } finally {
+        setIsPending(false);
+      }
   }
-
-  useEffect(() => {
-    if (state.response) {
-      setMessages(prev => [...prev, { role: 'model', content: state.response }]);
-    }
-  }, [state.response]);
   
   useEffect(() => {
     if(scrollAreaRef.current) {
@@ -116,7 +123,7 @@ export function WellbeingChat() {
                 )}
               </div>
             ))}
-             {pending && (
+             {isPending && (
               <div className="flex items-start gap-3">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>
@@ -133,12 +140,6 @@ export function WellbeingChat() {
         <form
           ref={formRef}
           action={handleAction}
-          onSubmit={(e) => {
-            const formData = new FormData(e.currentTarget);
-            handleAction(formData);
-            formRef.current?.reset();
-            e.preventDefault();
-          }}
           className="flex items-center gap-2 border-t pt-4"
         >
           <input
@@ -151,12 +152,12 @@ export function WellbeingChat() {
             placeholder="Type your message..."
             autoComplete="off"
             required
-            disabled={pending}
+            disabled={isPending}
           />
           <SubmitButton />
         </form>
-        {state.error && (
-          <p className="text-xs text-destructive">{state.error}</p>
+        {error && (
+          <p className="text-xs text-destructive">{error}</p>
         )}
       </CardContent>
     </Card>

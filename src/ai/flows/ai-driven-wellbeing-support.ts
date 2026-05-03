@@ -1,62 +1,55 @@
 
 'use server';
 /**
- * @fileOverview An AI-driven well-being support agent.
+ * @fileOverview An AI-driven well-being support agent using Groq.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { client } from '@/ai/claude';
 
-const AiDrivenWellbeingSupportInputSchema = z.object({
-  stressLevel: z.number(),
-  emotionalRegulation: z.string(),
-  physicalActivity: z.string(),
-  sleepQuality: z.string(),
-  studyHours: z.number(),
-});
-export type AiDrivenWellbeingSupportInput = z.infer<typeof AiDrivenWellbeingSupportInputSchema>;
+export type AiDrivenWellbeingSupportInput = {
+  stressLevel: number;
+  emotionalRegulation: string;
+  physicalActivity: string;
+  sleepQuality: string;
+  studyHours: number;
+};
 
-const AiDrivenWellbeingSupportOutputSchema = z.object({
-  feedback: z.string().describe('Personalized feedback and support suggestions.'),
-});
-export type AiDrivenWellbeingSupportOutput = z.infer<typeof AiDrivenWellbeingSupportOutputSchema>;
+export type AiDrivenWellbeingSupportOutput = {
+  feedback: string;
+};
 
 export async function provideAiDrivenWellbeingSupport(input: AiDrivenWellbeingSupportInput): Promise<AiDrivenWellbeingSupportOutput> {
-  return aiDrivenWellbeingSupportFlow(input);
-}
+  const response = await client.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    max_tokens: 512,
+    response_format: { type: 'json_object' },
+    messages: [
+      {
+        role: 'system',
+        content: 'You are an AI assistant designed to provide personalized feedback and support to students for maintaining their mental and physical well-being. Always respond with valid JSON in this format: {"feedback": "your feedback here"}',
+      },
+      {
+        role: 'user',
+        content: `Based on the following information, provide specific and actionable feedback. Keep it concise (2-3 sentences), tailored to the student, and encouraging.
 
-const aiDrivenWellbeingSupportFlow = ai.defineFlow(
-  {
-    name: 'aiDrivenWellbeingSupportFlow',
-    inputSchema: AiDrivenWellbeingSupportInputSchema,
-    outputSchema: AiDrivenWellbeingSupportOutputSchema,
-  },
-  async input => {
-    const {output} = await ai.generate({
-        model: 'googleai/gemini-1.5-flash',
-        prompt: `You are an AI assistant designed to provide personalized feedback and support to students for maintaining their mental and physical well-being.
+Stress Level (1-10): ${input.stressLevel}
+Emotional State: ${input.emotionalRegulation}
+Physical Activity: ${input.physicalActivity}
+Sleep Quality: ${input.sleepQuality}
+Study Hours: ${input.studyHours}`,
+      },
+    ],
+  });
 
-        Based on the following information provided by the student, offer specific and actionable suggestions.
-
-        Stress Level (1-10): ${input.stressLevel}
-        Emotional State: ${input.emotionalRegulation}
-        Physical Activity: ${input.physicalActivity}
-        Sleep Quality: ${input.sleepQuality}
-        Study Hours: ${input.studyHours}
-
-        Provide feedback that is tailored to the student's situation.
-        Keep the feedback concise and to the point, ideally in 2-3 sentences.
-        Offer support and encouragement to help them stay balanced during their studies.
-        `,
-        output: {
-            schema: AiDrivenWellbeingSupportOutputSchema
-        }
-    });
-
-    if (!output) {
-      throw new Error("AI failed to generate feedback");
-    }
-
-    return output;
+  const text = response.choices[0]?.message?.content;
+  if (!text) {
+    throw new Error('AI failed to generate feedback');
   }
-);
+
+  try {
+    const parsed = JSON.parse(text);
+    return { feedback: parsed.feedback };
+  } catch {
+    return { feedback: text };
+  }
+}

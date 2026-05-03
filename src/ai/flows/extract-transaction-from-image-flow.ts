@@ -1,73 +1,72 @@
 
 'use server';
 /**
- * @fileOverview An AI-powered flow to extract multiple transaction details from an image.
+ * @fileOverview AI-powered receipt/transaction extraction using Groq vision model.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { client } from '@/ai/claude';
 
-const ExtractTransactionsInputSchema = z.object({
-  photoDataUri: z
-    .string()
-    .describe(
-      "A photo of a receipt or transaction history, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-});
-export type ExtractTransactionsInput = z.infer<typeof ExtractTransactionsInputSchema>;
+export type ExtractTransactionsInput = {
+  photoDataUri: string;
+};
 
-
-const TransactionSchema = z.object({
-  description: z.string().describe("The description or merchant of the transaction."),
-  amount: z.number().describe("The total amount of the transaction."),
-  type: z.enum(['income', 'expense']).describe("The type of transaction (income or expense)."),
-  category: z.string().describe("The most likely category."),
-});
-
-const ExtractTransactionsOutputSchema = z.object({
-    transactions: z.array(TransactionSchema).describe("The list of extracted transactions."),
-});
-
-export type ExtractTransactionsOutput = z.infer<typeof ExtractTransactionsOutputSchema>;
+export type ExtractTransactionsOutput = {
+  transactions: {
+    description: string;
+    amount: number;
+    type: 'income' | 'expense';
+    category: string;
+  }[];
+};
 
 export async function extractTransactionsFromImage(input: ExtractTransactionsInput): Promise<ExtractTransactionsOutput> {
-  return extractTransactionsFromImageFlow(input);
-}
-
-const extractTransactionsFromImageFlow = ai.defineFlow(
-  {
-    name: 'extractTransactionsFromImageFlow',
-    inputSchema: ExtractTransactionsInputSchema,
-    outputSchema: ExtractTransactionsOutputSchema,
-  },
-  async ({ photoDataUri }) => {
-    const { output } = await ai.generate({
-        model: 'googleai/gemini-1.5-flash',
-        prompt: [
-            {
-                text: `You are an expert at extracting structured data from images of receipts or transaction histories.
-
-Analyze the following image and extract all key transaction details for every transaction you find.
-
-- The 'description' should be the name of the merchant or store.
-- For personal payments like UPI, the 'description' should be the name of the person receiving the payment.
-- The 'amount' should be the final total of the transaction.
-- The 'type' should be 'expense' for payments made, and 'income' for money received.
-- For 'category', make a reasonable guess based on the merchant (e.g., 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Salary', 'Other').
-
-If you cannot find any transactions in the image, return an empty array for the transactions.`,
+  const response = await client.chat.completions.create({
+    model: 'llama-3.2-11b-vision-preview',
+    max_tokens: 2048,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image_url',
+            image_url: {
+              url: input.photoDataUri,
             },
-            { media: { url: photoDataUri} },
+          },
+          {
+            type: 'text',
+            text: `You are an expert at extracting structured data from images of receipts or transaction histories.
+
+Analyze the image and extract all transaction details.
+- description: merchant or store name (for UPI, use the person's name)
+- amount: final total amount as a number
+- type: "expense" for payments made, "income" for money received
+- category: one of "Groceries", "Transport", "Entertainment", "Utilities", "Salary", "Other"
+
+If no transactions found, return empty array.
+
+Respond with ONLY valid JSON, no markdown, no code fences:
+{"transactions": [{"description": "...", "amount": 0, "type": "expense", "category": "..."}]}`,
+          },
         ],
-        output: {
-            schema: ExtractTransactionsOutputSchema,
-        },
-    });
+      },
+    ],
+  });
 
-    if (!output) {
-      return { transactions: [] };
-    }
-
-    return output;
+  const text = response.choices[0]?.message?.content;
+  if (!text) {
+    return { transactions: [] };
   }
-);
+
+  try {
+    // Try to extract JSON from the response (handle cases where model wraps in markdown)
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return { transactions: parsed.transactions || [] };
+    }
+    return { transactions: [] };
+  } catch {
+    return { transactions: [] };
+  }
+}

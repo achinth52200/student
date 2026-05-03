@@ -1,30 +1,14 @@
-// Implemented by Gemini.
+
 'use server';
 /**
  * @fileOverview A flow to simulate fetching recent financial transactions.
- *
- * - getRecentTransactions - A function that returns a list of mock transactions.
- * - RecentTransactionsOutput - The return type for the getRecentTransactions function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'zod';
 import type { Transaction } from '@/lib/types';
 
-const TransactionSchema = z.object({
-  id: z.string(),
-  description: z.string(),
-  amount: z.number(),
-  type: z.enum(['income', 'expense']),
-  category: z.enum(['Groceries' , 'Transport' , 'Entertainment' , 'Utilities' , 'Salary' , 'Other' , 'UPI']),
-  date: z.string(),
-  status: z.enum(['Completed', 'Pending', 'Failed']),
-});
-
-const RecentTransactionsOutputSchema = z.object({
-  transactions: z.array(TransactionSchema),
-});
-export type RecentTransactionsOutput = z.infer<typeof RecentTransactionsOutputSchema>;
+export type RecentTransactionsOutput = {
+  transactions: Transaction[];
+};
 
 // Expanded mock data for new transactions
 const allMockTransactions: Omit<Transaction, 'date' | 'id'>[] = [
@@ -95,32 +79,20 @@ const allMockTransactions: Omit<Transaction, 'date' | 'id'>[] = [
 
 
 export async function getRecentTransactions(): Promise<RecentTransactionsOutput> {
-  return getRecentTransactionsFlow();
-}
-
-const getRecentTransactionsFlow = ai.defineFlow(
-  {
-    name: 'getRecentTransactionsFlow',
-    inputSchema: z.undefined(),
-    outputSchema: RecentTransactionsOutputSchema,
-  },
-  async () => {
     // In a real app, this would be an API call to a bank or payment gateway.
     // Here, we'll return a random subset of mock data with a unique ID and current date.
     
-    // Get a random number of transactions to return (e.g., 1 to 3)
     const numTransactions = Math.floor(Math.random() * 3) + 1;
     const shuffled = [...allMockTransactions].sort(() => 0.5 - Math.random());
     const selectedTransactions = shuffled.slice(0, numTransactions);
 
     const transactionsWithDate = selectedTransactions.map(t => ({
       ...t, 
-      id: `txn-${Date.now()}-${Math.random()}`, // Create a unique ID
+      id: `txn-${Date.now()}-${Math.random()}`,
       date: new Date().toISOString()
     }));
     
     return {
       transactions: transactionsWithDate,
     };
-  }
-);
+}
