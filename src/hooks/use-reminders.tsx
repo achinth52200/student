@@ -1,9 +1,10 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import type { Reminder } from '@/lib/types';
 import { useAuth } from './use-auth';
+import { useNotifications } from './use-notifications';
 
 const initialReminders: Reminder[] = [
   {
@@ -40,7 +41,7 @@ export const ReminderProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const storageKey = user ? `reminders_${user.uid}` : 'reminders_guest';
-
+  const { sendNotification, checkAndNotifyReminders, requestPermission } = useNotifications();
 
   useEffect(() => {
     const storedReminders = localStorage.getItem(storageKey);
@@ -52,6 +53,32 @@ export const ReminderProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [storageKey]);
 
+  // Request notification permission and check for due reminders on load
+  useEffect(() => {
+    if (reminders.length === 0) return;
+
+    // Auto-request permission after a short delay
+    const timer = setTimeout(async () => {
+      const perm = await requestPermission();
+      if (perm === 'granted') {
+        checkAndNotifyReminders(reminders);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [reminders, requestPermission, checkAndNotifyReminders]);
+
+  // Check reminders every 30 minutes
+  useEffect(() => {
+    if (reminders.length === 0) return;
+
+    const interval = setInterval(() => {
+      checkAndNotifyReminders(reminders);
+    }, 30 * 60 * 1000); // Every 30 minutes
+
+    return () => clearInterval(interval);
+  }, [reminders, checkAndNotifyReminders]);
+
   const updateStoredReminders = (newReminders: Reminder[]) => {
       localStorage.setItem(storageKey, JSON.stringify(newReminders));
   }
@@ -61,6 +88,14 @@ export const ReminderProvider = ({ children }: { children: ReactNode }) => {
         const newReminder = { ...reminder, id: crypto.randomUUID() };
         const updated = [newReminder, ...prev];
         updateStoredReminders(updated);
+
+        // Send immediate notification for the new reminder
+        sendNotification({
+          title: '✅ Reminder Set!',
+          body: `"${newReminder.title}" — Due in 7 days`,
+          tag: `new-reminder-${newReminder.id}`,
+        });
+
         return updated;
     });
   };

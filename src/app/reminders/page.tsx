@@ -1,9 +1,12 @@
 
+"use client";
+
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Reminders } from "@/components/dashboard/reminders";
 import { PageTransitionLoader } from "@/components/page-transition-loader";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { NotificationBanner } from "@/components/notification-banner";
 
 export default function RemindersPage() {
   return (
@@ -14,7 +17,8 @@ export default function RemindersPage() {
           <AppSidebar />
           <SidebarInset className="flex-1">
             <AppHeader />
-            <main className="p-4 sm:p-6 lg:p-8">
+            <main className="p-4 sm:p-6 lg:p-8 space-y-4">
+              <NotificationBanner />
               <Reminders />
             </main>
           </SidebarInset>
