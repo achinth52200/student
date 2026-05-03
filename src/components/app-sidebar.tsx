@@ -47,7 +47,6 @@ export function AppSidebar() {
               </div>
             </div>
           </div>
-          </div>
         </div>
       </SidebarHeader>
 
