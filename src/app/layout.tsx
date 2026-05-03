@@ -9,6 +9,7 @@ import { PageLoader } from "@/components/page-loader";
 import { Suspense } from "react";
 import { cn } from "@/lib/utils"
 import { AuthProvider } from "@/hooks/use-auth";
+import { NotificationCenter } from "@/components/dashboard/notification-center";
 
 export const metadata: Metadata = {
   title: "StudentSync — Smart Student Life Manager",
@@ -38,6 +39,7 @@ export default function RootLayout({
                 <Suspense fallback={<PageLoader />}>
                   {children}
                 </Suspense>
+                <NotificationCenter />
                 <Toaster />
             </ReminderProvider>
           </AuthProvider>

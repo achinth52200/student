@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import React from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { NotificationCenter } from "@/components/dashboard/notification-center";
 
 export const menuItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", color: "text-indigo-500" },
@@ -48,8 +47,6 @@ export function AppSidebar() {
               </div>
             </div>
           </div>
-          <div className={cn(sidebarState === 'collapsed' && 'hidden')}>
-            <NotificationCenter />
           </div>
         </div>
       </SidebarHeader>

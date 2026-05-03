@@ -64,26 +64,33 @@ export function NotificationCenter() {
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={handlePopoverOpenChange}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-            >
-                {unreadCount}
-            </Badge>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80" align="end">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Notifications</h4>
+    <div className="fixed bottom-6 right-6 z-50">
+      <Popover open={isOpen} onOpenChange={handlePopoverOpenChange}>
+        <PopoverTrigger asChild>
+          <Button 
+            size="icon" 
+            className="h-14 w-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-xl shadow-indigo-500/30 transition-transform hover:scale-110 group relative"
+          >
+            {unreadCount > 0 && (
+              <span className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-75"></span>
+            )}
+            <Bell className={`h-6 w-6 text-white relative z-10 ${unreadCount > 0 ? 'animate-bounce' : ''}`} />
+            {unreadCount > 0 && (
+              <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-6 w-6 p-0 flex items-center justify-center text-xs font-bold border-2 border-white relative z-20 shadow-sm"
+              >
+                  {unreadCount}
+              </Badge>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 mb-4 mr-6 p-0 overflow-hidden border-indigo-100 shadow-2xl" align="end" sideOffset={12}>
+        <div className="grid gap-4 p-4">
+          <div className="space-y-1">
+            <h4 className="font-extrabold text-base leading-none text-indigo-950">Notifications</h4>
             <p className="text-sm text-muted-foreground">
-              Your latest updates.
+              Your latest updates and alerts.
             </p>
           </div>
           <ScrollArea className="h-[300px]">
@@ -119,9 +126,10 @@ export function NotificationCenter() {
                   <p className="text-sm text-muted-foreground text-center py-4">No new notifications.</p>
               )}
             </div>
-          </ScrollArea>
-        </div>
-      </PopoverContent>
-    </Popover>
+            </ScrollArea>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
