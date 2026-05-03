@@ -8,8 +8,8 @@ import {
   Wallet,
   Bell,
   LogOut,
-  Calculator,
   Zap,
+  Sparkles,
 } from "lucide-react";
 
 import {
@@ -36,7 +36,6 @@ export const menuItems = [
   { href: "/study-planner", icon: BookOpen, label: "Study Planner" },
   { href: "/well-being", icon: HeartPulse, label: "Well-being" },
   { href: "/reminders", icon: Bell, label: "Reminders" },
-  { href: "/attendance", icon: Calculator, label: "Attendance" },
 ];
 
 export function AppSidebar() {
@@ -47,25 +46,32 @@ export function AppSidebar() {
   
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25">
-              <Zap className="w-4 h-4 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(250,90%,65%)] to-[hsl(280,70%,55%)] flex items-center justify-center shadow-lg shadow-[hsla(250,90%,65%,0.3)]">
+              <Zap className="w-4.5 h-4.5 text-white" />
             </div>
-            <h1 className={cn(
-              "text-lg font-bold tracking-tight whitespace-nowrap gradient-text",
-              sidebarState === 'collapsed' && 'opacity-0 hidden'
-            )}>
-              StudentSync
-            </h1>
+            <div className={cn(sidebarState === 'collapsed' && 'hidden')}>
+              <h1 className="text-base font-bold tracking-tight text-white">StudentSync</h1>
+              <p className="text-[10px] text-muted-foreground -mt-0.5 flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5" /> AI Powered
+              </p>
+            </div>
           </div>
-          <div className={cn(sidebarState === 'collapsed' && 'opacity-0 hidden')}>
+          <div className={cn(sidebarState === 'collapsed' && 'hidden')}>
             <NotificationCenter />
           </div>
         </div>
       </SidebarHeader>
-      <SidebarContent className="mt-4">
+
+      <SidebarContent className="mt-2 px-2">
+        <p className={cn(
+          "text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-4 mb-2",
+          sidebarState === 'collapsed' && 'hidden'
+        )}>
+          Menu
+        </p>
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
@@ -73,41 +79,43 @@ export function AppSidebar() {
                 asChild
                 isActive={isActive(item.href)}
                 tooltip={{ children: item.label, side: "right" }}
-                className="transition-all duration-200"
               >
                 <Link href={item.href}>
                   <item.icon className="!w-[18px] !h-[18px]" />
-                  <span className="font-medium">{item.label}</span>
+                  <span className="font-medium text-[13px]">{item.label}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
+
+      <SidebarFooter className="p-3">
         <div className={cn(
-          "flex items-center gap-3 p-2 rounded-xl bg-white/5",
-          sidebarState === 'collapsed' && 'justify-center p-1'
+          "flex items-center gap-3 p-2.5 rounded-xl",
+          "bg-gradient-to-r from-[hsla(250,90%,65%,0.08)] to-transparent",
+          "border border-[hsla(250,90%,65%,0.08)]",
+          sidebarState === 'collapsed' && 'justify-center p-1.5 bg-none border-0'
         )}>
-          <Avatar className="h-9 w-9 ring-2 ring-primary/30">
-            <AvatarFallback className="bg-gradient-to-br from-primary/80 to-purple-400/80 text-white text-sm font-semibold">
+          <Avatar className="h-8 w-8 ring-2 ring-[hsla(250,90%,65%,0.3)]">
+            <AvatarFallback className="bg-gradient-to-br from-[hsl(250,90%,65%)] to-[hsl(280,70%,55%)] text-white text-xs font-bold">
               {user?.displayName?.charAt(0).toUpperCase() || 'A'}
             </AvatarFallback>
           </Avatar>
-          <div className={cn("flex flex-col min-w-0", sidebarState === 'collapsed' && 'hidden')}>
-            <span className="font-semibold text-sm truncate">{user?.displayName}</span>
-            <span className="text-xs text-muted-foreground truncate">{user?.email}</span>
+          <div className={cn("flex flex-col min-w-0 flex-1", sidebarState === 'collapsed' && 'hidden')}>
+            <span className="font-semibold text-xs truncate text-white">{user?.displayName}</span>
+            <span className="text-[10px] text-muted-foreground truncate">{user?.email}</span>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={logout}
             className={cn(
-              "ml-auto shrink-0 hover:bg-red-500/10 hover:text-red-400 transition-colors",
+              "shrink-0 h-7 w-7 hover:bg-red-500/10 hover:text-red-400 transition-all",
               sidebarState === 'collapsed' && 'hidden'
             )}
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
           </Button>
         </div>
       </SidebarFooter>
