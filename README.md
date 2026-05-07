@@ -13,18 +13,12 @@
 - **Receipt Scanner**: Use AI to extract transaction details (merchant, amount, category) from photos of receipts or UPI screenshots.
 - **Visual Analytics**: Interactive charts providing a clear breakdown of income vs. expenses and spending by category.
 - **Manual Tracking**: Easy-to-use interface for logging daily transactions.
-
-### 3. Precision Attendance Calculator
-- **Per-Subject Tracking**: Manage attendance for Theory, Practical, and Extra-Curricular subjects individually.
-- **"Can Bunk" Logic**: Calculates exactly how many classes you can skip while staying above the 75% threshold.
-- **Target Thresholds**: Dynamically calculates how many classes you must attend to reach 75%, 85%, or 95% attendance.
-
-### 4. AI Well-being Support
+### 3. AI Well-being Support
 - **Personalized Coaching**: An empathetic AI assistant that provides feedback on stress levels, sleep quality, and physical activity.
 - **Voice Feedback**: Integrated Text-to-Speech (TTS) technology that reads out AI-generated wellness tips.
 - **Well-being Chat**: A dedicated space to talk to a mentor-like bot about academic pressure and health.
 
-### 5. Smart Dashboard & Reminders
+### 4. Smart Dashboard & Reminders
 - **Personalized AI Tips**: Generates actionable advice (budgeting, study techniques, health) based on your real-time data.
 - **Notification Center**: Real-time alerts for upcoming deadlines and system updates.
 - **Reminders**: A streamlined task manager to keep your academic life organized.
